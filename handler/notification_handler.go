@@ -12,14 +12,14 @@ type NotificationHandler struct {
 }
 
 func NewNotificationHandler(router *httprouter.Router) {
-	basePath := "/api/v1/notification"
+	basePath := "/api/v1/notifications"
 	notificationHandler := &NotificationHandler{}
 
-	router.POST(basePath, notificationHandler.Register())
+	router.POST(basePath, notificationHandler.ListNotification())
 
 }
 
-func (h *NotificationHandler) Register() httprouter.Handle {
+func (h *NotificationHandler) ListNotification() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		dataByte, _ := json.Marshal(pkg.BaseResponse{
 			Code:    200,

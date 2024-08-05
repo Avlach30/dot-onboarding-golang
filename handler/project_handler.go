@@ -2,10 +2,10 @@ package handler
 
 import (
 	"encoding/json"
-	"net/http"
-
+	"github.com/codespace-id/codespace-x/dto"
 	"github.com/codespace-id/codespace-x/pkg"
 	"github.com/julienschmidt/httprouter"
+	"net/http"
 )
 
 type ProjectHandler struct {
@@ -22,36 +22,48 @@ func NewProjectHandler(router *httprouter.Router) {
 
 }
 
+// @Summary List Project
+// @Description List Project
+// @Tags Projects
+// @Accept json
+// @Produce json
+// @Param authorization header string false "Authorization value"
+// @Param basic-param query pkg.Pagination true "basic param"
+// @Success 200 {object} pkg.BaseResponse{data=[]dto.ListProjectResponse} "success"
+// @Failure default {object} pkg.BaseResponse "error"
+// @Router /api/v1/projects [get]
 func (h *ProjectHandler) ListProject() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-
-		data := []map[string]interface{}{
-			{
-				"uuid":         "CYUS-898H",
-				"name":         "Test TOEFL Online",
-				"description":  "Dapatkan wordpress landing",
-				"service_type": "web apps development",
-				"status":       "On Going",
-				"created_at":   "2011-08-12T20:17:46.384Z",
-				"astrodevs": []map[string]interface{}{
-					{
-						"fullname":  "Hiegar",
-						"role":      "UI/UX",
-						"image_url": "https://res.cloudinary.com/deafomwc7/image/upload/v1664837475/codespace/images/team/team-4a_aqfwhw.jpg",
-					},
-					{
-						"fullname":  "Ubai",
-						"role":      "Backend",
-						"image_url": "https://res.cloudinary.com/deafomwc7/image/upload/v1664837474/codespace/images/team/team-1a_asflru.jpg",
-					},
-				},
-			},
-		}
 
 		dataByte, _ := json.Marshal(pkg.BaseResponse{
 			Code:    200,
 			Message: "success",
-			Data:    data,
+			Data: []dto.ListProjectResponse{
+				{
+					UUID:        "CYUS-898H",
+					Name:        "Test TOEFL Online",
+					Description: "Dapatkan wordpress landing",
+					ServiceType: "web apps development",
+					Status:      "On Going",
+					CreatedAt:   "2011-08-12T20:17:46.384Z",
+					Astrodevs: []dto.UserResponse{
+						{
+							Fullname: "Hiegar",
+							Role:     "UI/UX",
+							ImageURL: "https://res.cloudinary.com/deafomwc7/image/upload/v1664837475/codespace/images/team/team-4a_aqfwhw.jpg",
+						},
+						{
+							Fullname: "Ubai",
+							Role:     "Backend",
+							ImageURL: "https://res.cloudinary.com/deafomwc7/image/upload/v1664837474/codespace/images/team/team-1a_asflru.jpg",
+						},
+					},
+				},
+			},
+			Meta: &pkg.MetaResponse{
+				Page:  1,
+				Limit: 10,
+			},
 		})
 
 		w.Header().Set("Content-Type", "application/json")
@@ -62,35 +74,45 @@ func (h *ProjectHandler) ListProject() httprouter.Handle {
 	}
 }
 
+// @Summary Detail Project
+// @Description Detail Project
+// @Tags Projects
+// @Accept json
+// @Produce json
+// @Param authorization header string false "Authorization value"
+// @Param project_uuid path string true "project_uuid"
+// @Success 200 {object} pkg.BaseResponse{data=dto.ListProjectResponse} "success"
+// @Failure default {object} pkg.BaseResponse "error"
+// @Router /api/v1/projects/{project_uuid} [get]
 func (h *ProjectHandler) DetailProject() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 		uuid := ps.ByName("uuid")
-		data := map[string]interface{}{
-			"uuid":         uuid,
-			"name":         "Test TOEFL Online",
-			"description":  "Dapatkan wordpress landing",
-			"service_type": "web apps development",
-			"status":       "On Going",
-			"created_at":   "2011-08-12T20:17:46.384Z",
-			"astrodevs": []map[string]interface{}{
-				{
-					"fullname":  "Hiegar",
-					"role":      "UI/UX",
-					"image_url": "https://res.cloudinary.com/deafomwc7/image/upload/v1664837475/codespace/images/team/team-4a_aqfwhw.jpg",
-				},
-				{
-					"fullname":  "Ubai",
-					"role":      "Backend",
-					"image_url": "https://res.cloudinary.com/deafomwc7/image/upload/v1664837474/codespace/images/team/team-1a_asflru.jpg",
-				},
-			},
-		}
 
 		dataByte, _ := json.Marshal(pkg.BaseResponse{
 			Code:    200,
 			Message: "success",
-			Data:    data,
+			Data: dto.ListProjectResponse{
+
+				UUID:        uuid,
+				Name:        "Test TOEFL Online",
+				Description: "Dapatkan wordpress landing",
+				ServiceType: "web apps development",
+				Status:      "On Going",
+				CreatedAt:   "2011-08-12T20:17:46.384Z",
+				Astrodevs: []dto.UserResponse{
+					{
+						Fullname: "Hiegar",
+						Role:     "UI/UX",
+						ImageURL: "https://res.cloudinary.com/deafomwc7/image/upload/v1664837475/codespace/images/team/team-4a_aqfwhw.jpg",
+					},
+					{
+						Fullname: "Ubai",
+						Role:     "Backend",
+						ImageURL: "https://res.cloudinary.com/deafomwc7/image/upload/v1664837474/codespace/images/team/team-1a_asflru.jpg",
+					},
+				},
+			},
 		})
 
 		w.Header().Set("Content-Type", "application/json")
