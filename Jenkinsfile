@@ -156,7 +156,7 @@ pipeline {
                 }
             }
             steps {
-                build job: "codespace-x-deploy", wait: true
+                sh 'ssh admin@194.233.70.62 "bash /var/www/codespace-x/codespace-x-deploy.sh"', wait: true
             }
         }
         stage('Send Discord Notif Dev') {
