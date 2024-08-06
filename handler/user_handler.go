@@ -23,7 +23,7 @@ func (h *UserHandler) Profile() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 		data := map[string]interface{}{}
-		data["fullname"] = "Ubaidillah Hakim Fadly Bro"
+		data["fullname"] = "Ubaidillah Hakim Fadlyy"
 		data["email"] = "ubaidillahhf@gmail.com"
 		data["user_type"] = "Personal"
 
