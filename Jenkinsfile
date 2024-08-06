@@ -156,7 +156,7 @@ pipeline {
                 }
             }
             steps {
-                build job: "Sirqu-Deploy-Prod", wait: true
+                build job: "codespace-x-deploy", wait: true
             }
         }
         stage('Send Discord Notif Dev') {
