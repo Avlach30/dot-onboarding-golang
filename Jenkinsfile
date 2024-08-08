@@ -179,7 +179,7 @@ pipeline {
                 }
             }
             environment {
-                DISCORD_WEBHOOK_URL = credentials('webhook_discord')
+                DISCORD_WEBHOOK_URL = credentials('webhook_discord_codespace')
             }
             steps {
                 discordSend description: "New CODESPACE X PROD pipeline triggered for $env.GIT_BRANCH", footer: 'CODESPACE X PROD Pipeline result', link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: env.DISCORD_WEBHOOK_URL
