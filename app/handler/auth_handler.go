@@ -2,7 +2,10 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/codespace-id/codespace-x/dto"
+	"github.com/codespace-id/codespace-x/app/domain/user"
+	"github.com/codespace-id/codespace-x/app/dto"
+	httperror "github.com/codespace-id/codespace-x/pkg/common/error"
+	"log"
 	"net/http"
 
 	"github.com/codespace-id/codespace-x/pkg"
@@ -10,13 +13,23 @@ import (
 )
 
 type AuthHandler struct {
+	userUsecase userdomain.Usecase
 }
 
-func NewAuthHandler(router *httprouter.Router) {
-	basePath := "/api/v1/auth"
-	authHandler := &AuthHandler{}
+func MiddlewareWrapper(n httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		log.Printf("HTTP request sent to %s from %s", r.URL.Path, r.RemoteAddr)
+		n(w, r, ps)
+	}
+}
 
-	router.POST(basePath+"/register", authHandler.Register())
+func NewAuthHandler(router *httprouter.Router, userUsecase userdomain.Usecase) {
+	basePath := "/api/v1/auth"
+	authHandler := &AuthHandler{
+		userUsecase: userUsecase,
+	}
+
+	router.POST(basePath+"/register", MiddlewareWrapper(authHandler.Register()))
 	router.POST(basePath+"/exchange-token", authHandler.ExchangeToken())
 
 }
@@ -33,27 +46,26 @@ func NewAuthHandler(router *httprouter.Router) {
 func (h *AuthHandler) Register() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
+		var err error
 		var payloadReq dto.RegisterRequest
+
 		decoder := json.NewDecoder(r.Body)
-		if err := decoder.Decode(&payloadReq); err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"code":400,"message":"body payload required"}`))
+		if err = decoder.Decode(&payloadReq); err != nil {
+			httperror.BadRequest(w, 400, "body payload required")
 			return
 		}
 		// validate payload
 		errMsgs := pkg.ValidateStruct(payloadReq)
 		if len(errMsgs) > 0 {
-			errByte, _ := json.Marshal(pkg.BaseResponse{
-				Code:    400,
-				Message: "error",
-				Data:    errMsgs,
-			})
-
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(errByte)
+			httperror.BadRequest(w, 400, errMsgs)
 			return
 		}
 		defer r.Body.Close()
+
+		if err = h.userUsecase.Create(r.Context(), payloadReq); err != nil {
+			httperror.BadRequest(w, 500, err.Error())
+			return
+		}
 
 		dataByte, _ := json.Marshal(pkg.BaseResponse{
 			Code:    200,
@@ -62,7 +74,7 @@ func (h *AuthHandler) Register() httprouter.Handle {
 		})
 
 		w.Header().Set("Content-Type", "application/json")
-		_, err := w.Write(dataByte)
+		_, err = w.Write(dataByte)
 		if err != nil {
 			return
 		}

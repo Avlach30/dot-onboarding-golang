@@ -2,7 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/codespace-id/codespace-x/dto"
+	"github.com/codespace-id/codespace-x/app/dto"
 	"net/http"
 
 	"github.com/codespace-id/codespace-x/pkg"

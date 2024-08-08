@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/codespace-id/codespace-x/app/domain/user"
 	"net/http"
 
 	"github.com/codespace-id/codespace-x/pkg"
@@ -9,11 +10,14 @@ import (
 )
 
 type UserHandler struct {
+	userUsecase userdomain.Usecase
 }
 
-func NewUserHandler(router *httprouter.Router) {
+func NewUserHandler(router *httprouter.Router, userUsecase userdomain.Usecase) {
 	basePath := "/api/v1/users"
-	userHandler := &UserHandler{}
+	userHandler := &UserHandler{
+		userUsecase: userUsecase,
+	}
 
 	router.GET(basePath+"/profile", userHandler.Profile())
 
