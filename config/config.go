@@ -41,6 +41,7 @@ var (
 	AppMode          = Get("APP_MODE", "PROD")
 	Secret           = GetRequired("JWT_SECRET")
 	JwtExpiredInDays = GetRequired("JWT_EXPIRED_IN_DAYS")
+	ServiceAuthToken = GetRequired("SERVICE_AUTH_TOKEN")
 
 	// MySQL
 	Host     = GetRequired("MYSQL_DB_HOST")

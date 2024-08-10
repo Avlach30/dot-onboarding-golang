@@ -24,8 +24,8 @@ func NewUserHandler(router *httprouter.Router, userUsecase userdomain.Usecase) {
 		userUsecase: userUsecase,
 	}
 
-	router.GET(basePath+"/profile", middleware.Wrapper(userHandler.Profile(), middleware.MiddlewareType{CheckTokenAuth: true}))
-	router.POST(basePath+"/register", middleware.Wrapper(userHandler.Register(), middleware.MiddlewareType{CheckTokenAuth: true}))
+	router.GET(basePath+"/profile", middleware.Wrapper(userHandler.Profile(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
+	router.POST(basePath+"/register", middleware.Wrapper(userHandler.Register(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
 
 }
 

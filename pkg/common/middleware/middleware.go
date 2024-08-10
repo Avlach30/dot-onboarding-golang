@@ -5,28 +5,31 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/codespace-id/codespace-x/config"
 	httperror "github.com/codespace-id/codespace-x/pkg/common/error"
 	"github.com/codespace-id/codespace-x/pkg/jwt"
 	"github.com/julienschmidt/httprouter"
 )
 
 type MiddlewareType struct {
-	CheckTokenAuth bool
+	TokenAuth         bool
+	XServiceAuthToken bool
 }
 
 // locals
 type contextKey string
 
 const (
+	App         contextKey = "app"
 	PhoneNumber contextKey = "phoneNumber"
 	Role        contextKey = "role"
 )
 
 func Wrapper(next httprouter.Handle, middlewareType MiddlewareType) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		var ctx context.Context
+		ctx := context.WithValue(r.Context(), App, "codespace-x")
 
-		if middlewareType.CheckTokenAuth {
+		if middlewareType.TokenAuth {
 			userAgent := r.Header.Get("Authorization")
 			splitToken := strings.Split(userAgent, " ")
 			if len(splitToken) < 2 {
@@ -40,8 +43,23 @@ func Wrapper(next httprouter.Handle, middlewareType MiddlewareType) httprouter.H
 				return
 			}
 
-			ctx = context.WithValue(r.Context(), PhoneNumber, claims.PhoneNumber)
+			ctx = context.WithValue(ctx, PhoneNumber, claims.PhoneNumber)
 			ctx = context.WithValue(ctx, Role, claims.Role)
+
+		}
+
+		if middlewareType.XServiceAuthToken {
+			serviceTokenReq := r.Header.Get("X-Service-Auth-Token")
+			if serviceTokenReq == "" {
+				httperror.SetResponse(w, 401, "unauthorized")
+				return
+			}
+
+			serviceToken := config.ServiceAuthToken
+			if serviceTokenReq != serviceToken {
+				httperror.SetResponse(w, 401, "unauthorized")
+				return
+			}
 
 		}
 

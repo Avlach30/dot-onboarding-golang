@@ -7,6 +7,7 @@ import (
 	userdomain "github.com/codespace-id/codespace-x/app/domain/user"
 	"github.com/codespace-id/codespace-x/app/dto"
 	httperror "github.com/codespace-id/codespace-x/pkg/common/error"
+	"github.com/codespace-id/codespace-x/pkg/common/middleware"
 	"github.com/codespace-id/codespace-x/pkg/jwt"
 
 	"github.com/codespace-id/codespace-x/pkg"
@@ -23,7 +24,7 @@ func NewAuthHandler(router *httprouter.Router, userUsecase userdomain.Usecase) {
 		userUsecase: userUsecase,
 	}
 
-	router.POST(basePath+"/exchange-token", authHandler.ExchangeToken())
+	router.POST(basePath+"/exchange-token", middleware.Wrapper(authHandler.ExchangeToken(), middleware.MiddlewareType{XServiceAuthToken: true}))
 
 }
 
