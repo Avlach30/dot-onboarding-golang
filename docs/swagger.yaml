@@ -59,6 +59,22 @@ definitions:
       page:
         type: integer
     type: object
+  projectdto.CreateProjectResponse:
+    properties:
+      uuid:
+        type: string
+    type: object
+  projectdto.UpdateProjectReq:
+    properties:
+      deadline_type:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      service_type:
+        type: integer
+    type: object
   userdto.GetProfileResponse:
     properties:
       fullname:
@@ -133,6 +149,17 @@ paths:
       consumes:
       - application/json
       description: List Banner
+      parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
+      - description: Authorization value
+        in: header
+        name: authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -143,7 +170,9 @@ paths:
             - $ref: '#/definitions/pkg.BaseResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.BannerResponse'
+                  items:
+                    $ref: '#/definitions/dto.BannerResponse'
+                  type: array
               type: object
         default:
           description: error
@@ -152,15 +181,51 @@ paths:
       summary: List Banner
       tags:
       - Banner
+  /api/v1/notifications:
+    get:
+      consumes:
+      - application/json
+      description: List Notif
+      parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
+      - description: Authorization value
+        in: header
+        name: authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: List Notif
+      tags:
+      - Notifications
   /api/v1/projects:
     get:
       consumes:
       - application/json
       description: List Project
       parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
       - description: Authorization value
         in: header
         name: authorization
+        required: true
         type: string
       - in: query
         name: limit
@@ -189,6 +254,46 @@ paths:
       summary: List Project
       tags:
       - Projects
+    post:
+      consumes:
+      - application/json
+      description: Create Project
+      parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
+      - description: Authorization value
+        in: header
+        name: authorization
+        required: true
+        type: string
+      - description: userdto.RegisterRequest
+        in: body
+        name: body-payload
+        required: true
+        schema:
+          $ref: '#/definitions/userdto.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/projectdto.CreateProjectResponse'
+              type: object
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Create Project
+      tags:
+      - Projects
   /api/v1/projects/{project_uuid}:
     get:
       consumes:
@@ -203,6 +308,7 @@ paths:
       - description: Authorization value
         in: header
         name: authorization
+        required: true
         type: string
       - description: project_uuid
         in: path
@@ -228,6 +334,81 @@ paths:
       summary: Detail Project
       tags:
       - Projects
+    patch:
+      consumes:
+      - application/json
+      description: Update Project
+      parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
+      - description: Authorization value
+        in: header
+        name: authorization
+        required: true
+        type: string
+      - description: projectdto.UpdateProjectReq
+        in: body
+        name: body-payload
+        required: true
+        schema:
+          $ref: '#/definitions/projectdto.UpdateProjectReq'
+      - description: uuid project
+        in: path
+        name: project_uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Update Project
+      tags:
+      - Projects
+  /api/v1/users/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get Profile
+      parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
+      - description: Authorization value
+        in: header
+        name: authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/userdto.GetProfileResponse'
+              type: object
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Get Profile
+      tags:
+      - User
   /api/v1/users/register:
     post:
       consumes:
@@ -242,6 +423,7 @@ paths:
       - description: Authorization value
         in: header
         name: authorization
+        required: true
         type: string
       - description: userdto.RegisterRequest
         in: body

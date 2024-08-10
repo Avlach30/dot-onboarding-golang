@@ -35,7 +35,7 @@ func NewUserHandler(router *httprouter.Router, userUsecase userdomain.Usecase) {
 // @Accept json
 // @Produce json
 // @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
-// @Param authorization header string false "Authorization value"
+// @Param authorization header string true "Authorization value"
 // @Success 200 {object} pkg.BaseResponse{data=userdto.GetProfileResponse} "success"
 // @Failure default {object} pkg.BaseResponse "error"
 // @Router /api/v1/users/profile [get]
@@ -81,7 +81,7 @@ func (h *UserHandler) Profile() httprouter.Handle {
 // @Accept json
 // @Produce json
 // @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
-// @Param authorization header string false "Authorization value"
+// @Param authorization header string true "Authorization value"
 // @Param body-payload body userdto.RegisterRequest true "userdto.RegisterRequest"
 // @Success 200 {object} pkg.BaseResponse{} "success"
 // @Failure default {object} pkg.BaseResponse "error"

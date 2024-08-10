@@ -92,6 +92,22 @@ const docTemplate = `{
                     "Banner"
                 ],
                 "summary": "List Banner",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization value",
+                        "name": "authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "success",
@@ -104,11 +120,59 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/dto.BannerResponse"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.BannerResponse"
+                                            }
                                         }
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "default": {
+                        "description": "error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/notifications": {
+            "get": {
+                "description": "List Notif",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "List Notif",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization value",
+                        "name": "authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
                         }
                     },
                     "default": {
@@ -136,9 +200,17 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Authorization value",
                         "name": "authorization",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "type": "integer",
@@ -180,6 +252,70 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Create Project",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Create Project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization value",
+                        "name": "authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "userdto.RegisterRequest",
+                        "name": "body-payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userdto.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pkg.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/projectdto.CreateProjectResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "default": {
+                        "description": "error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    }
+                }
             }
         },
         "/api/v1/projects/{project_uuid}": {
@@ -207,7 +343,8 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Authorization value",
                         "name": "authorization",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -230,6 +367,122 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/dto.ListProjectResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "default": {
+                        "description": "error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update Project",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Update Project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization value",
+                        "name": "authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "projectdto.UpdateProjectReq",
+                        "name": "body-payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/projectdto.UpdateProjectReq"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "uuid project",
+                        "name": "project_uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/profile": {
+            "get": {
+                "description": "Get Profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get Profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization value",
+                        "name": "authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pkg.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/userdto.GetProfileResponse"
                                         }
                                     }
                                 }
@@ -270,7 +523,8 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Authorization value",
                         "name": "authorization",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "description": "userdto.RegisterRequest",
@@ -388,6 +642,31 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "page": {
+                    "type": "integer"
+                }
+            }
+        },
+        "projectdto.CreateProjectResponse": {
+            "type": "object",
+            "properties": {
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "projectdto.UpdateProjectReq": {
+            "type": "object",
+            "properties": {
+                "deadline_type": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "service_type": {
                     "type": "integer"
                 }
             }

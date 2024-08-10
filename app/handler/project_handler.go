@@ -5,8 +5,10 @@ import (
 	"net/http"
 
 	"github.com/codespace-id/codespace-x/app/dto"
+	projectdto "github.com/codespace-id/codespace-x/app/dto/project"
 	userdto "github.com/codespace-id/codespace-x/app/dto/user"
 	"github.com/codespace-id/codespace-x/pkg"
+	"github.com/codespace-id/codespace-x/pkg/common/middleware"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -17,10 +19,10 @@ func NewProjectHandler(router *httprouter.Router) {
 	basePath := "/api/v1/projects"
 	projectHandler := &ProjectHandler{}
 
-	router.GET(basePath, projectHandler.ListProject())
-	router.GET(basePath+"/:uuid", projectHandler.DetailProject())
-	router.POST(basePath, projectHandler.CreateProject())
-	router.PATCH(basePath+"/:uuid", projectHandler.UpdateProject())
+	router.GET(basePath, middleware.Wrapper(projectHandler.ListProject(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
+	router.GET(basePath+"/:uuid", middleware.Wrapper(projectHandler.DetailProject(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
+	router.POST(basePath, middleware.Wrapper(projectHandler.CreateProject(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
+	router.PATCH(basePath+"/:uuid", middleware.Wrapper(projectHandler.UpdateProject(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
 
 }
 
@@ -29,7 +31,8 @@ func NewProjectHandler(router *httprouter.Router) {
 // @Tags Projects
 // @Accept json
 // @Produce json
-// @Param authorization header string false "Authorization value"
+// @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
+// @Param authorization header string true "Authorization value"
 // @Param basic-param query pkg.Pagination true "basic param"
 // @Success 200 {object} pkg.BaseResponse{data=[]dto.ListProjectResponse} "success"
 // @Failure default {object} pkg.BaseResponse "error"
@@ -81,7 +84,8 @@ func (h *ProjectHandler) ListProject() httprouter.Handle {
 // @Tags Projects
 // @Accept json
 // @Produce json
-// @Param authorization header string false "Authorization value"
+// @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
+// @Param authorization header string true "Authorization value"
 // @Param project_uuid path string true "project_uuid"
 // @Success 200 {object} pkg.BaseResponse{data=dto.ListProjectResponse} "success"
 // @Failure default {object} pkg.BaseResponse "error"
@@ -125,13 +129,24 @@ func (h *ProjectHandler) DetailProject() httprouter.Handle {
 	}
 }
 
+// @Summary Create Project
+// @Description Create Project
+// @Tags Projects
+// @Accept json
+// @Produce json
+// @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
+// @Param authorization header string true "Authorization value"
+// @Param body-payload body userdto.RegisterRequest true "userdto.RegisterRequest"
+// @Success 200 {object} pkg.BaseResponse{data=projectdto.CreateProjectResponse} "success"
+// @Failure default {object} pkg.BaseResponse "error"
+// @Router /api/v1/projects [post]
 func (h *ProjectHandler) CreateProject() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		dataByte, _ := json.Marshal(pkg.BaseResponse{
 			Code:    200,
 			Message: "success",
-			Data: map[string]interface{}{
-				"uuid": "XTY9A-YUABQ",
+			Data: projectdto.CreateProjectResponse{
+				UUID: "XTY9A-YUABQ",
 			},
 		})
 
@@ -143,19 +158,24 @@ func (h *ProjectHandler) CreateProject() httprouter.Handle {
 	}
 }
 
+// @Summary Update Project
+// @Description Update Project
+// @Tags Projects
+// @Accept json
+// @Produce json
+// @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
+// @Param authorization header string true "Authorization value"
+// @Param body-payload body projectdto.UpdateProjectReq true "projectdto.UpdateProjectReq"
+// @Param project_uuid path string true "uuid project"
+// @Success 200 {object} pkg.BaseResponse{} "success"
+// @Failure default {object} pkg.BaseResponse "error"
+// @Router /api/v1/projects/{project_uuid} [patch]
 func (h *ProjectHandler) UpdateProject() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 		uuid := ps.ByName("uuid")
 
-		// payload
-		type payload struct {
-			ServiceType  int    `json:"service_type"`
-			Name         string `json:"name"`
-			Description  string `json:"description"`
-			DeadlineType int    `json:"deadline_type"`
-		}
-		var payloadReq payload
+		var payloadReq projectdto.UpdateProjectReq
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(&payloadReq); err != nil {
 			w.Header().Set("Content-Type", "application/json")

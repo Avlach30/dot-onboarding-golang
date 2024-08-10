@@ -2,8 +2,10 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/codespace-id/codespace-x/app/dto"
 	"net/http"
+
+	"github.com/codespace-id/codespace-x/app/dto"
+	"github.com/codespace-id/codespace-x/pkg/common/middleware"
 
 	"github.com/codespace-id/codespace-x/pkg"
 	"github.com/julienschmidt/httprouter"
@@ -16,7 +18,7 @@ func NewBannerHandler(router *httprouter.Router) {
 	basePath := "/api/v1/banners"
 	bannerHandler := &BannerHandler{}
 
-	router.GET(basePath, bannerHandler.ListBanner())
+	router.GET(basePath, middleware.Wrapper(bannerHandler.ListBanner(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
 
 }
 
@@ -25,7 +27,9 @@ func NewBannerHandler(router *httprouter.Router) {
 // @Tags Banner
 // @Accept json
 // @Produce json
-// @Success 200 {object} pkg.BaseResponse{data=dto.BannerResponse} "success"
+// @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
+// @Param authorization header string true "Authorization value"
+// @Success 200 {object} pkg.BaseResponse{data=[]dto.BannerResponse} "success"
 // @Failure default {object} pkg.BaseResponse "error"
 // @Router /api/v1/banners [get]
 func (h *BannerHandler) ListBanner() httprouter.Handle {
