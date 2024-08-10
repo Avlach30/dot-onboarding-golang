@@ -1,51 +1,50 @@
 package config
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
-func InitConfig() error {
+func LoadConfig() error {
 	err := godotenv.Load()
 	if err != nil {
-		return err
+		log.Fatalf("Error loading .env file: %v", err)
 	}
 
 	return nil
 }
 
-func GetAppModeEnv() string {
-	appMode := os.Getenv("APP_MODE")
+func Get(key, defaultValue string) string {
+	LoadConfig()
 
-	if appMode == "" {
-		appMode = "development"
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
 	}
-
-	return appMode
+	return value
 }
 
-type DBConfig struct {
-	Host     string
-	Username string
-	Password string
-	Db       string
+func GetRequired(key string) string {
+	LoadConfig()
+
+	value := os.Getenv(key)
+	if value == "" {
+		log.Fatalf("Environment variable %s is required but not set", key)
+	}
+	return value
 }
 
-func GetMySqlEnv() DBConfig {
-	dbHost := os.Getenv("MYSQL_DB_HOST")
-	dbUser := os.Getenv("MYSQL_DB_USER")
-	dbPass := os.Getenv("MYSQL_DB_PASS")
-	dbName := os.Getenv("MYSQL_DB_NAME")
+var (
+	// General
+	AppMode          = Get("APP_MODE", "PROD")
+	Secret           = GetRequired("JWT_SECRET")
+	JwtExpiredInDays = GetRequired("JWT_EXPIRED_IN_DAYS")
 
-	if dbHost == "" || dbUser == "" || dbPass == "" || dbName == "" {
-		log.Fatal("GetMySqlEnv.EnvNotDefined")
-	}
-
-	return DBConfig{
-		Host:     dbHost,
-		Username: dbUser,
-		Password: dbPass,
-		Db:       dbName,
-	}
-}
+	// MySQL
+	Host     = GetRequired("MYSQL_DB_HOST")
+	Username = GetRequired("MYSQL_DB_USER")
+	Password = GetRequired("MYSQL_DB_PASS")
+	Database = GetRequired("MYSQL_DB_NAME")
+)

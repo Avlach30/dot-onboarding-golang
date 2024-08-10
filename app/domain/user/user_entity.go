@@ -7,4 +7,6 @@ type Entity struct {
 	PhoneNumber    string
 	Gender         string
 	Password       string
+	Role           string
+	ImageURL       string
 }

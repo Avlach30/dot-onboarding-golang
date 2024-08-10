@@ -2,18 +2,19 @@ package main
 
 import (
 	"encoding/json"
+	"log"
+	"net/http"
+
 	handler2 "github.com/codespace-id/codespace-x/app/handler"
 	"github.com/codespace-id/codespace-x/app/repository"
 	"github.com/codespace-id/codespace-x/app/usecase"
 	"github.com/codespace-id/codespace-x/config"
 	"github.com/codespace-id/codespace-x/pkg/dbconn/mysql"
-	"log"
-	"net/http"
 
 	_ "github.com/codespace-id/codespace-x/docs"
 	"github.com/codespace-id/codespace-x/pkg"
 	"github.com/julienschmidt/httprouter"
-	"github.com/swaggo/http-swagger"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 // @title Codespace X REST API
@@ -23,13 +24,10 @@ import (
 // @contact.url https://codespace.id
 // @contact.email mail@codespace.id
 func main() {
+
 	router := httprouter.New()
 
-	// instance config
-	config.InitConfig()
-
-	dbEnv := config.GetMySqlEnv()
-	db, err := mysql.NewMysqlDB(dbEnv.Host, dbEnv.Username, dbEnv.Password, dbEnv.Db)
+	db, err := mysql.NewMysqlDB(config.Host, config.Username, config.Password, config.Database)
 	if err != nil {
 		log.Fatal(err)
 	}

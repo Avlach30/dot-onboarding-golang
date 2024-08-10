@@ -3,7 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"github.com/codespace-id/codespace-x/app/domain/user"
+
+	userdomain "github.com/codespace-id/codespace-x/app/domain/user"
 	"github.com/pkg/errors"
 )
 
@@ -45,4 +46,34 @@ func (r *UserRepository) Create(ctx context.Context, payload userdomain.Entity) 
 	}
 
 	return nil
+}
+
+func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res userdomain.Entity, err error) {
+
+	query := `
+		SELECT
+			fullname, 
+			identity_number, 
+			phone_number, 
+		   gender
+		FROM
+			users
+		WHERE
+			phone_number = ?
+		`
+
+	if err := r.db.QueryRowContext(
+		ctx,
+		query,
+		phoneNumber,
+	).Scan(
+		&res.Fullname,
+		&res.IdentityNumber,
+		&res.PhoneNumber,
+		&res.Gender,
+	); err != nil {
+		return res, errors.Wrap(err, "UserRepository.Create.ExecContext")
+	}
+
+	return res, nil
 }

@@ -2,11 +2,12 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/codespace-id/codespace-x/app/domain/user"
+	"net/http"
+
+	userdomain "github.com/codespace-id/codespace-x/app/domain/user"
 	"github.com/codespace-id/codespace-x/app/dto"
 	httperror "github.com/codespace-id/codespace-x/pkg/common/error"
-	"log"
-	"net/http"
+	"github.com/codespace-id/codespace-x/pkg/jwt"
 
 	"github.com/codespace-id/codespace-x/pkg"
 	"github.com/julienschmidt/httprouter"
@@ -16,69 +17,14 @@ type AuthHandler struct {
 	userUsecase userdomain.Usecase
 }
 
-func MiddlewareWrapper(n httprouter.Handle) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		log.Printf("HTTP request sent to %s from %s", r.URL.Path, r.RemoteAddr)
-		n(w, r, ps)
-	}
-}
-
 func NewAuthHandler(router *httprouter.Router, userUsecase userdomain.Usecase) {
 	basePath := "/api/v1/auth"
 	authHandler := &AuthHandler{
 		userUsecase: userUsecase,
 	}
 
-	router.POST(basePath+"/register", MiddlewareWrapper(authHandler.Register()))
 	router.POST(basePath+"/exchange-token", authHandler.ExchangeToken())
 
-}
-
-// @Summary Register
-// @Description Register
-// @Tags Auth
-// @Accept json
-// @Produce json
-// @Param body-payload body dto.RegisterRequest true "payload"
-// @Success 200 {object} pkg.BaseResponse{data=nil} "success"
-// @Failure default {object} pkg.BaseResponse "error"
-// @Router /api/v1/auth/register [post]
-func (h *AuthHandler) Register() httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-
-		var err error
-		var payloadReq dto.RegisterRequest
-
-		decoder := json.NewDecoder(r.Body)
-		if err = decoder.Decode(&payloadReq); err != nil {
-			httperror.BadRequest(w, 400, "body payload required")
-			return
-		}
-		// validate payload
-		errMsgs := pkg.ValidateStruct(payloadReq)
-		if len(errMsgs) > 0 {
-			httperror.BadRequest(w, 400, errMsgs)
-			return
-		}
-		defer r.Body.Close()
-
-		if err = h.userUsecase.Create(r.Context(), payloadReq); err != nil {
-			httperror.BadRequest(w, 500, err.Error())
-			return
-		}
-
-		dataByte, _ := json.Marshal(pkg.BaseResponse{
-			Code:    200,
-			Message: "success",
-			Data:    nil,
-		})
-
-		w.Header().Set("Content-Type", "application/json")
-		_, err = w.Write(dataByte)
-		if err != nil {
-			return
-		}
-	}
 }
 
 // @Summary Exchange Token
@@ -96,33 +42,31 @@ func (h *AuthHandler) ExchangeToken() httprouter.Handle {
 		var payloadReq dto.ExchangeRequest
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(&payloadReq); err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"code":400,"message":"body payload required"}`))
+			httperror.SetResponse(w, 400, "body payload required")
 			return
 		}
 		// validate payload
 		errMsgs := pkg.ValidateStruct(payloadReq)
 		if len(errMsgs) > 0 {
-			errByte, _ := json.Marshal(pkg.BaseResponse{
-				Code:    400,
-				Message: "error",
-				Data:    errMsgs,
-			})
-
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(errByte)
+			httperror.SetResponse(w, 400, errMsgs)
 			return
 		}
 		defer r.Body.Close()
 
+		token, err := jwt.CreateToken(payloadReq.PhoneNumber, "CLIENT", payloadReq.FirebaseIdToken)
+		if err != nil {
+			httperror.SetResponse(w, 500, "internal server error")
+			return
+		}
+
 		dataByte, _ := json.Marshal(pkg.BaseResponse{
 			Code:    200,
 			Message: "success",
-			Data:    dto.ExchangeResponse{Token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.08Kl3VCSoYS0T4jDEjxaTjff10yx_YC8END-X0ARU1o"},
+			Data:    dto.ExchangeResponse{Token: token},
 		})
 
 		w.Header().Set("Content-Type", "application/json")
-		_, err := w.Write(dataByte)
+		_, err = w.Write(dataByte)
 		if err != nil {
 			return
 		}

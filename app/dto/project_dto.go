@@ -1,11 +1,13 @@
 package dto
 
+import userdto "github.com/codespace-id/codespace-x/app/dto/user"
+
 type ListProjectResponse struct {
-	UUID        string         `json:"uuid"`
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	ServiceType string         `json:"service_type"`
-	Status      string         `json:"status"`
-	CreatedAt   string         `json:"created_at"`
-	Astrodevs   []UserResponse `json:"astrodevs"`
+	UUID        string                       `json:"uuid"`
+	Name        string                       `json:"name"`
+	Description string                       `json:"description"`
+	ServiceType string                       `json:"service_type"`
+	Status      string                       `json:"status"`
+	CreatedAt   string                       `json:"created_at"`
+	Astrodevs   []userdto.GetProfileResponse `json:"astrodevs"`
 }

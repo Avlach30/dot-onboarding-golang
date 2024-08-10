@@ -2,10 +2,12 @@ package handler
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/codespace-id/codespace-x/app/dto"
+	userdto "github.com/codespace-id/codespace-x/app/dto/user"
 	"github.com/codespace-id/codespace-x/pkg"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
 )
 
 type ProjectHandler struct {
@@ -46,7 +48,7 @@ func (h *ProjectHandler) ListProject() httprouter.Handle {
 					ServiceType: "web apps development",
 					Status:      "On Going",
 					CreatedAt:   "2011-08-12T20:17:46.384Z",
-					Astrodevs: []dto.UserResponse{
+					Astrodevs: []userdto.GetProfileResponse{
 						{
 							Fullname: "Hiegar",
 							Role:     "UI/UX",
@@ -100,7 +102,7 @@ func (h *ProjectHandler) DetailProject() httprouter.Handle {
 				ServiceType: "web apps development",
 				Status:      "On Going",
 				CreatedAt:   "2011-08-12T20:17:46.384Z",
-				Astrodevs: []dto.UserResponse{
+				Astrodevs: []userdto.GetProfileResponse{
 					{
 						Fullname: "Hiegar",
 						Role:     "UI/UX",

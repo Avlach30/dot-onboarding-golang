@@ -2,15 +2,16 @@ package httperror
 
 import (
 	"encoding/json"
-	"github.com/codespace-id/codespace-x/pkg"
 	"net/http"
+
+	"github.com/codespace-id/codespace-x/pkg"
 )
 
-func BadRequest(w http.ResponseWriter, code int, message interface{}) {
+func SetResponse(w http.ResponseWriter, code int, message interface{}) {
 	errByte, _ := json.Marshal(pkg.BaseResponse{
 		Code:    code,
-		Message: "error",
-		Data:    message,
+		Message: "error: " + message.(string),
+		Data:    nil,
 	})
 
 	w.Header().Set("Content-Type", "application/json")

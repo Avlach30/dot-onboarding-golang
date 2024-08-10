@@ -2,9 +2,11 @@ package userdomain
 
 import (
 	"context"
-	"github.com/codespace-id/codespace-x/app/dto"
+
+	userdto "github.com/codespace-id/codespace-x/app/dto/user"
 )
 
 type Usecase interface {
-	Create(ctx context.Context, dto dto.RegisterRequest) error
+	Create(ctx context.Context, dto userdto.RegisterRequest) error
+	Profile(ctx context.Context, phoneNumber string) (res Entity, err error)
 }

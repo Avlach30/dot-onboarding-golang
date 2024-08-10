@@ -1,16 +1,10 @@
 package dto
 
 type ExchangeRequest struct {
+	PhoneNumber     string `json:"phone_number" validate:"required"`
 	FirebaseIdToken string `json:"firebase_id_token" validate:"required"`
 }
 
 type ExchangeResponse struct {
 	Token string `json:"token" `
-}
-
-type RegisterRequest struct {
-	Fullname    string `json:"fullname" validate:"required"`
-	Email       string `json:"email" validate:"required"`
-	PhoneNumber string `json:"phone_number" validate:"required"`
-	Type        string `json:"type"`
 }
