@@ -10,8 +10,8 @@ import (
 func SetResponse(w http.ResponseWriter, code int, message interface{}) {
 	errByte, _ := json.Marshal(pkg.BaseResponse{
 		Code:    code,
-		Message: "error: " + message.(string),
-		Data:    nil,
+		Message: "error",
+		Data:    message,
 	})
 
 	w.Header().Set("Content-Type", "application/json")

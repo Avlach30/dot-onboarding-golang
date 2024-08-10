@@ -26,6 +26,13 @@
                 "summary": "Exchange Token",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "payload exchange token",
                         "name": "body-payload",
                         "in": "body",
@@ -48,58 +55,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/dto.ExchangeResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "default": {
-                        "description": "error",
-                        "schema": {
-                            "$ref": "#/definitions/pkg.BaseResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/auth/register": {
-            "post": {
-                "description": "Register",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Register",
-                "parameters": [
-                    {
-                        "description": "payload",
-                        "name": "body-payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.RegisterRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "success",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/pkg.BaseResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object"
                                         }
                                     }
                                 }
@@ -234,6 +189,13 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Authorization value",
                         "name": "authorization",
                         "in": "header"
@@ -273,6 +235,59 @@
                     }
                 }
             }
+        },
+        "/api/v1/users/register": {
+            "post": {
+                "description": "Register",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Register",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization value",
+                        "name": "authorization",
+                        "in": "header"
+                    },
+                    {
+                        "description": "userdto.RegisterRequest",
+                        "name": "body-payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userdto.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -293,10 +308,14 @@
         "dto.ExchangeRequest": {
             "type": "object",
             "required": [
-                "firebase_id_token"
+                "firebase_id_token",
+                "phone_number"
             ],
             "properties": {
                 "firebase_id_token": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 }
             }
@@ -315,7 +334,7 @@
                 "astrodevs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.UserResponse"
+                        "$ref": "#/definitions/userdto.GetProfileResponse"
                     }
                 },
                 "created_at": {
@@ -334,38 +353,6 @@
                     "type": "string"
                 },
                 "uuid": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.RegisterRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "fullname"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "fullname": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.UserResponse": {
-            "type": "object",
-            "properties": {
-                "fullname": {
-                    "type": "string"
-                },
-                "image_url": {
-                    "type": "string"
-                },
-                "role": {
                     "type": "string"
                 }
             }
@@ -393,6 +380,42 @@
                 },
                 "page": {
                     "type": "integer"
+                }
+            }
+        },
+        "userdto.GetProfileResponse": {
+            "type": "object",
+            "properties": {
+                "fullname": {
+                    "type": "string"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "userdto.RegisterRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "fullname",
+                "phone_number"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "fullname": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         }

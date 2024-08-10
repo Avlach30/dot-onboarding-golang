@@ -29,6 +29,16 @@ func NewUserHandler(router *httprouter.Router, userUsecase userdomain.Usecase) {
 
 }
 
+// @Summary Get Profile
+// @Description Get Profile
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
+// @Param authorization header string false "Authorization value"
+// @Success 200 {object} pkg.BaseResponse{data=userdto.GetProfileResponse} "success"
+// @Failure default {object} pkg.BaseResponse "error"
+// @Router /api/v1/users/profile [get]
 func (h *UserHandler) Profile() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
@@ -70,8 +80,10 @@ func (h *UserHandler) Profile() httprouter.Handle {
 // @Tags User
 // @Accept json
 // @Produce json
-// @Param body-payload body dto.RegisterRequest true "payload"
-// @Success 200 {object} pkg.BaseResponse{data=nil} "success"
+// @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
+// @Param authorization header string false "Authorization value"
+// @Param body-payload body userdto.RegisterRequest true "userdto.RegisterRequest"
+// @Success 200 {object} pkg.BaseResponse{} "success"
 // @Failure default {object} pkg.BaseResponse "error"
 // @Router /api/v1/users/register [post]
 func (h *UserHandler) Register() httprouter.Handle {

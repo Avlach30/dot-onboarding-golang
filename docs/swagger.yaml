@@ -12,8 +12,11 @@ definitions:
     properties:
       firebase_id_token:
         type: string
+      phone_number:
+        type: string
     required:
     - firebase_id_token
+    - phone_number
     type: object
   dto.ExchangeResponse:
     properties:
@@ -24,7 +27,7 @@ definitions:
     properties:
       astrodevs:
         items:
-          $ref: '#/definitions/dto.UserResponse'
+          $ref: '#/definitions/userdto.GetProfileResponse'
         type: array
       created_at:
         type: string
@@ -37,27 +40,6 @@ definitions:
       status:
         type: string
       uuid:
-        type: string
-    type: object
-  dto.RegisterRequest:
-    properties:
-      email:
-        type: string
-      fullname:
-        type: string
-      type:
-        type: string
-    required:
-    - email
-    - fullname
-    type: object
-  dto.UserResponse:
-    properties:
-      fullname:
-        type: string
-      image_url:
-        type: string
-      role:
         type: string
     type: object
   pkg.BaseResponse:
@@ -77,6 +59,30 @@ definitions:
       page:
         type: integer
     type: object
+  userdto.GetProfileResponse:
+    properties:
+      fullname:
+        type: string
+      image_url:
+        type: string
+      role:
+        type: string
+    type: object
+  userdto.RegisterRequest:
+    properties:
+      email:
+        type: string
+      fullname:
+        type: string
+      phone_number:
+        type: string
+      type:
+        type: string
+    required:
+    - email
+    - fullname
+    - phone_number
+    type: object
 info:
   contact:
     email: mail@codespace.id
@@ -92,6 +98,11 @@ paths:
       - application/json
       description: Exchange Token
       parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
       - description: payload exchange token
         in: body
         name: body-payload
@@ -115,37 +126,6 @@ paths:
           schema:
             $ref: '#/definitions/pkg.BaseResponse'
       summary: Exchange Token
-      tags:
-      - Auth
-  /api/v1/auth/register:
-    post:
-      consumes:
-      - application/json
-      description: Register
-      parameters:
-      - description: payload
-        in: body
-        name: body-payload
-        required: true
-        schema:
-          $ref: '#/definitions/dto.RegisterRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: success
-          schema:
-            allOf:
-            - $ref: '#/definitions/pkg.BaseResponse'
-            - properties:
-                data:
-                  type: object
-              type: object
-        default:
-          description: error
-          schema:
-            $ref: '#/definitions/pkg.BaseResponse'
-      summary: Register
       tags:
       - Auth
   /api/v1/banners:
@@ -215,6 +195,11 @@ paths:
       - application/json
       description: Detail Project
       parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
       - description: Authorization value
         in: header
         name: authorization
@@ -243,4 +228,39 @@ paths:
       summary: Detail Project
       tags:
       - Projects
+  /api/v1/users/register:
+    post:
+      consumes:
+      - application/json
+      description: Register
+      parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
+      - description: Authorization value
+        in: header
+        name: authorization
+        type: string
+      - description: userdto.RegisterRequest
+        in: body
+        name: body-payload
+        required: true
+        schema:
+          $ref: '#/definitions/userdto.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Register
+      tags:
+      - User
 swagger: "2.0"

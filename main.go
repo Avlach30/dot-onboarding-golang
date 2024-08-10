@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	handler2 "github.com/codespace-id/codespace-x/app/handler"
+	"github.com/codespace-id/codespace-x/app/handler"
 	"github.com/codespace-id/codespace-x/app/repository"
 	"github.com/codespace-id/codespace-x/app/usecase"
 	"github.com/codespace-id/codespace-x/config"
@@ -62,11 +62,11 @@ func main() {
 	router.GET("/swagger/*filepath", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		httpSwagger.WrapHandler(w, r)
 	})
-	handler2.NewUserHandler(router, userUsecase)
-	handler2.NewAuthHandler(router, userUsecase)
-	handler2.NewBannerHandler(router)
-	handler2.NewNotificationHandler(router)
-	handler2.NewProjectHandler(router)
+	handler.NewUserHandler(router, userUsecase)
+	handler.NewAuthHandler(router, userUsecase)
+	handler.NewBannerHandler(router)
+	handler.NewNotificationHandler(router)
+	handler.NewProjectHandler(router)
 
 	log.Println("=== SERVER STARTED at PORT 7777 ===")
 	log.Fatal(http.ListenAndServe(":7777", router))

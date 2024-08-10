@@ -3,6 +3,7 @@ package pkg
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 )
 
@@ -15,14 +16,38 @@ func ValidateStruct(
 	fields := reflect.TypeOf(data)
 	values := reflect.ValueOf(data)
 
+	if fields.Kind() != reflect.Struct {
+		errMsgs = append(errMsgs, "must struct type")
+		return errMsgs
+	}
+
 	for i := 0; i < fields.NumField(); i++ {
 		field := fields.Field(i)
-		value := values.Field(i)
+		fieldValue := values.Field(i)
+		tag := field.Tag.Get("validate")
 
-		// Check for validate:"required" tag
-		if tag := field.Tag.Get("validate"); tag == "required" {
-			if value.IsZero() || (value.Kind() == reflect.String && value.Len() == 0) {
-				errMsgs = append(errMsgs, fmt.Sprintf("%s is required", toSnakeCase(field.Name)))
+		if tag == "" {
+			continue
+		}
+
+		// Split the tag values if there are multiple
+		tags := strings.Split(tag, ",")
+		for _, t := range tags {
+			switch t {
+			case "required":
+				if fieldValue.String() == "" {
+					errMsgs = append(errMsgs, fmt.Sprintf("%s is required", toSnakeCase(field.Name)))
+				}
+			case "e164":
+				if fieldValue.String() != "" {
+					pattern := `^\+[1-9]?[0-9]{7,14}$`
+					re, _ := regexp.Compile(pattern)
+
+					match := re.MatchString(fieldValue.String())
+					if !match {
+						errMsgs = append(errMsgs, fmt.Sprintf("%s is must use format e164", toSnakeCase(field.Name)))
+					}
+				}
 			}
 		}
 	}

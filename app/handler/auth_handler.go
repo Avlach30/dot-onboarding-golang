@@ -33,6 +33,7 @@ func NewAuthHandler(router *httprouter.Router, userUsecase userdomain.Usecase) {
 // @Tags Auth
 // @Accept json
 // @Produce json
+// @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
 // @Param body-payload body dto.ExchangeRequest true "payload exchange token"
 // @Success 200 {object} pkg.BaseResponse{data=dto.ExchangeResponse} "success"
 // @Failure default {object} pkg.BaseResponse "error"
@@ -40,7 +41,7 @@ func NewAuthHandler(router *httprouter.Router, userUsecase userdomain.Usecase) {
 func (h *AuthHandler) ExchangeToken() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
-		var payloadReq dto.ExchangeRequest
+		payloadReq := dto.ExchangeRequest{}
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(&payloadReq); err != nil {
 			httperror.SetResponse(w, 400, "body payload required")
