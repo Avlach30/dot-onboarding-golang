@@ -30,34 +30,16 @@ func Wrapper(next httprouter.Handle, middlewareType MiddlewareType) httprouter.H
 		ctx := context.WithValue(r.Context(), App, "codespace-x")
 
 		if middlewareType.TokenAuth {
-			userAgent := r.Header.Get("Authorization")
-			splitToken := strings.Split(userAgent, " ")
-			if len(splitToken) < 2 {
-				httperror.SetResponse(w, 401, "invalid token")
+			var shouldReturn bool
+			ctx, shouldReturn = authMiddleware(ctx, r, w)
+			if shouldReturn {
 				return
 			}
-
-			claims, err := jwt.ParseToken(splitToken[1])
-			if err != nil {
-				httperror.SetResponse(w, 401, "invalid token")
-				return
-			}
-
-			ctx = context.WithValue(ctx, PhoneNumber, claims.PhoneNumber)
-			ctx = context.WithValue(ctx, Role, claims.Role)
-
 		}
 
 		if middlewareType.XServiceAuthToken {
-			serviceTokenReq := r.Header.Get("X-Service-Auth-Token")
-			if serviceTokenReq == "" {
-				httperror.SetResponse(w, 401, "unauthorized")
-				return
-			}
-
-			serviceToken := config.ServiceAuthToken
-			if serviceTokenReq != serviceToken {
-				httperror.SetResponse(w, 401, "unauthorized")
+			shouldReturn := serviceTokenMiddleware(r, w)
+			if shouldReturn {
 				return
 			}
 
@@ -65,4 +47,38 @@ func Wrapper(next httprouter.Handle, middlewareType MiddlewareType) httprouter.H
 
 		next(w, r.WithContext(ctx), ps)
 	}
+}
+
+func serviceTokenMiddleware(r *http.Request, w http.ResponseWriter) bool {
+	serviceTokenReq := r.Header.Get("X-Service-Auth-Token")
+	if serviceTokenReq == "" {
+		httperror.SetResponse(w, 401, "unauthorized")
+		return true
+	}
+
+	serviceToken := config.ServiceAuthToken
+	if serviceTokenReq != serviceToken {
+		httperror.SetResponse(w, 401, "unauthorized")
+		return true
+	}
+	return false
+}
+
+func authMiddleware(ctx context.Context, r *http.Request, w http.ResponseWriter) (context.Context, bool) {
+	userAgent := r.Header.Get("Authorization")
+	splitToken := strings.Split(userAgent, " ")
+	if len(splitToken) < 2 {
+		httperror.SetResponse(w, 401, "invalid token")
+		return nil, true
+	}
+
+	claims, err := jwt.ParseToken(splitToken[1])
+	if err != nil {
+		httperror.SetResponse(w, 401, "invalid token")
+		return nil, true
+	}
+
+	ctx = context.WithValue(ctx, PhoneNumber, claims.PhoneNumber)
+	ctx = context.WithValue(ctx, Role, claims.Role)
+	return ctx, false
 }

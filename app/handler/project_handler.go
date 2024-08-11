@@ -32,7 +32,7 @@ func NewProjectHandler(router *httprouter.Router) {
 // @Accept json
 // @Produce json
 // @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
-// @Param authorization header string true "Authorization value"
+// @Param authorization header string false "Authorization value"
 // @Param basic-param query pkg.Pagination true "basic param"
 // @Success 200 {object} pkg.BaseResponse{data=[]dto.ListProjectResponse} "success"
 // @Failure default {object} pkg.BaseResponse "error"

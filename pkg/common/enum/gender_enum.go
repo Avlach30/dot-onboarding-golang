@@ -1,13 +1,17 @@
 package enum
 
-type GenderType string
+type GenderType int
 
 const (
-	MALE    GenderType = "MALE"
-	FEMALE  GenderType = "FEMALE"
-	UNKNOWN GenderType = "UNKNOWN"
+	MALE GenderType = iota
+	FEMALE
+	UNKNOWN
 )
 
 func (enum GenderType) Value() string {
-	return string(enum)
+	return [...]string{
+		"MALE",
+		"FEMALE",
+		"UNKNOWN",
+	}[enum]
 }
