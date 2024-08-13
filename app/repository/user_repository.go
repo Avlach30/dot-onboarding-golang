@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-
 	userdomain "github.com/codespace-id/codespace-x/app/domain/user"
 	"github.com/pkg/errors"
 )
@@ -72,6 +71,9 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res user
 		&res.PhoneNumber,
 		&res.Gender,
 	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return res, nil
+		}
 		return res, errors.Wrap(err, "UserRepository.Create.ExecContext")
 	}
 

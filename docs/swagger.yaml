@@ -1,14 +1,5 @@
 definitions:
-  dto.BannerResponse:
-    properties:
-      description:
-        type: string
-      name:
-        type: string
-      source_url:
-        type: string
-    type: object
-  dto.ExchangeRequest:
+  authdto.ExchangeRequest:
     properties:
       firebase_id_token:
         type: string
@@ -18,9 +9,35 @@ definitions:
     - firebase_id_token
     - phone_number
     type: object
-  dto.ExchangeResponse:
+  authdto.ExchangeResponse:
     properties:
       token:
+        type: string
+    type: object
+  authdto.OtpRequest:
+    properties:
+      phone_number:
+        type: string
+    required:
+    - phone_number
+    type: object
+  authdto.OtpValidateRequest:
+    properties:
+      otp:
+        type: string
+      phone_number:
+        type: string
+    required:
+    - otp
+    - phone_number
+    type: object
+  dto.BannerResponse:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      source_url:
         type: string
     type: object
   dto.ListProjectResponse:
@@ -124,7 +141,7 @@ paths:
         name: body-payload
         required: true
         schema:
-          $ref: '#/definitions/dto.ExchangeRequest'
+          $ref: '#/definitions/authdto.ExchangeRequest'
       produces:
       - application/json
       responses:
@@ -135,13 +152,137 @@ paths:
             - $ref: '#/definitions/pkg.BaseResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.ExchangeResponse'
+                  $ref: '#/definitions/authdto.ExchangeResponse'
               type: object
         default:
           description: error
           schema:
             $ref: '#/definitions/pkg.BaseResponse'
       summary: Exchange Token
+      tags:
+      - Auth
+  /api/v1/auth/otp/request:
+    post:
+      consumes:
+      - application/json
+      description: OTP Request
+      parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
+      - description: payload otp request
+        in: body
+        name: body-payload
+        required: true
+        schema:
+          $ref: '#/definitions/authdto.OtpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: OTP Request
+      tags:
+      - Auth
+  /api/v1/auth/otp/resend:
+    post:
+      consumes:
+      - application/json
+      description: OTP Resend
+      parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
+      - description: payload otp request resend
+        in: body
+        name: body-payload
+        required: true
+        schema:
+          $ref: '#/definitions/authdto.OtpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: OTP Resend
+      tags:
+      - Auth
+  /api/v1/auth/otp/validate:
+    post:
+      consumes:
+      - application/json
+      description: OTP Validate
+      parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
+      - description: payload otp request
+        in: body
+        name: body-payload
+        required: true
+        schema:
+          $ref: '#/definitions/authdto.OtpValidateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: OTP Validate
+      tags:
+      - Auth
+  /api/v1/auth/phone/verify:
+    post:
+      consumes:
+      - application/json
+      description: Used when register before hit register button
+      parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
+      - description: payload otp request resend
+        in: body
+        name: body-payload
+        required: true
+        schema:
+          $ref: '#/definitions/authdto.OtpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Phone Verification
       tags:
       - Auth
   /api/v1/banners:
@@ -225,7 +366,6 @@ paths:
       - description: Authorization value
         in: header
         name: authorization
-        required: true
         type: string
       - in: query
         name: limit

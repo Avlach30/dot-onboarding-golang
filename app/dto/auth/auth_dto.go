@@ -1,4 +1,4 @@
-package dto
+package authdto
 
 type ExchangeRequest struct {
 	PhoneNumber     string `json:"phone_number" validate:"required,e164"`

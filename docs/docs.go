@@ -47,7 +47,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.ExchangeRequest"
+                            "$ref": "#/definitions/authdto.ExchangeRequest"
                         }
                     }
                 ],
@@ -63,11 +63,199 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/dto.ExchangeResponse"
+                                            "$ref": "#/definitions/authdto.ExchangeResponse"
                                         }
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "default": {
+                        "description": "error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/otp/request": {
+            "post": {
+                "description": "OTP Request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "OTP Request",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "payload otp request",
+                        "name": "body-payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authdto.OtpRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/otp/resend": {
+            "post": {
+                "description": "OTP Resend",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "OTP Resend",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "payload otp request resend",
+                        "name": "body-payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authdto.OtpRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/otp/validate": {
+            "post": {
+                "description": "OTP Validate",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "OTP Validate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "payload otp request",
+                        "name": "body-payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authdto.OtpValidateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/phone/verify": {
+            "post": {
+                "description": "Used when register before hit register button",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Phone Verification",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "payload otp request resend",
+                        "name": "body-payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authdto.OtpRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
                         }
                     },
                     "default": {
@@ -209,8 +397,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Authorization value",
                         "name": "authorization",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "integer",
@@ -554,21 +741,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.BannerResponse": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "source_url": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.ExchangeRequest": {
+        "authdto.ExchangeRequest": {
             "type": "object",
             "required": [
                 "firebase_id_token",
@@ -583,10 +756,50 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ExchangeResponse": {
+        "authdto.ExchangeResponse": {
             "type": "object",
             "properties": {
                 "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "authdto.OtpRequest": {
+            "type": "object",
+            "required": [
+                "phone_number"
+            ],
+            "properties": {
+                "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "authdto.OtpValidateRequest": {
+            "type": "object",
+            "required": [
+                "otp",
+                "phone_number"
+            ],
+            "properties": {
+                "otp": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.BannerResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "source_url": {
                     "type": "string"
                 }
             }

@@ -48,4 +48,10 @@ var (
 	Username = GetRequired("MYSQL_DB_USER")
 	Password = GetRequired("MYSQL_DB_PASS")
 	Database = GetRequired("MYSQL_DB_NAME")
+
+	// OTP
+	ZenzivaBaseURL   = Get("ZENZIVA_BASE_URL", "")
+	ZenzivaUserKey   = Get("ZENZIVA_USER_KEY", "")
+	ZenzivaPassKey   = Get("ZENZIVA_PASS_KEY", "")
+	OtpExpiredInMins = Get("OTP_EXPIRED_IN_MINS", "5")
 )

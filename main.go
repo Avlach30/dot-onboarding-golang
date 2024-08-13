@@ -9,6 +9,7 @@ import (
 	"github.com/codespace-id/codespace-x/app/repository"
 	"github.com/codespace-id/codespace-x/app/usecase"
 	"github.com/codespace-id/codespace-x/config"
+	"github.com/codespace-id/codespace-x/pkg/Integrations/otp/implementations/zenziva"
 	"github.com/codespace-id/codespace-x/pkg/dbconn/mysql"
 
 	_ "github.com/codespace-id/codespace-x/docs"
@@ -32,11 +33,16 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// 3rd parties
+	zenzivaOTP := zenziva.NewZenziva(config.ZenzivaBaseURL, config.ZenzivaPassKey, config.ZenzivaUserKey)
+
 	// repository
 	userRepo := repository.NewUserRepository(db)
+	otpRepo := repository.NewOtpRepository(db)
 
 	// usecase
 	userUsecase := usecase.NewUserUsecase(userRepo)
+	authUsecase := usecase.NewAuthUsecase(zenzivaOTP, otpRepo, userRepo)
 
 	router.GET("/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		type healthRes struct {
@@ -63,7 +69,7 @@ func main() {
 		httpSwagger.WrapHandler(w, r)
 	})
 	handler.NewUserHandler(router, userUsecase)
-	handler.NewAuthHandler(router, userUsecase)
+	handler.NewAuthHandler(router, userUsecase, authUsecase)
 	handler.NewBannerHandler(router)
 	handler.NewNotificationHandler(router)
 	handler.NewProjectHandler(router)

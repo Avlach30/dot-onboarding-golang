@@ -16,7 +16,7 @@ const (
 
 func NewMysqlDB(dbHost, dbUser, dbPass, dbName string) (*sql.DB, error) {
 
-	connectionString := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", dbUser, dbPass, dbHost, dbName)
+	connectionString := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", dbUser, dbPass, dbHost, dbName)
 
 	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
