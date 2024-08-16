@@ -3,9 +3,10 @@ package usecase
 import (
 	"context"
 	"database/sql"
-	userdomain "github.com/codespace-id/codespace-x/app/domain/user"
 	"strconv"
 	"time"
+
+	userdomain "github.com/codespace-id/codespace-x/app/domain/user"
 
 	authdomain "github.com/codespace-id/codespace-x/app/domain/auth"
 	authdto "github.com/codespace-id/codespace-x/app/dto/auth"
@@ -43,14 +44,26 @@ func (uc *authUsecase) OtpRequest(ctx context.Context, phoneNumber string) error
 	}
 	expiredAt := time.Now().UTC().Add(time.Minute * time.Duration(expiredInMins))
 
-	if err := uc.otpRepo.Upsert(ctx, authdomain.OtpEntity{
-		Code:       newOtp,
-		Identifier: phoneNumber,
-		Trial:      0,
-		IsValid:    0,
-		ExpiredAt:  sql.NullTime{Time: expiredAt, Valid: true},
-	}); err != nil {
-		return errors.WithMessage(err, errTrace)
+	otpData, _ := uc.otpRepo.FindByIdentifier(ctx, phoneNumber)
+
+	if otpData.Identifier != "" {
+		otpData.Code = newOtp
+		otpData.ExpiredAt = sql.NullTime{Time: expiredAt, Valid: true}
+		otpData.Trial = 0
+		otpData.IsValid = 0
+		if err := uc.otpRepo.UpdateByIdentifier(ctx, phoneNumber, otpData); err != nil {
+			return errors.WithMessage(err, errTrace)
+		}
+	} else {
+		if err := uc.otpRepo.Create(ctx, authdomain.OtpEntity{
+			Code:       newOtp,
+			Identifier: phoneNumber,
+			Trial:      0,
+			IsValid:    0,
+			ExpiredAt:  sql.NullTime{Time: expiredAt, Valid: true},
+		}); err != nil {
+			return errors.WithMessage(err, errTrace)
+		}
 	}
 
 	uc.otpService.SendOTP(phoneNumber, newOtp)
