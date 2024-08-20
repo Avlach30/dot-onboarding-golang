@@ -47,7 +47,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/authdto.ExchangeRequest"
+                            "$ref": "#/definitions/dto.ExchangeRequest"
                         }
                     }
                 ],
@@ -63,7 +63,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/authdto.ExchangeResponse"
+                                            "$ref": "#/definitions/dto.ExchangeResponse"
                                         }
                                     }
                                 }
@@ -106,7 +106,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/authdto.OtpRequest"
+                            "$ref": "#/definitions/dto.OtpRequest"
                         }
                     }
                 ],
@@ -153,7 +153,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/authdto.OtpRequest"
+                            "$ref": "#/definitions/dto.OtpRequest"
                         }
                     }
                 ],
@@ -200,7 +200,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/authdto.OtpValidateRequest"
+                            "$ref": "#/definitions/dto.OtpValidateRequest"
                         }
                     }
                 ],
@@ -247,7 +247,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/authdto.OtpRequest"
+                            "$ref": "#/definitions/dto.OtpRequest"
                         }
                     }
                 ],
@@ -294,6 +294,16 @@ const docTemplate = `{
                         "name": "authorization",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "per_page",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -310,7 +320,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/dto.BannerResponse"
+                                                "$ref": "#/definitions/bannerdto.BannerResponse"
                                             }
                                         }
                                     }
@@ -473,7 +483,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/userdto.RegisterRequest"
+                            "$ref": "#/definitions/dto.RegisterRequest"
                         }
                     }
                 ],
@@ -489,7 +499,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/projectdto.CreateProjectResponse"
+                                            "$ref": "#/definitions/dto.CreateProjectResponse"
                                         }
                                     }
                                 }
@@ -596,12 +606,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "projectdto.UpdateProjectReq",
+                        "description": "dto.UpdateProjectReq",
                         "name": "body-payload",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/projectdto.UpdateProjectReq"
+                            "$ref": "#/definitions/dto.UpdateProjectReq"
                         }
                     },
                     {
@@ -669,7 +679,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/userdto.GetProfileResponse"
+                                            "$ref": "#/definitions/dto.GetProfileResponse"
                                         }
                                     }
                                 }
@@ -714,12 +724,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "userdto.RegisterRequest",
+                        "description": "dto.RegisterRequest",
                         "name": "body-payload",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/userdto.RegisterRequest"
+                            "$ref": "#/definitions/dto.RegisterRequest"
                         }
                     }
                 ],
@@ -741,7 +751,29 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "authdto.ExchangeRequest": {
+        "bannerdto.BannerResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "source_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreateProjectResponse": {
+            "type": "object",
+            "properties": {
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ExchangeRequest": {
             "type": "object",
             "required": [
                 "firebase_id_token",
@@ -756,7 +788,7 @@ const docTemplate = `{
                 }
             }
         },
-        "authdto.ExchangeResponse": {
+        "dto.ExchangeResponse": {
             "type": "object",
             "properties": {
                 "token": {
@@ -764,42 +796,16 @@ const docTemplate = `{
                 }
             }
         },
-        "authdto.OtpRequest": {
-            "type": "object",
-            "required": [
-                "phone_number"
-            ],
-            "properties": {
-                "phone_number": {
-                    "type": "string"
-                }
-            }
-        },
-        "authdto.OtpValidateRequest": {
-            "type": "object",
-            "required": [
-                "otp",
-                "phone_number"
-            ],
-            "properties": {
-                "otp": {
-                    "type": "string"
-                },
-                "phone_number": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.BannerResponse": {
+        "dto.GetProfileResponse": {
             "type": "object",
             "properties": {
-                "description": {
+                "fullname": {
                     "type": "string"
                 },
-                "name": {
+                "image_url": {
                     "type": "string"
                 },
-                "source_url": {
+                "role": {
                     "type": "string"
                 }
             }
@@ -810,7 +816,7 @@ const docTemplate = `{
                 "astrodevs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/userdto.GetProfileResponse"
+                        "$ref": "#/definitions/dto.GetProfileResponse"
                     }
                 },
                 "created_at": {
@@ -833,72 +839,33 @@ const docTemplate = `{
                 }
             }
         },
-        "pkg.BaseResponse": {
+        "dto.OtpRequest": {
             "type": "object",
+            "required": [
+                "phone_number"
+            ],
             "properties": {
-                "code": {
-                    "type": "integer"
-                },
-                "data": {},
-                "message": {
-                    "type": "string"
-                },
-                "meta": {
-                    "$ref": "#/definitions/pkg.MetaResponse"
-                }
-            }
-        },
-        "pkg.MetaResponse": {
-            "type": "object",
-            "properties": {
-                "limit": {
-                    "type": "integer"
-                },
-                "page": {
-                    "type": "integer"
-                }
-            }
-        },
-        "projectdto.CreateProjectResponse": {
-            "type": "object",
-            "properties": {
-                "uuid": {
+                "phone_number": {
                     "type": "string"
                 }
             }
         },
-        "projectdto.UpdateProjectReq": {
+        "dto.OtpValidateRequest": {
             "type": "object",
+            "required": [
+                "otp",
+                "phone_number"
+            ],
             "properties": {
-                "deadline_type": {
-                    "type": "integer"
-                },
-                "description": {
+                "otp": {
                     "type": "string"
                 },
-                "name": {
-                    "type": "string"
-                },
-                "service_type": {
-                    "type": "integer"
-                }
-            }
-        },
-        "userdto.GetProfileResponse": {
-            "type": "object",
-            "properties": {
-                "fullname": {
-                    "type": "string"
-                },
-                "image_url": {
-                    "type": "string"
-                },
-                "role": {
+                "phone_number": {
                     "type": "string"
                 }
             }
         },
-        "userdto.RegisterRequest": {
+        "dto.RegisterRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -917,6 +884,49 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.UpdateProjectReq": {
+            "type": "object",
+            "properties": {
+                "deadline_type": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "service_type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "pkg.BaseResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/pkg.MetaResponse"
+                }
+            }
+        },
+        "pkg.MetaResponse": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer"
+                },
+                "per_page": {
+                    "type": "integer"
                 }
             }
         }

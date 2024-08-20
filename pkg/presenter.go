@@ -8,6 +8,6 @@ type BaseResponse struct {
 }
 
 type MetaResponse struct {
-	Page  int `json:"page"`
-	Limit int `json:"limit"`
+	Page    int `json:"page"`
+	PerPage int `json:"per_page"`
 }

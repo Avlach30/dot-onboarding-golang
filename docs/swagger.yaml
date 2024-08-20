@@ -1,5 +1,19 @@
 definitions:
-  authdto.ExchangeRequest:
+  bannerdto.BannerResponse:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      source_url:
+        type: string
+    type: object
+  dto.CreateProjectResponse:
+    properties:
+      uuid:
+        type: string
+    type: object
+  dto.ExchangeRequest:
     properties:
       firebase_id_token:
         type: string
@@ -9,42 +23,25 @@ definitions:
     - firebase_id_token
     - phone_number
     type: object
-  authdto.ExchangeResponse:
+  dto.ExchangeResponse:
     properties:
       token:
         type: string
     type: object
-  authdto.OtpRequest:
+  dto.GetProfileResponse:
     properties:
-      phone_number:
+      fullname:
         type: string
-    required:
-    - phone_number
-    type: object
-  authdto.OtpValidateRequest:
-    properties:
-      otp:
+      image_url:
         type: string
-      phone_number:
-        type: string
-    required:
-    - otp
-    - phone_number
-    type: object
-  dto.BannerResponse:
-    properties:
-      description:
-        type: string
-      name:
-        type: string
-      source_url:
+      role:
         type: string
     type: object
   dto.ListProjectResponse:
     properties:
       astrodevs:
         items:
-          $ref: '#/definitions/userdto.GetProfileResponse'
+          $ref: '#/definitions/dto.GetProfileResponse'
         type: array
       created_at:
         type: string
@@ -59,49 +56,24 @@ definitions:
       uuid:
         type: string
     type: object
-  pkg.BaseResponse:
+  dto.OtpRequest:
     properties:
-      code:
-        type: integer
-      data: {}
-      message:
+      phone_number:
         type: string
-      meta:
-        $ref: '#/definitions/pkg.MetaResponse'
+    required:
+    - phone_number
     type: object
-  pkg.MetaResponse:
+  dto.OtpValidateRequest:
     properties:
-      limit:
-        type: integer
-      page:
-        type: integer
+      otp:
+        type: string
+      phone_number:
+        type: string
+    required:
+    - otp
+    - phone_number
     type: object
-  projectdto.CreateProjectResponse:
-    properties:
-      uuid:
-        type: string
-    type: object
-  projectdto.UpdateProjectReq:
-    properties:
-      deadline_type:
-        type: integer
-      description:
-        type: string
-      name:
-        type: string
-      service_type:
-        type: integer
-    type: object
-  userdto.GetProfileResponse:
-    properties:
-      fullname:
-        type: string
-      image_url:
-        type: string
-      role:
-        type: string
-    type: object
-  userdto.RegisterRequest:
+  dto.RegisterRequest:
     properties:
       email:
         type: string
@@ -115,6 +87,34 @@ definitions:
     - email
     - fullname
     - phone_number
+    type: object
+  dto.UpdateProjectReq:
+    properties:
+      deadline_type:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      service_type:
+        type: integer
+    type: object
+  pkg.BaseResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+      meta:
+        $ref: '#/definitions/pkg.MetaResponse'
+    type: object
+  pkg.MetaResponse:
+    properties:
+      page:
+        type: integer
+      per_page:
+        type: integer
     type: object
 info:
   contact:
@@ -141,7 +141,7 @@ paths:
         name: body-payload
         required: true
         schema:
-          $ref: '#/definitions/authdto.ExchangeRequest'
+          $ref: '#/definitions/dto.ExchangeRequest'
       produces:
       - application/json
       responses:
@@ -152,7 +152,7 @@ paths:
             - $ref: '#/definitions/pkg.BaseResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/authdto.ExchangeResponse'
+                  $ref: '#/definitions/dto.ExchangeResponse'
               type: object
         default:
           description: error
@@ -177,7 +177,7 @@ paths:
         name: body-payload
         required: true
         schema:
-          $ref: '#/definitions/authdto.OtpRequest'
+          $ref: '#/definitions/dto.OtpRequest'
       produces:
       - application/json
       responses:
@@ -208,7 +208,7 @@ paths:
         name: body-payload
         required: true
         schema:
-          $ref: '#/definitions/authdto.OtpRequest'
+          $ref: '#/definitions/dto.OtpRequest'
       produces:
       - application/json
       responses:
@@ -239,7 +239,7 @@ paths:
         name: body-payload
         required: true
         schema:
-          $ref: '#/definitions/authdto.OtpValidateRequest'
+          $ref: '#/definitions/dto.OtpValidateRequest'
       produces:
       - application/json
       responses:
@@ -270,7 +270,7 @@ paths:
         name: body-payload
         required: true
         schema:
-          $ref: '#/definitions/authdto.OtpRequest'
+          $ref: '#/definitions/dto.OtpRequest'
       produces:
       - application/json
       responses:
@@ -301,6 +301,12 @@ paths:
         name: authorization
         required: true
         type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: per_page
+        type: integer
       produces:
       - application/json
       responses:
@@ -312,7 +318,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/dto.BannerResponse'
+                    $ref: '#/definitions/bannerdto.BannerResponse'
                   type: array
               type: object
         default:
@@ -414,7 +420,7 @@ paths:
         name: body-payload
         required: true
         schema:
-          $ref: '#/definitions/userdto.RegisterRequest'
+          $ref: '#/definitions/dto.RegisterRequest'
       produces:
       - application/json
       responses:
@@ -425,7 +431,7 @@ paths:
             - $ref: '#/definitions/pkg.BaseResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/projectdto.CreateProjectResponse'
+                  $ref: '#/definitions/dto.CreateProjectResponse'
               type: object
         default:
           description: error
@@ -489,12 +495,12 @@ paths:
         name: authorization
         required: true
         type: string
-      - description: projectdto.UpdateProjectReq
+      - description: dto.UpdateProjectReq
         in: body
         name: body-payload
         required: true
         schema:
-          $ref: '#/definitions/projectdto.UpdateProjectReq'
+          $ref: '#/definitions/dto.UpdateProjectReq'
       - description: uuid project
         in: path
         name: project_uuid
@@ -540,7 +546,7 @@ paths:
             - $ref: '#/definitions/pkg.BaseResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/userdto.GetProfileResponse'
+                  $ref: '#/definitions/dto.GetProfileResponse'
               type: object
         default:
           description: error
@@ -565,12 +571,12 @@ paths:
         name: authorization
         required: true
         type: string
-      - description: userdto.RegisterRequest
+      - description: dto.RegisterRequest
         in: body
         name: body-payload
         required: true
         schema:
-          $ref: '#/definitions/userdto.RegisterRequest'
+          $ref: '#/definitions/dto.RegisterRequest'
       produces:
       - application/json
       responses:

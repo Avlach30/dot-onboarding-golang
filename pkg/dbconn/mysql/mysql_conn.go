@@ -3,6 +3,7 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
+	"github.com/codespace-id/codespace-x/config"
 	_ "github.com/go-sql-driver/mysql"
 	"time"
 )
@@ -14,7 +15,12 @@ const (
 	connMaxIdleTime = 20
 )
 
-func NewMysqlDB(dbHost, dbUser, dbPass, dbName string) (*sql.DB, error) {
+func NewMysqlDB() (*sql.DB, error) {
+
+	dbHost := config.Host
+	dbUser := config.Username
+	dbPass := config.Password
+	dbName := config.Database
 
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", dbUser, dbPass, dbHost, dbName)
 

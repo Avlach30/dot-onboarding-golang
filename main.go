@@ -2,18 +2,26 @@ package main
 
 import (
 	"encoding/json"
+	authHandler "github.com/codespace-id/codespace-x/app/auth/handler"
+	"github.com/codespace-id/codespace-x/app/auth/repository"
+	authUsecase "github.com/codespace-id/codespace-x/app/auth/usecase"
+	"github.com/codespace-id/codespace-x/app/banner/handler"
+	bannerRepo "github.com/codespace-id/codespace-x/app/banner/repository"
+	bannerUsecase "github.com/codespace-id/codespace-x/app/banner/usecase"
+	notifHandler "github.com/codespace-id/codespace-x/app/notification/handler"
+	projectHandler "github.com/codespace-id/codespace-x/app/project/handler"
+	userHandler "github.com/codespace-id/codespace-x/app/user/handler"
+	userRepo "github.com/codespace-id/codespace-x/app/user/repository"
+	"github.com/codespace-id/codespace-x/app/user/usecase"
+	"github.com/codespace-id/codespace-x/pkg/common/enum"
+	"github.com/codespace-id/codespace-x/pkg/dbconn"
 	"log"
 	"net/http"
 
-	"github.com/codespace-id/codespace-x/app/handler"
-	"github.com/codespace-id/codespace-x/app/repository"
-	"github.com/codespace-id/codespace-x/app/usecase"
 	"github.com/codespace-id/codespace-x/config"
-	"github.com/codespace-id/codespace-x/pkg/Integrations/otp/implementations/zenziva"
-	"github.com/codespace-id/codespace-x/pkg/dbconn/mysql"
-
 	_ "github.com/codespace-id/codespace-x/docs"
 	"github.com/codespace-id/codespace-x/pkg"
+	"github.com/codespace-id/codespace-x/pkg/Integrations/otp/implementations/zenziva"
 	"github.com/julienschmidt/httprouter"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
@@ -28,7 +36,7 @@ func main() {
 
 	router := httprouter.New()
 
-	db, err := mysql.NewMysqlDB(config.Host, config.Username, config.Password, config.Database)
+	db, err := dbconn.GetDb(enum.MYSQL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -37,12 +45,14 @@ func main() {
 	zenzivaOTP := zenziva.NewZenziva(config.ZenzivaBaseURL, config.ZenzivaPassKey, config.ZenzivaUserKey)
 
 	// repository
-	userRepo := repository.NewUserRepository(db)
+	userRepo := userRepo.NewUserRepository(db)
 	otpRepo := repository.NewOtpRepository(db)
+	bannerRepo := bannerRepo.NewBannerRepository(db)
 
 	// usecase
 	userUsecase := usecase.NewUserUsecase(userRepo)
-	authUsecase := usecase.NewAuthUsecase(zenzivaOTP, otpRepo, userRepo)
+	authUsecase := authUsecase.NewAuthUsecase(zenzivaOTP, otpRepo, userRepo)
+	bannerUsecase := bannerUsecase.NewBannerUsecase(bannerRepo)
 
 	router.GET("/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		type healthRes struct {
@@ -68,11 +78,11 @@ func main() {
 	router.GET("/swagger/*filepath", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		httpSwagger.WrapHandler(w, r)
 	})
-	handler.NewUserHandler(router, userUsecase)
-	handler.NewAuthHandler(router, userUsecase, authUsecase)
-	handler.NewBannerHandler(router)
-	handler.NewNotificationHandler(router)
-	handler.NewProjectHandler(router)
+	userHandler.NewUserHandler(router, userUsecase)
+	authHandler.NewAuthHandler(router, userUsecase, authUsecase)
+	handler.NewBannerHandler(router, bannerUsecase)
+	notifHandler.NewNotificationHandler(router)
+	projectHandler.NewProjectHandler(router)
 
 	log.Println("=== SERVER STARTED at PORT 7777 ===")
 	log.Fatal(http.ListenAndServe(":7777", router))
