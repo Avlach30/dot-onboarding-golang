@@ -1,6 +1,15 @@
 package domain
 
+import "time"
+
 type Entity struct {
-	ID     uint
-	UserID int64
+	ID                int64
+	UUID              string
+	Name              string
+	Description       string
+	ThumbnailImageURL string
+	ServiceType       string
+	Status            string
+	TargetTime        string
+	CreatedAt         time.Time
 }

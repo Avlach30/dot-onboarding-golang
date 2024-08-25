@@ -2,21 +2,29 @@ package handler
 
 import (
 	"encoding/json"
+	commondto "github.com/codespace-id/codespace-x/app/common/dto"
+	projectDomain "github.com/codespace-id/codespace-x/app/project/domain"
 	"github.com/codespace-id/codespace-x/app/project/dto"
 	userdto "github.com/codespace-id/codespace-x/app/user/dto"
-	"net/http"
-
 	"github.com/codespace-id/codespace-x/pkg"
+	httperror "github.com/codespace-id/codespace-x/pkg/common/error"
 	"github.com/codespace-id/codespace-x/pkg/common/middleware"
 	"github.com/julienschmidt/httprouter"
+	"log"
+	"net/http"
+	"runtime/debug"
+	"strconv"
 )
 
 type ProjectHandler struct {
+	projectUsecase projectDomain.Usecase
 }
 
-func NewProjectHandler(router *httprouter.Router) {
+func NewProjectHandler(router *httprouter.Router, projectUsecase projectDomain.Usecase) {
 	basePath := "/api/v1/projects"
-	projectHandler := &ProjectHandler{}
+	projectHandler := &ProjectHandler{
+		projectUsecase: projectUsecase,
+	}
 
 	router.GET(basePath, middleware.Wrapper(projectHandler.ListProject(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
 	router.GET(basePath+"/:uuid", middleware.Wrapper(projectHandler.DetailProject(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
@@ -32,46 +40,56 @@ func NewProjectHandler(router *httprouter.Router) {
 // @Produce json
 // @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
 // @Param authorization header string false "Authorization value"
-// @Param basic-param query pkg.Pagination true "basic param"
+// @Param basic-param query commondto.Pagination true "basic param"
 // @Success 200 {object} pkg.BaseResponse{data=[]dto.ListProjectResponse} "success"
 // @Failure default {object} pkg.BaseResponse "error"
 // @Router /api/v1/projects [get]
 func (h *ProjectHandler) ListProject() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
+		// Retrieve values from context (locals)
+		phoneNumber, _ := r.Context().Value(middleware.PhoneNumber).(string)
+
+		var err error
+		var payloadReq commondto.Pagination
+
+		queryParams := r.URL.Query()
+
+		if page, ok := queryParams["page"]; ok {
+			pageAsInt, _ := strconv.Atoi(page[0])
+			payloadReq.Page = pageAsInt
+		}
+		if perPage, ok := queryParams["per_page"]; ok {
+			perPageInt, _ := strconv.Atoi(perPage[0])
+			payloadReq.PerPage = perPageInt
+		}
+
+		if payloadReq.Page == 0 {
+			payloadReq.Page = 1
+		}
+		if payloadReq.PerPage == 0 {
+			payloadReq.PerPage = 10
+		}
+
+		res, err := h.projectUsecase.ListProject(r.Context(), phoneNumber, payloadReq.Page, payloadReq.PerPage)
+		if err != nil {
+			log.Println("error getting projects: ", string(debug.Stack()))
+			httperror.SetResponse(w, 500, "internal server error")
+			return
+		}
+
 		dataByte, _ := json.Marshal(pkg.BaseResponse{
 			Code:    200,
 			Message: "success",
-			Data: []dto.ListProjectResponse{
-				{
-					UUID:        "CYUS-898H",
-					Name:        "Test TOEFL Online",
-					Description: "Dapatkan wordpress landing",
-					ServiceType: "web apps development",
-					Status:      "On Going",
-					CreatedAt:   "2011-08-12T20:17:46.384Z",
-					Astrodevs: []userdto.GetProfileResponse{
-						{
-							Fullname: "Hiegar",
-							Role:     "UI/UX",
-							ImageURL: "https://res.cloudinary.com/deafomwc7/image/upload/v1664837475/codespace/images/team/team-4a_aqfwhw.jpg",
-						},
-						{
-							Fullname: "Ubai",
-							Role:     "Backend",
-							ImageURL: "https://res.cloudinary.com/deafomwc7/image/upload/v1664837474/codespace/images/team/team-1a_asflru.jpg",
-						},
-					},
-				},
-			},
+			Data:    res,
 			Meta: &pkg.MetaResponse{
-				Page:    1,
-				PerPage: 10,
+				Page:    payloadReq.Page,
+				PerPage: payloadReq.PerPage,
 			},
 		})
 
 		w.Header().Set("Content-Type", "application/json")
-		_, err := w.Write(dataByte)
+		_, err = w.Write(dataByte)
 		if err != nil {
 			return
 		}
@@ -128,29 +146,61 @@ func (h *ProjectHandler) DetailProject() httprouter.Handle {
 	}
 }
 
-// @Summary Create Project
-// @Description Create Project
+// @Summary CreateTx Project
+// @Description CreateTx Project
 // @Tags Projects
 // @Accept json
 // @Produce json
 // @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
 // @Param authorization header string true "Authorization value"
-// @Param body-payload body userdto.RegisterRequest true "userdto.RegisterRequest"
+// @Param body-payload body dto.CreateProjectRequest true "dto.CreateProjectRequest"
 // @Success 200 {object} pkg.BaseResponse{data=dto.CreateProjectResponse} "success"
 // @Failure default {object} pkg.BaseResponse "error"
 // @Router /api/v1/projects [post]
 func (h *ProjectHandler) CreateProject() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+
+		var err error
+		var payloadReq dto.CreateProjectRequest
+
+		// Retrieve values from context (locals)
+		phoneNumber, _ := r.Context().Value(middleware.PhoneNumber).(string)
+
+		decoder := json.NewDecoder(r.Body)
+		if err = decoder.Decode(&payloadReq); err != nil {
+			httperror.SetResponse(w, 400, "body payload required")
+			return
+		}
+		// validate payload
+		errMsgs := pkg.ValidateStruct(payloadReq)
+		if len(errMsgs) > 0 {
+			httperror.SetResponse(w, 400, errMsgs)
+			return
+		}
+		defer r.Body.Close()
+
+		project, err := h.projectUsecase.CreateNewInquiry(r.Context(), phoneNumber, projectDomain.Entity{
+			Name:        payloadReq.Name,
+			Description: payloadReq.Description,
+			ServiceType: payloadReq.ServiceType,
+			TargetTime:  payloadReq.TimePriority,
+		})
+		if err != nil {
+			log.Println("error creating projects: ", string(debug.Stack()))
+			httperror.SetResponse(w, 500, "internal server error")
+			return
+		}
+
 		dataByte, _ := json.Marshal(pkg.BaseResponse{
 			Code:    200,
 			Message: "success",
 			Data: dto.CreateProjectResponse{
-				UUID: "XTY9A-YUABQ",
+				UUID: project.UUID,
 			},
 		})
 
 		w.Header().Set("Content-Type", "application/json")
-		_, err := w.Write(dataByte)
+		_, err = w.Write(dataByte)
 		if err != nil {
 			return
 		}

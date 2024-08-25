@@ -61,11 +61,17 @@ func serviceTokenMiddleware(r *http.Request, w http.ResponseWriter) bool {
 		httperror.SetResponse(w, 401, "unauthorized")
 		return true
 	}
+
 	return false
 }
 
 func authMiddleware(ctx context.Context, r *http.Request, w http.ResponseWriter) (context.Context, bool) {
 	userAgent := r.Header.Get("Authorization")
+	if userAgent == "" {
+		// threat as guest
+		return ctx, false
+	}
+
 	splitToken := strings.Split(userAgent, " ")
 	if len(splitToken) < 2 {
 		httperror.SetResponse(w, 401, "invalid token")

@@ -2,8 +2,8 @@ package handler
 
 import (
 	"encoding/json"
-	userdomain "github.com/codespace-id/codespace-x/app/user/domain"
 	"github.com/codespace-id/codespace-x/app/user/dto"
+	userdomain "github.com/codespace-id/codespace-x/app/user/userdomain"
 	"net/http"
 	"strings"
 

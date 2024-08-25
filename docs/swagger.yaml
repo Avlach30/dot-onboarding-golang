@@ -8,6 +8,35 @@ definitions:
       source_url:
         type: string
     type: object
+  commondto.ListServiceResponse:
+    properties:
+      name:
+        type: string
+      value:
+        type: string
+    type: object
+  commondto.ListTargetDateResponse:
+    properties:
+      name:
+        type: string
+      value:
+        type: string
+    type: object
+  dto.CreateProjectRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      service_type:
+        type: string
+      time_priority:
+        type: string
+    required:
+    - description
+    - service_type
+    - time_priority
+    type: object
   dto.CreateProjectResponse:
     properties:
       uuid:
@@ -52,6 +81,8 @@ definitions:
       service_type:
         type: string
       status:
+        type: string
+      thumbnail_image_url:
         type: string
       uuid:
         type: string
@@ -328,6 +359,82 @@ paths:
       summary: List Banner
       tags:
       - Banner
+  /api/v1/commons/our-service:
+    get:
+      consumes:
+      - application/json
+      description: Our Service
+      parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/commondto.ListServiceResponse'
+                  type: array
+              type: object
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Our Service
+      tags:
+      - Commons
+  /api/v1/commons/target-time:
+    get:
+      consumes:
+      - application/json
+      description: Target Time
+      parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/commondto.ListTargetDateResponse'
+                  type: array
+              type: object
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Target Time
+      tags:
+      - Commons
   /api/v1/notifications:
     get:
       consumes:
@@ -374,10 +481,10 @@ paths:
         name: authorization
         type: string
       - in: query
-        name: limit
+        name: page
         type: integer
       - in: query
-        name: page
+        name: per_page
         type: integer
       produces:
       - application/json
@@ -403,7 +510,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create Project
+      description: CreateTx Project
       parameters:
       - description: X-Service-Auth-Token
         in: header
@@ -415,12 +522,12 @@ paths:
         name: authorization
         required: true
         type: string
-      - description: userdto.RegisterRequest
+      - description: dto.CreateProjectRequest
         in: body
         name: body-payload
         required: true
         schema:
-          $ref: '#/definitions/dto.RegisterRequest'
+          $ref: '#/definitions/dto.CreateProjectRequest'
       produces:
       - application/json
       responses:
@@ -437,7 +544,7 @@ paths:
           description: error
           schema:
             $ref: '#/definitions/pkg.BaseResponse'
-      summary: Create Project
+      summary: CreateTx Project
       tags:
       - Projects
   /api/v1/projects/{project_uuid}:

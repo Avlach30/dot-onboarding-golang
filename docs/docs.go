@@ -337,6 +337,132 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/commons/our-service": {
+            "get": {
+                "description": "Our Service",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Commons"
+                ],
+                "summary": "Our Service",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pkg.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/commondto.ListServiceResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "default": {
+                        "description": "error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/commons/target-time": {
+            "get": {
+                "description": "Target Time",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Commons"
+                ],
+                "summary": "Target Time",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pkg.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/commondto.ListTargetDateResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "default": {
+                        "description": "error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/notifications": {
             "get": {
                 "description": "List Notif",
@@ -411,12 +537,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "name": "limit",
+                        "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "name": "page",
+                        "name": "per_page",
                         "in": "query"
                     }
                 ],
@@ -451,7 +577,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create Project",
+                "description": "CreateTx Project",
                 "consumes": [
                     "application/json"
                 ],
@@ -461,7 +587,7 @@ const docTemplate = `{
                 "tags": [
                     "Projects"
                 ],
-                "summary": "Create Project",
+                "summary": "CreateTx Project",
                 "parameters": [
                     {
                         "type": "string",
@@ -478,12 +604,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "userdto.RegisterRequest",
+                        "description": "dto.CreateProjectRequest",
                         "name": "body-payload",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.RegisterRequest"
+                            "$ref": "#/definitions/dto.CreateProjectRequest"
                         }
                     }
                 ],
@@ -765,6 +891,50 @@ const docTemplate = `{
                 }
             }
         },
+        "commondto.ListServiceResponse": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "commondto.ListTargetDateResponse": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreateProjectRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "service_type",
+                "time_priority"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "service_type": {
+                    "type": "string"
+                },
+                "time_priority": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateProjectResponse": {
             "type": "object",
             "properties": {
@@ -832,6 +1002,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                },
+                "thumbnail_image_url": {
                     "type": "string"
                 },
                 "uuid": {

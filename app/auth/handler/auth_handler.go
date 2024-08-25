@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	authdomain "github.com/codespace-id/codespace-x/app/auth/domain"
 	"github.com/codespace-id/codespace-x/app/auth/dto"
-	userdomain "github.com/codespace-id/codespace-x/app/user/domain"
+	userdomain "github.com/codespace-id/codespace-x/app/user/userdomain"
 	"net/http"
 
 	httperror "github.com/codespace-id/codespace-x/pkg/common/error"

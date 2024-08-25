@@ -1,7 +1,7 @@
-package domain
+package userdomain
 
 type Entity struct {
-	ID             uint
+	ID             int64
 	Fullname       string
 	IdentityNumber string
 	PhoneNumber    string

@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS user_projects (
+     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+     user_id INT(11) NOT NULL,
+     project_id INT(11) NOT NULL,
+     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+     FOREIGN KEY (user_id) REFERENCES users(id),
+     FOREIGN KEY (project_id) REFERENCES projects(id)
+);

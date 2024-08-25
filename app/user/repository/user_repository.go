@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"github.com/codespace-id/codespace-x/app/user/domain"
+	"github.com/codespace-id/codespace-x/app/user/userdomain"
 
 	"github.com/pkg/errors"
 )
@@ -12,13 +12,13 @@ type UserRepository struct {
 	db *sql.DB
 }
 
-func NewUserRepository(db *sql.DB) domain.Repository {
+func NewUserRepository(db *sql.DB) userdomain.Repository {
 	return &UserRepository{
 		db: db,
 	}
 }
 
-func (r *UserRepository) Create(ctx context.Context, payload domain.Entity) error {
+func (r *UserRepository) Create(ctx context.Context, payload userdomain.Entity) error {
 
 	query := `
 		INSERT INTO 
@@ -42,16 +42,17 @@ func (r *UserRepository) Create(ctx context.Context, payload domain.Entity) erro
 		payload.Gender,
 		payload.Password,
 	); err != nil {
-		return errors.Wrap(err, "UserRepository.Create.ExecContext")
+		return errors.Wrap(err, "UserRepository.CreateTx.ExecContext")
 	}
 
 	return nil
 }
 
-func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res domain.Entity, err error) {
+func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res userdomain.Entity, err error) {
 
 	query := `
 		SELECT
+		    id,
 			fullname, 
 			identity_number, 
 			phone_number, 
@@ -67,6 +68,7 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res doma
 		query,
 		phoneNumber,
 	).Scan(
+		&res.ID,
 		&res.Fullname,
 		&res.IdentityNumber,
 		&res.PhoneNumber,
@@ -75,7 +77,7 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res doma
 		if errors.Is(err, sql.ErrNoRows) {
 			return res, nil
 		}
-		return res, errors.Wrap(err, "UserRepository.Create.ExecContext")
+		return res, errors.Wrap(err, "UserRepository.CreateTx.ExecContext")
 	}
 
 	return res, nil

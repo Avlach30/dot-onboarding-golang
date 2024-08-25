@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"github.com/codespace-id/codespace-x/app/auth/domain"
 	authdto "github.com/codespace-id/codespace-x/app/auth/dto"
-	userdomain "github.com/codespace-id/codespace-x/app/user/domain"
+	userdomain "github.com/codespace-id/codespace-x/app/user/userdomain"
 	"strconv"
 	"time"
 
