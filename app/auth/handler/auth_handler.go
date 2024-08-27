@@ -228,7 +228,7 @@ func (h *AuthHandler) OtpResend() httprouter.Handle {
 	}
 }
 
-// @Summary Phone Verification
+// @Summary PhoneNumber Verification
 // @Description Used when register before hit register button
 // @Tags Auth
 // @Accept json

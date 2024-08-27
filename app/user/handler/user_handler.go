@@ -53,7 +53,7 @@ func (h *UserHandler) Profile() httprouter.Handle {
 
 		res, err := h.userUsecase.Profile(r.Context(), phoneNumber)
 		if err != nil {
-			httperror.SetResponse(w, 400, "body payload required")
+			httperror.SetResponse(w, 500, "internal server error")
 			return
 		}
 
@@ -61,9 +61,10 @@ func (h *UserHandler) Profile() httprouter.Handle {
 			Code:    200,
 			Message: "success",
 			Data: dto.GetProfileResponse{
-				Fullname: res.Fullname,
-				Role:     res.Role,
-				ImageURL: res.ImageURL,
+				Fullname:    res.Fullname,
+				ImageURL:    res.ImageURL,
+				PhoneNumber: res.PhoneNumber,
+				Email:       res.Email,
 			},
 		})
 

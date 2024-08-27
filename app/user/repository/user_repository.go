@@ -27,10 +27,11 @@ func (r *UserRepository) Create(ctx context.Context, payload userdomain.Entity) 
 				identity_number, 
 				phone_number, 
 			    gender,
-			    password
+			    password,
+			    image_url
 			) 
 		VALUES 
-			(?, ?, ?, ?, ?)
+			(?, ?, ?, ?, ?, ?)
 		`
 
 	if _, err := r.db.ExecContext(
@@ -41,6 +42,7 @@ func (r *UserRepository) Create(ctx context.Context, payload userdomain.Entity) 
 		payload.PhoneNumber,
 		payload.Gender,
 		payload.Password,
+		payload.ImageURL,
 	); err != nil {
 		return errors.Wrap(err, "UserRepository.CreateTx.ExecContext")
 	}
@@ -56,13 +58,16 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res user
 			fullname, 
 			identity_number, 
 			phone_number, 
-		   gender
+		   gender,
+		   email,
+		   image_url
 		FROM
 			users
 		WHERE
 			phone_number = ?
 		`
 
+	var email sql.NullString
 	if err := r.db.QueryRowContext(
 		ctx,
 		query,
@@ -73,6 +78,8 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res user
 		&res.IdentityNumber,
 		&res.PhoneNumber,
 		&res.Gender,
+		&email,
+		&res.ImageURL,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return res, nil
@@ -80,5 +87,6 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res user
 		return res, errors.Wrap(err, "UserRepository.CreateTx.ExecContext")
 	}
 
+	res.Email = email.String
 	return res, nil
 }

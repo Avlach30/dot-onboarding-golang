@@ -4,6 +4,7 @@ import (
 	"context"
 	userdto "github.com/codespace-id/codespace-x/app/user/dto"
 	"github.com/codespace-id/codespace-x/app/user/userdomain"
+	"github.com/codespace-id/codespace-x/pkg/common/generator"
 
 	"github.com/codespace-id/codespace-x/pkg/common/enum"
 	"github.com/pkg/errors"
@@ -37,6 +38,7 @@ func (u *userUsecase) Create(ctx context.Context, dto userdto.RegisterRequest) e
 		PhoneNumber:    dto.PhoneNumber,
 		Gender:         enum.UNKNOWN.Value(),
 		Password:       "x",
+		ImageURL:       generator.GenerateRandomPhotoProfile(),
 	}); err != nil {
 		return errors.WithMessage(err, traceTag)
 	}
@@ -56,5 +58,7 @@ func (u *userUsecase) Profile(ctx context.Context, phoneNumber string) (res user
 		IdentityNumber: userData.IdentityNumber,
 		PhoneNumber:    userData.PhoneNumber,
 		Gender:         userData.Gender,
+		Email:          userData.Email,
+		ImageURL:       userData.ImageURL,
 	}, nil
 }

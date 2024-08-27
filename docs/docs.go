@@ -232,7 +232,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Phone Verification",
+                "summary": "PhoneNumber Verification",
                 "parameters": [
                     {
                         "type": "string",

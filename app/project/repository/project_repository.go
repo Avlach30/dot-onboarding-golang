@@ -131,6 +131,7 @@ func (r *ProjectRepository) Update(ctx context.Context, payload domain.Entity) (
 func (r *ProjectRepository) GetByPhoneNumber(ctx context.Context, phoneNumber string, page, perPage int) (res []domain.Entity, err error) {
 	query := `
 		SELECT
+		    p.id as id,
 		     uuid,
 			name,
 			description, 
@@ -144,7 +145,7 @@ func (r *ProjectRepository) GetByPhoneNumber(ctx context.Context, phoneNumber st
 		JOIN users u ON up.user_id = u.id
 		LEFT JOIN project_images pi ON p.id = pi.project_id AND pi.is_thumbnail = 1
 		WHERE u.phone_number = ?
-		GROUP BY uuid, name, description, service_type, status, created_at
+		GROUP BY id, uuid, name, description, service_type, status, created_at
 		LIMIT ? OFFSET ?
 		`
 
@@ -168,6 +169,7 @@ func (r *ProjectRepository) GetByPhoneNumber(ctx context.Context, phoneNumber st
 
 		var thumbnailImageURL sql.NullString
 		err = list.Scan(
+			&project.ID,
 			&project.UUID,
 			&project.Name,
 			&project.Description,

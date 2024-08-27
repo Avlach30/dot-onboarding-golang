@@ -17,13 +17,15 @@ import (
 )
 
 type ProjectHandler struct {
-	projectUsecase projectDomain.Usecase
+	projectUsecase       projectDomain.Usecase
+	projectPublicUsecase projectDomain.PublicUsecase
 }
 
-func NewProjectHandler(router *httprouter.Router, projectUsecase projectDomain.Usecase) {
+func NewProjectHandler(router *httprouter.Router, projectUsecase projectDomain.Usecase, projectPublicUsecase projectDomain.PublicUsecase) {
 	basePath := "/api/v1/projects"
 	projectHandler := &ProjectHandler{
-		projectUsecase: projectUsecase,
+		projectUsecase:       projectUsecase,
+		projectPublicUsecase: projectPublicUsecase,
 	}
 
 	router.GET(basePath, middleware.Wrapper(projectHandler.ListProject(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
@@ -71,11 +73,22 @@ func (h *ProjectHandler) ListProject() httprouter.Handle {
 			payloadReq.PerPage = 10
 		}
 
-		res, err := h.projectUsecase.ListProject(r.Context(), phoneNumber, payloadReq.Page, payloadReq.PerPage)
-		if err != nil {
-			log.Println("error getting projects: ", string(debug.Stack()))
-			httperror.SetResponse(w, 500, "internal server error")
-			return
+		var res []dto.ListProjectResponse
+
+		if phoneNumber != "" {
+			res, err = h.projectUsecase.ListProject(r.Context(), phoneNumber, payloadReq.Page, payloadReq.PerPage)
+			if err != nil {
+				log.Println("error getting projects: ", string(debug.Stack()))
+				httperror.SetResponse(w, 500, "internal server error")
+				return
+			}
+		} else if phoneNumber == "" {
+			res, err = h.projectPublicUsecase.ListProject(r.Context(), phoneNumber, payloadReq.Page, payloadReq.PerPage)
+			if err != nil {
+				log.Println("error getting projects: ", string(debug.Stack()))
+				httperror.SetResponse(w, 500, "internal server error")
+				return
+			}
 		}
 
 		dataByte, _ := json.Marshal(pkg.BaseResponse{

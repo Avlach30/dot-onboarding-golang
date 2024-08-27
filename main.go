@@ -54,13 +54,14 @@ func main() {
 	bannerRepository := bannerRepo.NewBannerRepository(db)
 	projectRepository := projectRepo.NewProjectRepository(db)
 	sqlTxRepo := commonrepo.NewSqlTx(db)
-	userProjectRepo := projectRepo.NewUserProjectRepository()
+	userProjectRepo := projectRepo.NewUserProjectRepository(db)
 
 	// usecase
 	userUsecase := userUC.NewUserUsecase(userRepository)
 	authUsecase := authUC.NewAuthUsecase(zenzivaOTP, otpRepo, userRepository)
 	bannerUsecase := bannerUC.NewBannerUsecase(bannerRepository)
 	projectUsecase := projectUC.NewProjectUsecase(projectRepository, sqlTxRepo, userProjectRepo, userRepository)
+	projectPublicUsecase := projectUC.NewProjectPublicUsecase(projectRepository, sqlTxRepo, userProjectRepo, userRepository)
 
 	router.GET("/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		type healthRes struct {
@@ -91,7 +92,7 @@ func main() {
 	authHandler.NewAuthHandler(router, userUsecase, authUsecase)
 	handler.NewBannerHandler(router, bannerUsecase)
 	notifHandler.NewNotificationHandler(router)
-	projectHandler.NewProjectHandler(router, projectUsecase)
+	projectHandler.NewProjectHandler(router, projectUsecase, projectPublicUsecase)
 	commonHandler.NewCommonHandler(router)
 
 	log.Println("=== SERVER STARTED at PORT 7777 ===")

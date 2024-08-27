@@ -7,6 +7,7 @@ import (
 	"github.com/codespace-id/codespace-x/app/project/dto"
 	userdto "github.com/codespace-id/codespace-x/app/user/dto"
 	"github.com/codespace-id/codespace-x/app/user/userdomain"
+	"github.com/codespace-id/codespace-x/pkg/common/enum"
 	"github.com/codespace-id/codespace-x/pkg/common/generator"
 	"github.com/pkg/errors"
 	"time"
@@ -72,30 +73,33 @@ func (uc *projectUsecase) CreateNewInquiry(ctx context.Context, phoneNumber stri
 // ListProject implements projectdomain.Usecase.
 func (uc *projectUsecase) ListProject(ctx context.Context, phoneNumber string, page int, perPage int) (res []dto.ListProjectResponse, err error) {
 
-	var bannerData []domain.Entity
+	var projectData []domain.Entity
 
-	if phoneNumber != "" {
-		bannerData, err = uc.projectRepo.GetByPhoneNumber(ctx, phoneNumber, page, perPage)
-		if err != nil {
-			return nil, errors.WithMessage(err, "projectUsecase.ListProject")
-		}
-	} else {
-		bannerData, err = uc.projectRepo.Get(ctx, page, perPage)
-		if err != nil {
-			return nil, errors.WithMessage(err, "projectUsecase.ListProject")
-		}
+	projectData, err = uc.projectRepo.GetByPhoneNumber(ctx, phoneNumber, page, perPage)
+	if err != nil {
+		return nil, errors.WithMessage(err, "projectUsecase.ListProject")
 	}
 
-	for _, val := range bannerData {
+	for _, val := range projectData {
+		var astroDev []userdto.GetProfileResponse
+		users, _ := uc.userProjectRepo.GetByProjectID(ctx, val.ID, 1, 20)
+		for _, user := range users {
+			astroDev = append(astroDev, userdto.GetProfileResponse{
+				Fullname: user.Fullname,
+				ImageURL: user.ImageURL,
+				Role:     user.Role,
+			})
+		}
+
 		res = append(res, dto.ListProjectResponse{
 			UUID:              val.UUID,
 			Name:              val.Name,
 			Description:       val.Description,
 			ThumbnailImageURL: val.ThumbnailImageURL,
-			ServiceType:       val.ServiceType,
+			ServiceType:       enum.GetTransformServiceType(val.ServiceType),
 			Status:            val.Status,
 			CreatedAt:         val.CreatedAt.Format(time.RFC3339),
-			Astrodevs:         make([]userdto.GetProfileResponse, 0),
+			Astrodevs:         astroDev,
 		})
 	}
 
