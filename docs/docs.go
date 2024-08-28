@@ -763,6 +763,82 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/projects/{project_uuid}/histories": {
+            "get": {
+                "description": "Project Histories",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Project Histories",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization value",
+                        "name": "authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "project_uuid",
+                        "name": "project_uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pkg.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.ProjectHistoryRes"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "default": {
+                        "description": "error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/users/profile": {
             "get": {
                 "description": "Get Profile",
@@ -1055,6 +1131,9 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "deadline": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -1071,6 +1150,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ProjectHistoryRes": {
+            "type": "object",
+            "properties": {
+                "attachment_url": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "history_type": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }

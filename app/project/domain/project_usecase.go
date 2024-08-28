@@ -15,4 +15,5 @@ type Usecase interface {
 	ListProject(ctx context.Context, phoneNumber string, page, perPage int) (res []dto.ListProjectResponse, err error)
 	UpdateDetailProject(ctx context.Context, dto Entity) error
 	PublicUsecase
+	ListProjectHistory(ctx context.Context, projectUUID string, page int, perPage int) (res []dto.ProjectHistoryRes, err error)
 }

@@ -116,6 +116,8 @@ definitions:
         type: array
       created_at:
         type: string
+      deadline:
+        type: string
       description:
         type: string
       name:
@@ -127,6 +129,19 @@ definitions:
       thumbnail_image_url:
         type: string
       uuid:
+        type: string
+    type: object
+  dto.ProjectHistoryRes:
+    properties:
+      attachment_url:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      history_type:
+        type: string
+      title:
         type: string
     type: object
   dto.RegisterRequest:
@@ -649,6 +664,53 @@ paths:
           schema:
             $ref: '#/definitions/pkg.BaseResponse'
       summary: Update Project
+      tags:
+      - Projects
+  /api/v1/projects/{project_uuid}/histories:
+    get:
+      consumes:
+      - application/json
+      description: Project Histories
+      parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
+      - description: Authorization value
+        in: header
+        name: authorization
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: per_page
+        type: integer
+      - description: project_uuid
+        in: path
+        name: project_uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.ProjectHistoryRes'
+                  type: array
+              type: object
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Project Histories
       tags:
       - Projects
   /api/v1/users/profile:

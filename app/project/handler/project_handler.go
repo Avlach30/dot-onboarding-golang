@@ -32,6 +32,7 @@ func NewProjectHandler(router *httprouter.Router, projectUsecase projectDomain.U
 	router.GET(basePath+"/:uuid", middleware.Wrapper(projectHandler.DetailProject(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
 	router.POST(basePath, middleware.Wrapper(projectHandler.CreateProject(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
 	router.PATCH(basePath+"/:uuid", middleware.Wrapper(projectHandler.UpdateProject(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
+	router.GET(basePath+"/:uuid/histories", middleware.Wrapper(projectHandler.ProjectHistories(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
 
 }
 
@@ -268,6 +269,72 @@ func (h *ProjectHandler) UpdateProject() httprouter.Handle {
 
 		w.Header().Set("Content-Type", "application/json")
 		_, err := w.Write(dataByte)
+		if err != nil {
+			return
+		}
+	}
+}
+
+// @Summary Project Histories
+// @Description Project Histories
+// @Tags Projects
+// @Accept json
+// @Produce json
+// @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
+// @Param authorization header string false "Authorization value"
+// @Param basic-param query commondto.Pagination true "basic param"
+// @Param project_uuid path string true "project_uuid"
+// @Success 200 {object} pkg.BaseResponse{data=[]dto.ProjectHistoryRes} "success"
+// @Failure default {object} pkg.BaseResponse "error"
+// @Router /api/v1/projects/{project_uuid}/histories [get]
+func (h *ProjectHandler) ProjectHistories() httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+		// Retrieve values from context (locals)
+		phoneNumber, _ := r.Context().Value(middleware.PhoneNumber).(string)
+		if phoneNumber == "" {
+			log.Println("error getting project: ", string(debug.Stack()))
+			httperror.SetResponse(w, 403, "forbidden")
+			return
+		}
+
+		UUID := ps.ByName("uuid")
+
+		var err error
+		var payloadReq commondto.Pagination
+
+		queryParams := r.URL.Query()
+		if page, ok := queryParams["page"]; ok {
+			pageAsInt, _ := strconv.Atoi(page[0])
+			payloadReq.Page = pageAsInt
+		}
+		if perPage, ok := queryParams["per_page"]; ok {
+			perPageInt, _ := strconv.Atoi(perPage[0])
+			payloadReq.PerPage = perPageInt
+		}
+
+		if payloadReq.Page == 0 {
+			payloadReq.Page = 1
+		}
+		if payloadReq.PerPage == 0 {
+			payloadReq.PerPage = 50
+		}
+
+		data, err := h.projectUsecase.ListProjectHistory(r.Context(), UUID, payloadReq.Page, payloadReq.PerPage)
+		if err != nil {
+			log.Println("error getting project history: ", string(debug.Stack()))
+			httperror.SetResponse(w, 500, "internal server error")
+			return
+		}
+
+		dataByte, _ := json.Marshal(pkg.BaseResponse{
+			Code:    200,
+			Message: "success",
+			Data:    data,
+		})
+
+		w.Header().Set("Content-Type", "application/json")
+		_, err = w.Write(dataByte)
 		if err != nil {
 			return
 		}

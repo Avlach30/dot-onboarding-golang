@@ -14,20 +14,29 @@ import (
 )
 
 type projectUsecase struct {
-	projectRepo       domain.Repository
-	sqlTxRepo         commonrepo.SqlTx
-	userProjectRepo   domain.UserProjectRepository
-	userRepo          userdomain.Repository
-	projectImagesRepo domain.ProjectImagesRepository
+	projectRepo        domain.Repository
+	sqlTxRepo          commonrepo.SqlTx
+	userProjectRepo    domain.UserProjectRepository
+	userRepo           userdomain.Repository
+	projectImagesRepo  domain.ProjectImagesRepository
+	projectHistoryRepo domain.ProjectHistoryRepository
 }
 
-func NewProjectUsecase(projectRepo domain.Repository, sqlTxRepo commonrepo.SqlTx, userProjectRepo domain.UserProjectRepository, userRepo userdomain.Repository, projectImagesRepo domain.ProjectImagesRepository) domain.Usecase {
+func NewProjectUsecase(
+	projectRepo domain.Repository,
+	sqlTxRepo commonrepo.SqlTx,
+	userProjectRepo domain.UserProjectRepository,
+	userRepo userdomain.Repository,
+	projectImagesRepo domain.ProjectImagesRepository,
+	projectHistoryRepo domain.ProjectHistoryRepository,
+) domain.Usecase {
 	return &projectUsecase{
-		projectRepo:       projectRepo,
-		sqlTxRepo:         sqlTxRepo,
-		userProjectRepo:   userProjectRepo,
-		userRepo:          userRepo,
-		projectImagesRepo: projectImagesRepo,
+		projectRepo:        projectRepo,
+		sqlTxRepo:          sqlTxRepo,
+		userProjectRepo:    userProjectRepo,
+		userRepo:           userRepo,
+		projectImagesRepo:  projectImagesRepo,
+		projectHistoryRepo: projectHistoryRepo,
 	}
 }
 
@@ -88,7 +97,7 @@ func (uc *projectUsecase) ListProject(ctx context.Context, phoneNumber string, p
 	}
 
 	for _, val := range projectData {
-		var astroDev []userdto.GetProfileResponse
+		astroDev := make([]userdto.GetProfileResponse, 0)
 		users, _ := uc.userProjectRepo.GetByProjectID(ctx, val.ID, 1, 20)
 		for _, user := range users {
 			astroDev = append(astroDev, userdto.GetProfileResponse{
@@ -131,6 +140,15 @@ func (uc *projectUsecase) ProjectDetail(ctx context.Context, UUID string) (res d
 		})
 	}
 
+	deadline := "Not Started Yet"
+	if data.Status == enum.ON_DEVELOPMENT.Value() {
+		deadline = enum.GetProjectTimeType(data.TargetTime)
+	} else if data.Status == enum.BAST_AND_GUARANTEE.Value() {
+		deadline = ""
+	} else if data.Status == enum.FINISHED.Value() {
+		deadline = ""
+	}
+
 	return dto.ProjectDetailResponse{
 		UUID:              data.UUID,
 		Name:              data.Name,
@@ -140,6 +158,7 @@ func (uc *projectUsecase) ProjectDetail(ctx context.Context, UUID string) (res d
 		Status:            data.Status,
 		CreatedAt:         data.CreatedAt.Format("2006-01-02 15:04:05"),
 		Astrodevs:         astroDev,
+		Deadline:          deadline,
 	}, nil
 
 }
@@ -147,4 +166,24 @@ func (uc *projectUsecase) ProjectDetail(ctx context.Context, UUID string) (res d
 // UpdateDetailProject implements projectdomain.Usecase.
 func (uc *projectUsecase) UpdateDetailProject(ctx context.Context, dto domain.Entity) error {
 	panic("unimplemented")
+}
+
+func (uc *projectUsecase) ListProjectHistory(ctx context.Context, projectUUID string, page int, perPage int) (res []dto.ProjectHistoryRes, err error) {
+
+	projectData, err := uc.projectHistoryRepo.Get(ctx, projectUUID, page, perPage)
+	if err != nil {
+		return nil, errors.WithMessage(err, "projectUsecase.ListProjectHistory")
+	}
+
+	for _, val := range projectData {
+		res = append(res, dto.ProjectHistoryRes{
+			HistoryType:   val.HistoryType,
+			Title:         val.Title,
+			Description:   val.Description,
+			AttachmentUrl: val.AttachmentUrl,
+			CreatedAt:     val.CreatedAt.Format(time.RFC3339),
+		})
+	}
+
+	return res, nil
 }

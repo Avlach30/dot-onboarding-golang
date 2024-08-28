@@ -11,4 +11,5 @@ type ProjectDetailResponse struct {
 	Status            string                       `json:"status"`
 	CreatedAt         string                       `json:"created_at"`
 	Astrodevs         []userdto.GetProfileResponse `json:"astrodevs"`
+	Deadline          string                       `json:"deadline"`
 }
