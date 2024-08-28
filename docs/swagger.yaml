@@ -15,7 +15,7 @@ definitions:
       value:
         type: string
     type: object
-  commondto.ListTargetDateResponse:
+  commondto.ListTargetTimeResponse:
     properties:
       name:
         type: string
@@ -59,9 +59,13 @@ definitions:
     type: object
   dto.GetProfileResponse:
     properties:
+      email:
+        type: string
       fullname:
         type: string
       image_url:
+        type: string
+      phone_number:
         type: string
       role:
         type: string
@@ -103,6 +107,27 @@ definitions:
     required:
     - otp
     - phone_number
+    type: object
+  dto.ProjectDetailResponse:
+    properties:
+      astrodevs:
+        items:
+          $ref: '#/definitions/dto.GetProfileResponse'
+        type: array
+      created_at:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      service_type:
+        type: string
+      status:
+        type: string
+      thumbnail_image_url:
+        type: string
+      uuid:
+        type: string
     type: object
   dto.RegisterRequest:
     properties:
@@ -313,7 +338,7 @@ paths:
           description: error
           schema:
             $ref: '#/definitions/pkg.BaseResponse'
-      summary: Phone Verification
+      summary: PhoneNumber Verification
       tags:
       - Auth
   /api/v1/banners:
@@ -425,7 +450,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/commondto.ListTargetDateResponse'
+                    $ref: '#/definitions/commondto.ListTargetTimeResponse'
                   type: array
               type: object
         default:
@@ -561,7 +586,6 @@ paths:
       - description: Authorization value
         in: header
         name: authorization
-        required: true
         type: string
       - description: project_uuid
         in: path
@@ -578,7 +602,7 @@ paths:
             - $ref: '#/definitions/pkg.BaseResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.ListProjectResponse'
+                  $ref: '#/definitions/dto.ProjectDetailResponse'
               type: object
         default:
           description: error

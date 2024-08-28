@@ -20,7 +20,6 @@ func NewProjectRepository(db *sql.DB) domain.Repository {
 	}
 }
 
-// Create implements projectdomain.Repository.
 func (r *ProjectRepository) CreateTx(ctx context.Context, dbTx *sql.Tx, payload domain.Entity) (res domain.Entity, err error) {
 
 	newUUID := uuid.New().String()
@@ -62,12 +61,51 @@ func (r *ProjectRepository) CreateTx(ctx context.Context, dbTx *sql.Tx, payload 
 	return res, nil
 }
 
-// Find implements projectdomain.Repository.
-func (r *ProjectRepository) Find(ctx context.Context, ID int) (res domain.Entity, err error) {
-	panic("unimplemented")
+func (r *ProjectRepository) Find(ctx context.Context, UUID string) (res domain.Entity, err error) {
+	query := `
+		SELECT
+		    p.id AS id,
+		   p.uuid,
+			p.name,
+			p.description, 
+			p.service_type,
+			p.status,
+			p.created_at,
+			pi.image_url AS thumbnail_image_url
+		FROM
+			projects p
+		JOIN project_images pi ON p.id = pi.project_id AND pi.is_thumbnail = 1
+		WHERE p.uuid = ?
+		`
+
+	var project domain.Entity
+	var thumbnailImageURL sql.NullString
+
+	if err := r.db.QueryRowContext(
+		ctx,
+		query,
+		UUID,
+	).Scan(
+		&project.ID,
+		&project.UUID,
+		&project.Name,
+		&project.Description,
+		&project.ServiceType,
+		&project.Status,
+		&project.CreatedAt,
+		&thumbnailImageURL,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return res, nil
+		}
+		return res, errors.Wrap(err, "ProjectRepository.Find.QueryRowContext")
+	}
+
+	project.ThumbnailImageURL = thumbnailImageURL.String
+
+	return project, nil
 }
 
-// Get implements projectdomain.Repository.
 func (r *ProjectRepository) Get(ctx context.Context, page, perPage int) (res []domain.Entity, err error) {
 	query := `
 		SELECT
@@ -123,7 +161,6 @@ func (r *ProjectRepository) Get(ctx context.Context, page, perPage int) (res []d
 	return res, nil
 }
 
-// Update implements projectdomain.Repository.
 func (r *ProjectRepository) Update(ctx context.Context, payload domain.Entity) (err error) {
 	panic("unimplemented")
 }
@@ -180,6 +217,63 @@ func (r *ProjectRepository) GetByPhoneNumber(ctx context.Context, phoneNumber st
 		)
 		if err != nil {
 			return res, errors.Wrap(err, "ProjectRepository.Get.QueryContext")
+		}
+
+		project.ThumbnailImageURL = thumbnailImageURL.String
+		res = append(res, project)
+	}
+
+	return res, nil
+}
+
+func (r *ProjectRepository) GetByStatus(ctx context.Context, page, perPage int, status string) (res []domain.Entity, err error) {
+	query := `
+		SELECT
+		    uuid,
+			name,
+			description, 
+			service_type,
+			status,
+			p.created_at,
+			MAX(pi.image_url) AS thumbnail_image_url
+		FROM
+			projects p
+		LEFT JOIN project_images pi ON p.id = pi.project_id AND pi.is_thumbnail = 1
+		WHERE p.status = ?
+		GROUP BY uuid, name, description, service_type, status, created_at
+		LIMIT ? OFFSET ?
+		`
+
+	list, err := r.db.QueryContext(
+		ctx,
+		query,
+		status,
+		perPage,
+		utils.GetPaginationOffset(page, perPage),
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return res, nil
+		}
+		return res, errors.Wrap(err, "ProjectRepository.GetByStatus.QueryContext")
+	}
+	defer list.Close()
+
+	for list.Next() {
+		var project domain.Entity
+
+		var thumbnailImageURL sql.NullString
+		err = list.Scan(
+			&project.UUID,
+			&project.Name,
+			&project.Description,
+			&project.ServiceType,
+			&project.Status,
+			&project.CreatedAt,
+			&thumbnailImageURL,
+		)
+		if err != nil {
+			return res, errors.Wrap(err, "ProjectRepository.GetByStatus.QueryContext")
 		}
 
 		project.ThumbnailImageURL = thumbnailImageURL.String

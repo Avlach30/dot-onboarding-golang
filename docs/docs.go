@@ -446,7 +446,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/commondto.ListTargetDateResponse"
+                                                "$ref": "#/definitions/commondto.ListTargetTimeResponse"
                                             }
                                         }
                                     }
@@ -666,8 +666,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Authorization value",
                         "name": "authorization",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",
@@ -689,7 +688,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/dto.ListProjectResponse"
+                                            "$ref": "#/definitions/dto.ProjectDetailResponse"
                                         }
                                     }
                                 }
@@ -902,7 +901,7 @@ const docTemplate = `{
                 }
             }
         },
-        "commondto.ListTargetDateResponse": {
+        "commondto.ListTargetTimeResponse": {
             "type": "object",
             "properties": {
                 "name": {
@@ -969,10 +968,16 @@ const docTemplate = `{
         "dto.GetProfileResponse": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string"
+                },
                 "fullname": {
                     "type": "string"
                 },
                 "image_url": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 },
                 "role": {
@@ -1034,6 +1039,38 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ProjectDetailResponse": {
+            "type": "object",
+            "properties": {
+                "astrodevs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.GetProfileResponse"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "service_type": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "thumbnail_image_url": {
+                    "type": "string"
+                },
+                "uuid": {
                     "type": "string"
                 }
             }

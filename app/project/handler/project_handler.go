@@ -115,44 +115,37 @@ func (h *ProjectHandler) ListProject() httprouter.Handle {
 // @Accept json
 // @Produce json
 // @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
-// @Param authorization header string true "Authorization value"
+// @Param authorization header string false "Authorization value"
 // @Param project_uuid path string true "project_uuid"
-// @Success 200 {object} pkg.BaseResponse{data=dto.ListProjectResponse} "success"
+// @Success 200 {object} pkg.BaseResponse{data=dto.ProjectDetailResponse} "success"
 // @Failure default {object} pkg.BaseResponse "error"
 // @Router /api/v1/projects/{project_uuid} [get]
 func (h *ProjectHandler) DetailProject() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
-		uuid := ps.ByName("uuid")
+		// Retrieve values from context (locals)
+		phoneNumber, _ := r.Context().Value(middleware.PhoneNumber).(string)
+		UUID := ps.ByName("uuid")
+
+		data, err := h.projectUsecase.ProjectDetail(r.Context(), UUID)
+		if err != nil {
+			log.Println("error getting project: ", string(debug.Stack()))
+			httperror.SetResponse(w, 500, "internal server error")
+			return
+		}
+
+		if phoneNumber == "" {
+			data.Astrodevs = make([]userdto.GetProfileResponse, 0)
+		}
 
 		dataByte, _ := json.Marshal(pkg.BaseResponse{
 			Code:    200,
 			Message: "success",
-			Data: dto.ListProjectResponse{
-
-				UUID:        uuid,
-				Name:        "Test TOEFL Online",
-				Description: "Dapatkan wordpress landing",
-				ServiceType: "web apps development",
-				Status:      "On Going",
-				CreatedAt:   "2011-08-12T20:17:46.384Z",
-				Astrodevs: []userdto.GetProfileResponse{
-					{
-						Fullname: "Hiegar",
-						Role:     "UI/UX",
-						ImageURL: "https://res.cloudinary.com/deafomwc7/image/upload/v1664837475/codespace/images/team/team-4a_aqfwhw.jpg",
-					},
-					{
-						Fullname: "Ubai",
-						Role:     "Backend",
-						ImageURL: "https://res.cloudinary.com/deafomwc7/image/upload/v1664837474/codespace/images/team/team-1a_asflru.jpg",
-					},
-				},
-			},
+			Data:    data,
 		})
 
 		w.Header().Set("Content-Type", "application/json")
-		_, err := w.Write(dataByte)
+		_, err = w.Write(dataByte)
 		if err != nil {
 			return
 		}

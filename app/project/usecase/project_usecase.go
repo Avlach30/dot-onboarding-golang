@@ -114,8 +114,34 @@ func (uc *projectUsecase) ListProject(ctx context.Context, phoneNumber string, p
 }
 
 // ProjectDetail implements projectdomain.Usecase.
-func (uc *projectUsecase) ProjectDetail(ctx context.Context, ID int64) (res domain.Entity, err error) {
-	panic("unimplemented")
+func (uc *projectUsecase) ProjectDetail(ctx context.Context, UUID string) (res dto.ProjectDetailResponse, err error) {
+
+	data, err := uc.projectRepo.Find(ctx, UUID)
+	if err != nil {
+		return res, errors.WithMessage(err, "projectUsecase.ProjectDetail")
+	}
+
+	var astroDev []userdto.GetProfileResponse
+	users, _ := uc.userProjectRepo.GetByProjectID(ctx, data.ID, 1, 20)
+	for _, user := range users {
+		astroDev = append(astroDev, userdto.GetProfileResponse{
+			Fullname: user.Fullname,
+			ImageURL: user.ImageURL,
+			Role:     user.Role,
+		})
+	}
+
+	return dto.ProjectDetailResponse{
+		UUID:              data.UUID,
+		Name:              data.Name,
+		Description:       data.Description,
+		ThumbnailImageURL: data.ThumbnailImageURL,
+		ServiceType:       enum.GetTransformServiceType(data.ServiceType),
+		Status:            data.Status,
+		CreatedAt:         data.CreatedAt.Format("2006-01-02 15:04:05"),
+		Astrodevs:         astroDev,
+	}, nil
+
 }
 
 // UpdateDetailProject implements projectdomain.Usecase.

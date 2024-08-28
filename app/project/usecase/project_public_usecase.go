@@ -31,7 +31,7 @@ func NewProjectPublicUsecase(projectRepo domain.Repository, sqlTxRepo commonrepo
 func (uc *projectPublicUsecase) ListProject(ctx context.Context, phoneNumber string, page, perPage int) (res []dto.ListProjectResponse, err error) {
 	var bannerData []domain.Entity
 
-	bannerData, err = uc.projectRepo.Get(ctx, page, perPage)
+	bannerData, err = uc.projectRepo.GetByStatus(ctx, page, perPage, enum.FINISHED.Value())
 	if err != nil {
 		return nil, errors.WithMessage(err, "projectUsecase.ListProject")
 	}
