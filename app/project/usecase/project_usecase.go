@@ -14,18 +14,20 @@ import (
 )
 
 type projectUsecase struct {
-	projectRepo     domain.Repository
-	sqlTxRepo       commonrepo.SqlTx
-	userProjectRepo domain.UserProjectRepository
-	userRepo        userdomain.Repository
+	projectRepo       domain.Repository
+	sqlTxRepo         commonrepo.SqlTx
+	userProjectRepo   domain.UserProjectRepository
+	userRepo          userdomain.Repository
+	projectImagesRepo domain.ProjectImagesRepository
 }
 
-func NewProjectUsecase(projectRepo domain.Repository, sqlTxRepo commonrepo.SqlTx, userProjectRepo domain.UserProjectRepository, userRepo userdomain.Repository) domain.Usecase {
+func NewProjectUsecase(projectRepo domain.Repository, sqlTxRepo commonrepo.SqlTx, userProjectRepo domain.UserProjectRepository, userRepo userdomain.Repository, projectImagesRepo domain.ProjectImagesRepository) domain.Usecase {
 	return &projectUsecase{
-		projectRepo:     projectRepo,
-		sqlTxRepo:       sqlTxRepo,
-		userProjectRepo: userProjectRepo,
-		userRepo:        userRepo,
+		projectRepo:       projectRepo,
+		sqlTxRepo:         sqlTxRepo,
+		userProjectRepo:   userProjectRepo,
+		userRepo:          userRepo,
+		projectImagesRepo: projectImagesRepo,
 	}
 }
 
@@ -54,6 +56,11 @@ func (uc *projectUsecase) CreateNewInquiry(ctx context.Context, phoneNumber stri
 	if project.UUID == "" {
 		dbTx.Rollback()
 		return res, errors.WithMessage(errors.New("Create Project Failed"), "ProjectUsecase.CreateNewInquiry")
+	}
+
+	if err := uc.projectImagesRepo.CreateTx(ctx, dbTx, generator.GenerateRandomProjectImage(), project.ID); err != nil {
+		dbTx.Rollback()
+		return res, errors.WithMessage(err, "ProjectUsecase.CreateNewInquiry")
 	}
 
 	if err := uc.userProjectRepo.CreateTx(ctx, dbTx, user.ID, project.ID); err != nil {

@@ -39,6 +39,7 @@ func (u *userUsecase) Create(ctx context.Context, dto userdto.RegisterRequest) e
 		Gender:         enum.UNKNOWN.Value(),
 		Password:       "x",
 		ImageURL:       generator.GenerateRandomPhotoProfile(),
+		Email:          dto.Email,
 	}); err != nil {
 		return errors.WithMessage(err, traceTag)
 	}

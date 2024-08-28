@@ -68,6 +68,7 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res user
 		`
 
 	var email sql.NullString
+	var imageUrl sql.NullString
 	if err := r.db.QueryRowContext(
 		ctx,
 		query,
@@ -79,7 +80,7 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res user
 		&res.PhoneNumber,
 		&res.Gender,
 		&email,
-		&res.ImageURL,
+		&imageUrl,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return res, nil
@@ -88,5 +89,7 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res user
 	}
 
 	res.Email = email.String
+	res.ImageURL = imageUrl.String
+
 	return res, nil
 }

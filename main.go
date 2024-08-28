@@ -55,12 +55,13 @@ func main() {
 	projectRepository := projectRepo.NewProjectRepository(db)
 	sqlTxRepo := commonrepo.NewSqlTx(db)
 	userProjectRepo := projectRepo.NewUserProjectRepository(db)
+	projectImagesRepo := projectRepo.NewProjectImagesRepository(db)
 
 	// usecase
 	userUsecase := userUC.NewUserUsecase(userRepository)
 	authUsecase := authUC.NewAuthUsecase(zenzivaOTP, otpRepo, userRepository)
 	bannerUsecase := bannerUC.NewBannerUsecase(bannerRepository)
-	projectUsecase := projectUC.NewProjectUsecase(projectRepository, sqlTxRepo, userProjectRepo, userRepository)
+	projectUsecase := projectUC.NewProjectUsecase(projectRepository, sqlTxRepo, userProjectRepo, userRepository, projectImagesRepo)
 	projectPublicUsecase := projectUC.NewProjectPublicUsecase(projectRepository, sqlTxRepo, userProjectRepo, userRepository)
 
 	router.GET("/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
