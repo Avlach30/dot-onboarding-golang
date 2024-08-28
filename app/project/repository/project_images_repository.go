@@ -20,7 +20,7 @@ func NewProjectImagesRepository(db *sql.DB) domain.ProjectImagesRepository {
 func (r *ProjectImagesRepository) CreateTx(ctx context.Context, dbTx *sql.Tx, imageUrl string, projectID int64) (err error) {
 	query := `
 		INSERT INTO 
-			user_projects(
+			project_images(
 				image_url, 
 				project_id, 
 				is_thumbnail
