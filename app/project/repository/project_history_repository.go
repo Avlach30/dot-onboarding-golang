@@ -25,6 +25,7 @@ func (r *ProjectHistoryRepository) Get(ctx context.Context, projectUUID string, 
 			ph.description, 
 			ph.history_type,
 			ph.attachment_url,
+			ph.attachment_title,
 			ph.created_at
 		FROM
 			project_histories ph
@@ -52,12 +53,14 @@ func (r *ProjectHistoryRepository) Get(ctx context.Context, projectUUID string, 
 		var project domain.ProjectHistoryEntity
 
 		var attachmentUrl sql.NullString
+		var attachmentTitle sql.NullString
 		err = list.Scan(
 			&project.ID,
 			&project.Title,
 			&project.Description,
 			&project.HistoryType,
 			&attachmentUrl,
+			&attachmentTitle,
 			&project.CreatedAt,
 		)
 		if err != nil {
@@ -65,6 +68,7 @@ func (r *ProjectHistoryRepository) Get(ctx context.Context, projectUUID string, 
 		}
 
 		project.AttachmentUrl = attachmentUrl.String
+		project.AttachmentTitle = attachmentTitle.String
 		res = append(res, project)
 	}
 

@@ -177,12 +177,17 @@ func (uc *projectUsecase) ListProjectHistory(ctx context.Context, projectUUID st
 
 	for _, val := range projectData {
 		res = append(res, dto.ProjectHistoryRes{
-			HistoryType:   val.HistoryType,
-			Title:         val.Title,
-			Description:   val.Description,
-			AttachmentUrl: val.AttachmentUrl,
-			CreatedAt:     val.CreatedAt.Format(time.RFC3339),
+			HistoryType:     val.HistoryType,
+			Title:           val.Title,
+			Description:     val.Description,
+			AttachmentUrl:   val.AttachmentUrl,
+			AttachmentTitle: val.AttachmentTitle,
+			CreatedAt:       val.CreatedAt.Format(time.RFC3339),
 		})
+	}
+
+	if len(res) <= 0 {
+		return make([]dto.ProjectHistoryRes, 0), nil
 	}
 
 	return res, nil
