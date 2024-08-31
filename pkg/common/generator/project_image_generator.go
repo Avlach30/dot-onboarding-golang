@@ -6,7 +6,9 @@ import (
 )
 
 var projectImageUrl = []string{
-	"https://res.cloudinary.com/deafomwc7/image/upload/v1710229364/codespace/images/WhyChooseUs/Screenshot_2024-03-12_at_14.41.16_zcei8q.png",
+	"https://minio-cloud.codespace.id/backoffice/project-thumbnail/project-1.png",
+	"https://minio-cloud.codespace.id/backoffice/project-thumbnail/project-2.png",
+	"https://minio-cloud.codespace.id/backoffice/project-thumbnail/project-3.png",
 }
 
 func GenerateRandomProjectImage() string {

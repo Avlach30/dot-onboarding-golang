@@ -7,16 +7,16 @@ import (
 )
 
 var spaceTerms = []string{
-	"galaxy",
-	"planet",
-	"ufo",
-	"asteroid",
-	"comet",
-	"nebula",
-	"star",
-	"moon",
-	"cosmos",
-	"blackhole",
+	"Galaxy",
+	"Planet",
+	"Ufo",
+	"Asteroid",
+	"Comet",
+	"Nebula",
+	"Star",
+	"Moon",
+	"Cosmos",
+	"Blackhole",
 }
 
 func GenerateRandomProjectName() string {
