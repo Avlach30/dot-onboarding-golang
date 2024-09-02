@@ -14,6 +14,7 @@ import (
 	projectHandler "github.com/codespace-id/codespace-x/app/project/handler"
 	projectRepo "github.com/codespace-id/codespace-x/app/project/repository"
 	projectUC "github.com/codespace-id/codespace-x/app/project/usecase"
+	tncHandler "github.com/codespace-id/codespace-x/app/tnc/handler"
 	userHandler "github.com/codespace-id/codespace-x/app/user/handler"
 	userRepo "github.com/codespace-id/codespace-x/app/user/repository"
 	userUC "github.com/codespace-id/codespace-x/app/user/usecase"
@@ -96,6 +97,7 @@ func main() {
 	notifHandler.NewNotificationHandler(router)
 	projectHandler.NewProjectHandler(router, projectUsecase, projectPublicUsecase)
 	commonHandler.NewCommonHandler(router)
+	tncHandler.NewTncHandler(router)
 
 	log.Println("=== SERVER STARTED at PORT 7777 ===")
 	log.Fatal(http.ListenAndServe(":7777", router))
