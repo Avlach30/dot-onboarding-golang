@@ -18,6 +18,7 @@ import (
 	userHandler "github.com/codespace-id/codespace-x/app/user/handler"
 	userRepo "github.com/codespace-id/codespace-x/app/user/repository"
 	userUC "github.com/codespace-id/codespace-x/app/user/usecase"
+	"github.com/codespace-id/codespace-x/pkg/Integrations/notifications/implementations/discord"
 	"github.com/codespace-id/codespace-x/pkg/common/enum"
 	"github.com/codespace-id/codespace-x/pkg/dbconn"
 	"log"
@@ -48,6 +49,9 @@ func main() {
 
 	// 3rd parties
 	zenzivaOTP := zenziva.NewZenziva(config.ZenzivaBaseURL, config.ZenzivaPassKey, config.ZenzivaUserKey)
+	discordNotif := discord.NewDiscord()
+
+	//discordNotif.Send(config.WebhookNewOutPayments, "💸 Pembayaran Berhasil Ditransfer \n\n AstroDev: Ubaidillah \n Role: Laravel Dev \n Project: Test TOEFL \n Commision: Rp 50.000.000")
 
 	// repository
 	userRepository := userRepo.NewUserRepository(db)
@@ -63,7 +67,7 @@ func main() {
 	userUsecase := userUC.NewUserUsecase(userRepository)
 	authUsecase := authUC.NewAuthUsecase(zenzivaOTP, otpRepo, userRepository)
 	bannerUsecase := bannerUC.NewBannerUsecase(bannerRepository)
-	projectUsecase := projectUC.NewProjectUsecase(projectRepository, sqlTxRepo, userProjectRepo, userRepository, projectImagesRepo, projectHistoryRepo)
+	projectUsecase := projectUC.NewProjectUsecase(projectRepository, sqlTxRepo, userProjectRepo, userRepository, projectImagesRepo, projectHistoryRepo, discordNotif)
 	projectPublicUsecase := projectUC.NewProjectPublicUsecase(projectRepository, sqlTxRepo, userProjectRepo, userRepository)
 
 	router.GET("/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {

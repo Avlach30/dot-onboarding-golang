@@ -54,4 +54,8 @@ var (
 	ZenzivaUserKey   = Get("ZENZIVA_USER_KEY", "")
 	ZenzivaPassKey   = Get("ZENZIVA_PASS_KEY", "")
 	OtpExpiredInMins = Get("OTP_EXPIRED_IN_MINS", "5")
+
+	// Discord
+	WebhookNewInquiry     = Get("DISCORD_WEBHOOK_NEW_INQUIRY", "")
+	WebhookNewOutPayments = Get("DISCORD_WEBHOOK_NEW_OUT_PAYMENTS", "")
 )

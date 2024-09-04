@@ -7,6 +7,8 @@ import (
 	"github.com/codespace-id/codespace-x/app/project/dto"
 	userdto "github.com/codespace-id/codespace-x/app/user/dto"
 	"github.com/codespace-id/codespace-x/app/user/userdomain"
+	"github.com/codespace-id/codespace-x/config"
+	"github.com/codespace-id/codespace-x/pkg/Integrations/notifications"
 	"github.com/codespace-id/codespace-x/pkg/common/enum"
 	"github.com/codespace-id/codespace-x/pkg/common/generator"
 	"github.com/pkg/errors"
@@ -20,6 +22,7 @@ type projectUsecase struct {
 	userRepo           userdomain.Repository
 	projectImagesRepo  domain.ProjectImagesRepository
 	projectHistoryRepo domain.ProjectHistoryRepository
+	discordNotif       notifications.NotificationProxy
 }
 
 func NewProjectUsecase(
@@ -29,6 +32,7 @@ func NewProjectUsecase(
 	userRepo userdomain.Repository,
 	projectImagesRepo domain.ProjectImagesRepository,
 	projectHistoryRepo domain.ProjectHistoryRepository,
+	discordNotif notifications.NotificationProxy,
 ) domain.Usecase {
 	return &projectUsecase{
 		projectRepo:        projectRepo,
@@ -37,6 +41,7 @@ func NewProjectUsecase(
 		userRepo:           userRepo,
 		projectImagesRepo:  projectImagesRepo,
 		projectHistoryRepo: projectHistoryRepo,
+		discordNotif:       discordNotif,
 	}
 }
 
@@ -78,6 +83,8 @@ func (uc *projectUsecase) CreateNewInquiry(ctx context.Context, phoneNumber stri
 	}
 
 	err = dbTx.Commit()
+
+	uc.discordNotif.Send(config.WebhookNewInquiry, "New Inquiry From CodespaceX: \n Nama:"+entity.Name+"\n Phone:"+phoneNumber+"\n\n Deskripsi"+entity.Description)
 
 	res = domain.Entity{
 		UUID: project.UUID,
