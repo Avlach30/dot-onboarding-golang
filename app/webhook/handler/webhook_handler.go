@@ -21,7 +21,7 @@ func NewWebhookHandler(router *httprouter.Router, webhookUC domain.WebhookUsecas
 		webhookUC,
 	}
 
-	router.GET(basePath+"/disbursement", webhookHandler.XenditDisbursementCallback())
+	router.POST(basePath+"/disbursement", webhookHandler.XenditDisbursementCallback())
 }
 
 func (h *webhookHandler) XenditDisbursementCallback() httprouter.Handle {
