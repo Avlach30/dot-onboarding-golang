@@ -49,7 +49,7 @@ func (uc *webhookUsecase) BatchDisbursement(ctx context.Context, reqDto webhookD
 	totalError := strconv.FormatInt(reqDto.TotalErrorBatch, 64)
 	totalErrorAmount := strconv.FormatFloat(reqDto.TotalErrorBatchAmount, 'f', -1, 64)
 
-	uc.discordNotif.Send(config.WebhookNewOutPayments, webhookTitle+"\n\nTotal Request: "+totalRequest+"\nTotal Request Amount: "+totalRequestAmount+"\nTotal Executed Amount: Rp. "+totalExecuted+"\nTotal Executed Amount: "+totalExecutedAmount+"\nTotal Error : "+totalError+"\nTotal Error Amount: "+totalErrorAmount+"")
+	uc.discordNotif.Send(config.WebhookNewOutPayments, webhookTitle+"\n\nTotal Request: "+totalRequest+"\nTotal Request Amount: "+totalRequestAmount+"\nTotal Executed Amount: Rp. "+totalExecuted+"\nTotal Executed Amount: "+totalExecutedAmount+"\nTotal Error : "+totalError+"\nTotal Error Amount: "+totalErrorAmount+"\nReference: "+reqDto.Reference+"")
 
 	return nil
 }
