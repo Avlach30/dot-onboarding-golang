@@ -22,6 +22,7 @@ func NewWebhookHandler(router *httprouter.Router, webhookUC domain.WebhookUsecas
 	}
 
 	router.POST(basePath+"/disbursement", webhookHandler.XenditDisbursementCallback())
+	router.POST(basePath+"/batch-disbursement", webhookHandler.XenditBatchDisbursementCallback())
 }
 
 func (h *webhookHandler) XenditDisbursementCallback() httprouter.Handle {
@@ -51,6 +52,52 @@ func (h *webhookHandler) XenditDisbursementCallback() httprouter.Handle {
 		defer r.Body.Close()
 
 		err = h.webhookUC.Disbursement(r.Context(), payloadReq)
+		if err != nil {
+			httperror.SetResponse(w, 500, "internal server error")
+			return
+		}
+
+		dataByte, _ := json.Marshal(pkg.BaseResponse{
+			Code:    200,
+			Message: "success",
+			Data:    nil,
+		})
+
+		w.Header().Set("Content-Type", "application/json")
+		_, err = w.Write(dataByte)
+		if err != nil {
+			return
+		}
+	}
+}
+
+func (h *webhookHandler) XenditBatchDisbursementCallback() httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+
+		// validate, the request is originally from xendit
+		callbackToken := r.Header.Get("x-callback-token")
+		if callbackToken != config.XenditWebhookToken {
+			httperror.SetResponse(w, 401, "unauthorized")
+			return
+		}
+
+		var err error
+		var payloadReq webhookDto.WebhookBatchDisbursementReq
+
+		decoder := json.NewDecoder(r.Body)
+		if err = decoder.Decode(&payloadReq); err != nil {
+			httperror.SetResponse(w, 400, "body payload required")
+			return
+		}
+		// validate payload
+		errMsgs := pkg.ValidateStruct(payloadReq)
+		if len(errMsgs) > 0 {
+			httperror.SetResponse(w, 400, errMsgs)
+			return
+		}
+		defer r.Body.Close()
+
+		err = h.webhookUC.BatchDisbursement(r.Context(), payloadReq)
 		if err != nil {
 			httperror.SetResponse(w, 500, "internal server error")
 			return

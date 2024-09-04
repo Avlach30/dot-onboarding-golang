@@ -7,4 +7,5 @@ import (
 
 type WebhookUsecase interface {
 	Disbursement(ctx context.Context, reqDto webhookDto.WebhookDisbursementReq) (err error)
+	BatchDisbursement(ctx context.Context, reqDto webhookDto.WebhookBatchDisbursementReq) (err error)
 }
