@@ -18,6 +18,8 @@ import (
 	userHandler "github.com/codespace-id/codespace-x/app/user/handler"
 	userRepo "github.com/codespace-id/codespace-x/app/user/repository"
 	userUC "github.com/codespace-id/codespace-x/app/user/usecase"
+	webhookHandler "github.com/codespace-id/codespace-x/app/webhook/handler"
+	webhookUC "github.com/codespace-id/codespace-x/app/webhook/usecase"
 	"github.com/codespace-id/codespace-x/pkg/Integrations/notifications/implementations/discord"
 	"github.com/codespace-id/codespace-x/pkg/common/enum"
 	"github.com/codespace-id/codespace-x/pkg/dbconn"
@@ -51,8 +53,6 @@ func main() {
 	zenzivaOTP := zenziva.NewZenziva(config.ZenzivaBaseURL, config.ZenzivaPassKey, config.ZenzivaUserKey)
 	discordNotif := discord.NewDiscord()
 
-	//discordNotif.Send(config.WebhookNewOutPayments, "💸 Pembayaran Berhasil Ditransfer \n\n AstroDev: Ubaidillah \n Role: Laravel Dev \n Project: Test TOEFL \n Commision: Rp 50.000.000")
-
 	// repository
 	userRepository := userRepo.NewUserRepository(db)
 	otpRepo := repository.NewOtpRepository(db)
@@ -69,6 +69,7 @@ func main() {
 	bannerUsecase := bannerUC.NewBannerUsecase(bannerRepository)
 	projectUsecase := projectUC.NewProjectUsecase(projectRepository, sqlTxRepo, userProjectRepo, userRepository, projectImagesRepo, projectHistoryRepo, discordNotif)
 	projectPublicUsecase := projectUC.NewProjectPublicUsecase(projectRepository, sqlTxRepo, userProjectRepo, userRepository)
+	webhookUsecase := webhookUC.NewWebhookUsecase(discordNotif)
 
 	router.GET("/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		type healthRes struct {
@@ -102,6 +103,7 @@ func main() {
 	projectHandler.NewProjectHandler(router, projectUsecase, projectPublicUsecase)
 	commonHandler.NewCommonHandler(router)
 	tncHandler.NewTncHandler(router)
+	webhookHandler.NewWebhookHandler(router, webhookUsecase)
 
 	log.Println("=== SERVER STARTED at PORT 7777 ===")
 	log.Fatal(http.ListenAndServe(":7777", router))
