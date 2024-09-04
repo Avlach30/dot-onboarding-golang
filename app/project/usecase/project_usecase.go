@@ -84,7 +84,7 @@ func (uc *projectUsecase) CreateNewInquiry(ctx context.Context, phoneNumber stri
 
 	err = dbTx.Commit()
 
-	uc.discordNotif.Send(config.WebhookNewInquiry, "New Inquiry From CodespaceX App 🥳\nCC: @hiegarr \n\nNama:"+user.Fullname+"\nPhone:"+phoneNumber+"\nProject Name:"+entity.Name+"\n\n Deskripsi"+entity.Description)
+	uc.discordNotif.Send(config.WebhookNewInquiry, "New Inquiry From CodespaceX App 🥳\nCC: Sam <@422102506198401054> \n\nNama: "+user.Fullname+"\nPhone: "+phoneNumber+"\nProject Name: "+entity.Name+"\n\nDeskripsi: \n"+entity.Description)
 
 	res = domain.Entity{
 		UUID: project.UUID,
