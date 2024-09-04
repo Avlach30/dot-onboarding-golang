@@ -42,11 +42,11 @@ func (uc *webhookUsecase) BatchDisbursement(ctx context.Context, reqDto webhookD
 		webhookTitle = "**Xendit BATCH Disbursement FAILED** ⛔"
 	}
 
-	totalRequest := strconv.FormatInt(reqDto.TotalRequestBatch, 64)
+	totalRequest := strconv.Itoa(reqDto.TotalRequestBatch)
 	totalRequestAmount := strconv.FormatFloat(reqDto.TotalRequestBatchAmount, 'f', -1, 64)
-	totalExecuted := strconv.FormatInt(reqDto.TotalExecutedBatch, 64)
+	totalExecuted := strconv.Itoa(reqDto.TotalExecutedBatch)
 	totalExecutedAmount := strconv.FormatFloat(reqDto.TotalExecutedBatchAmount, 'f', -1, 64)
-	totalError := strconv.FormatInt(reqDto.TotalErrorBatch, 64)
+	totalError := strconv.Itoa(reqDto.TotalErrorBatch)
 	totalErrorAmount := strconv.FormatFloat(reqDto.TotalErrorBatchAmount, 'f', -1, 64)
 
 	uc.discordNotif.Send(config.WebhookNewOutPayments, webhookTitle+"\n\nTotal Request: "+totalRequest+"\nTotal Request Amount: "+totalRequestAmount+"\nTotal Executed Amount: Rp. "+totalExecuted+"\nTotal Executed Amount: "+totalExecutedAmount+"\nTotal Error : "+totalError+"\nTotal Error Amount: "+totalErrorAmount+"\nReference: "+reqDto.Reference+"")

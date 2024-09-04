@@ -75,11 +75,11 @@ func (h *webhookHandler) XenditBatchDisbursementCallback() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 		// validate, the request is originally from xendit
-		callbackToken := r.Header.Get("x-callback-token")
-		if callbackToken != config.XenditWebhookToken {
-			httperror.SetResponse(w, 401, "unauthorized")
-			return
-		}
+		//callbackToken := r.Header.Get("x-callback-token")
+		//if callbackToken != config.XenditWebhookToken {
+		//	httperror.SetResponse(w, 401, "unauthorized")
+		//	return
+		//}
 
 		var err error
 		var payloadReq webhookDto.WebhookBatchDisbursementReq
