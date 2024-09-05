@@ -30,9 +30,9 @@ func (uc *webhookUsecase) Disbursement(ctx context.Context, reqDto webhookDto.We
 		webhookTitle = "**Xendit Disbursement FAILED** ⛔"
 	}
 
-	amountAsString := strconv.FormatFloat(reqDto.Amount, 'f', -1, 64)
+	amountAsString := formatter.CurrencyDotSeparator(language.Indonesian, "Rp.", reqDto.Amount)
 
-	uc.discordNotif.Send(config.WebhookNewOutPayments, webhookTitle+"\n\n Transfer ke: "+reqDto.AccountHolderName+" \n Bank: "+reqDto.BankCode+" \n Amount: Rp. "+amountAsString+" \n Description: "+reqDto.DisbursementDescription+"")
+	uc.discordNotif.Send(config.WebhookNewOutPayments, webhookTitle+"\n\n Transfer ke: "+reqDto.AccountHolderName+" \n Bank: "+reqDto.BankCode+" \n Amount: "+amountAsString+" \n Description: "+reqDto.DisbursementDescription+"")
 
 	return nil
 }
