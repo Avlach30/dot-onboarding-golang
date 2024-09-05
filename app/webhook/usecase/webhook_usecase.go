@@ -6,6 +6,8 @@ import (
 	webhookDto "github.com/codespace-id/codespace-x/app/webhook/dto"
 	"github.com/codespace-id/codespace-x/config"
 	"github.com/codespace-id/codespace-x/pkg/Integrations/notifications"
+	"github.com/codespace-id/codespace-x/pkg/common/formatter"
+	"golang.org/x/text/language"
 	"strconv"
 )
 
@@ -43,13 +45,13 @@ func (uc *webhookUsecase) BatchDisbursement(ctx context.Context, reqDto webhookD
 	}
 
 	totalRequest := strconv.Itoa(reqDto.TotalRequestBatch)
-	totalRequestAmount := strconv.FormatFloat(reqDto.TotalRequestBatchAmount, 'f', -1, 64)
+	totalRequestAmount := formatter.CurrencyDotSeparator(language.Indonesian, "Rp.", reqDto.TotalRequestBatchAmount)
 	totalExecuted := strconv.Itoa(reqDto.TotalExecutedBatch)
-	totalExecutedAmount := strconv.FormatFloat(reqDto.TotalExecutedBatchAmount, 'f', -1, 64)
+	totalExecutedAmount := formatter.CurrencyDotSeparator(language.Indonesian, "Rp.", reqDto.TotalExecutedBatchAmount)
 	totalError := strconv.Itoa(reqDto.TotalErrorBatch)
-	totalErrorAmount := strconv.FormatFloat(reqDto.TotalErrorBatchAmount, 'f', -1, 64)
+	totalErrorAmount := formatter.CurrencyDotSeparator(language.Indonesian, "Rp.", reqDto.TotalErrorBatchAmount)
 
-	uc.discordNotif.Send(config.WebhookNewOutPayments, webhookTitle+"\n\nTotal Request: "+totalRequest+"\nTotal Request Amount: "+totalRequestAmount+"\nTotal Executed Amount: Rp. "+totalExecuted+"\nTotal Executed Amount: "+totalExecutedAmount+"\nTotal Error : "+totalError+"\nTotal Error Amount: "+totalErrorAmount+"\nReference: "+reqDto.Reference+"")
+	uc.discordNotif.Send(config.WebhookNewOutPayments, webhookTitle+"\n\nTotal Request: "+totalRequest+"\nTotal Request Amount: "+totalRequestAmount+"\nTotal Executed: "+totalExecuted+"\nTotal Executed Amount: "+totalExecutedAmount+"\nTotal Error : "+totalError+"\nTotal Error Amount: "+totalErrorAmount+"\nReference: "+reqDto.Reference+"")
 
 	return nil
 }
