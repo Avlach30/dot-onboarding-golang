@@ -8,5 +8,5 @@ import (
 func CurrencyDotSeparator(lang language.Tag, currencyCode string, amount float64) string {
 	p := message.NewPrinter(lang)
 
-	return p.Sprintf("%s. %f", currencyCode, amount)
+	return p.Sprintf("%s %d", currencyCode, int(amount))
 }

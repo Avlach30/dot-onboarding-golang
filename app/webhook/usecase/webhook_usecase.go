@@ -30,7 +30,7 @@ func (uc *webhookUsecase) Disbursement(ctx context.Context, reqDto webhookDto.We
 		webhookTitle = "**Xendit Disbursement FAILED** ⛔"
 	}
 
-	amountAsString := formatter.CurrencyDotSeparator(language.Indonesian, "Rp.", reqDto.Amount)
+	amountAsString := formatter.CurrencyDotSeparator(language.Indonesian, "IDR", reqDto.Amount)
 
 	uc.discordNotif.Send(config.WebhookNewOutPayments, webhookTitle+"\n\n Transfer ke: "+reqDto.AccountHolderName+" \n Bank: "+reqDto.BankCode+" \n Amount: "+amountAsString+" \n Description: "+reqDto.DisbursementDescription+"")
 
@@ -45,11 +45,11 @@ func (uc *webhookUsecase) BatchDisbursement(ctx context.Context, reqDto webhookD
 	}
 
 	totalRequest := strconv.Itoa(reqDto.TotalRequestBatch)
-	totalRequestAmount := formatter.CurrencyDotSeparator(language.Indonesian, "Rp.", reqDto.TotalRequestBatchAmount)
+	totalRequestAmount := formatter.CurrencyDotSeparator(language.Indonesian, "IDR", reqDto.TotalRequestBatchAmount)
 	totalExecuted := strconv.Itoa(reqDto.TotalExecutedBatch)
-	totalExecutedAmount := formatter.CurrencyDotSeparator(language.Indonesian, "Rp.", reqDto.TotalExecutedBatchAmount)
+	totalExecutedAmount := formatter.CurrencyDotSeparator(language.Indonesian, "IDR", reqDto.TotalExecutedBatchAmount)
 	totalError := strconv.Itoa(reqDto.TotalErrorBatch)
-	totalErrorAmount := formatter.CurrencyDotSeparator(language.Indonesian, "Rp.", reqDto.TotalErrorBatchAmount)
+	totalErrorAmount := formatter.CurrencyDotSeparator(language.Indonesian, "IDR", reqDto.TotalErrorBatchAmount)
 
 	uc.discordNotif.Send(config.WebhookNewOutPayments, webhookTitle+"\n\nTotal Request: "+totalRequest+"\nTotal Request Amount: "+totalRequestAmount+"\nTotal Executed: "+totalExecuted+"\nTotal Executed Amount: "+totalExecutedAmount+"\nTotal Error : "+totalError+"\nTotal Error Amount: "+totalErrorAmount+"\nReference: "+reqDto.Reference+"")
 
