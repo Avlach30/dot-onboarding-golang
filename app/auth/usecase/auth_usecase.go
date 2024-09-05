@@ -45,6 +45,12 @@ func (uc *authUsecase) OtpRequest(ctx context.Context, phoneNumber string) error
 
 	otpData, _ := uc.otpRepo.FindByIdentifier(ctx, phoneNumber)
 
+	// tester account
+	testPhoneNumber := config.TestAccountPhoneNumber
+	if testPhoneNumber != "" && testPhoneNumber == phoneNumber {
+		return nil
+	}
+
 	if otpData.Identifier != "" {
 		otpData.Code = newOtp
 		otpData.ExpiredAt = sql.NullTime{Time: expiredAt, Valid: true}
@@ -77,6 +83,13 @@ func (uc *authUsecase) OtpValidate(ctx context.Context, payload authdto.OtpValid
 	otpData, err := uc.otpRepo.FindByIdentifier(ctx, payload.PhoneNumber)
 	if err != nil {
 		return errors.WithMessage(err, errTrace)
+	}
+
+	// tester account
+	testPhoneNumber := config.TestAccountPhoneNumber
+	testOTP := config.TestOtpNumber
+	if testPhoneNumber != "" && testPhoneNumber == payload.PhoneNumber && testOTP == payload.Otp {
+		return nil
 	}
 
 	if payload.Otp != otpData.Code {

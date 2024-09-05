@@ -61,4 +61,8 @@ var (
 
 	// Xendit
 	XenditWebhookToken = Get("XENDIT_WEBHOOK_TOKEN", "")
+
+	// Tester Account
+	TestAccountPhoneNumber = Get("TEST_ACCOUNT_PHONE_NUMBER", "")
+	TestOtpNumber          = Get("TEST_ACCOUNT_OTP", "")
 )
