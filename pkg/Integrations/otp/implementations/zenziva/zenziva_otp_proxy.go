@@ -31,19 +31,16 @@ func NewZenziva(
 // SendOTP implements otp.OtpProxy.
 func (z *zenziva) SendOTP(contact string, code string) (resMsg interface{}, err error) {
 	httpMethod := http.MethodPost
-	subURL := "/waofficial/api/sendWAOfficial/"
 
-	request := dto.OtpRequest{
+	request := dto.OtpRequestSmsMasking{
 		Userkey: config.ZenzivaUserKey,
 		Passkey: config.ZenzivaPassKey,
 		To:      contact,
-		Brand:   "CODESPACE",
-		Otp:     code,
+		Message: "Kode OTP " + code + ", Rahasiakan OTP dari siapapun, OTP berlaku 5 menit. Regards codespace.id",
 	}
 	reqBody, _ := json.Marshal(request)
 
-	url := z.baseURL + subURL
-	resp, err := otp.CallAPI(httpMethod, url, reqBody)
+	resp, err := otp.CallAPI(httpMethod, z.baseURL, reqBody)
 	if err != nil {
 		return nil, errors.Wrap(err, "zenziva.SendOTP")
 	}
