@@ -65,7 +65,7 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res user
 		FROM
 			users u
 			LEFT JOIN user_role ur ON ur.user_id = u.id
-			JOIN roles r ON r. id = ur.role_id
+			LEFT JOIN roles r ON r. id = ur.role_id
 		WHERE
 			u.phone_number = ?
 		GROUP BY

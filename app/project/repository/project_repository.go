@@ -72,7 +72,8 @@ func (r *ProjectRepository) Find(ctx context.Context, UUID string) (res domain.E
 			p.status,
 			p.created_at,
 			pi.image_url AS thumbnail_image_url,
-			p.target_time
+			p.target_time,
+			p.astrodevs
 		FROM
 			projects p
 		JOIN project_images pi ON p.id = pi.project_id AND pi.is_thumbnail = 1
@@ -82,6 +83,7 @@ func (r *ProjectRepository) Find(ctx context.Context, UUID string) (res domain.E
 	var project domain.Entity
 	var thumbnailImageURL sql.NullString
 	var targetTime sql.NullString
+	var astrodevs sql.NullString
 
 	if err := r.db.QueryRowContext(
 		ctx,
@@ -97,6 +99,7 @@ func (r *ProjectRepository) Find(ctx context.Context, UUID string) (res domain.E
 		&project.CreatedAt,
 		&thumbnailImageURL,
 		&targetTime,
+		&astrodevs,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return res, nil
@@ -106,6 +109,7 @@ func (r *ProjectRepository) Find(ctx context.Context, UUID string) (res domain.E
 
 	project.ThumbnailImageURL = thumbnailImageURL.String
 	project.TargetTime = targetTime.String
+	project.Astrodevs = astrodevs.String
 
 	return project, nil
 }
