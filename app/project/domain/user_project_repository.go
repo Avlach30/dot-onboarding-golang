@@ -8,5 +8,5 @@ import (
 
 type UserProjectRepository interface {
 	CreateTx(ctx context.Context, dbTx *sql.Tx, userID, projectID int64) (err error)
-	GetByProjectID(ctx context.Context, projectID int64, page, perPage int) (res []userdomain.Entity, err error)
+	GetTalentInCharge(ctx context.Context, projectID int64, page, perPage int) (res []userdomain.Entity, err error)
 }

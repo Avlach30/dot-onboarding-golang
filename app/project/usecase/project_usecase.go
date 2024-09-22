@@ -105,7 +105,7 @@ func (uc *projectUsecase) ListProject(ctx context.Context, phoneNumber string, p
 
 	for _, val := range projectData {
 		astroDev := make([]userdto.GetProfileResponse, 0)
-		users, _ := uc.userProjectRepo.GetByProjectID(ctx, val.ID, 1, 20)
+		users, _ := uc.userProjectRepo.GetTalentInCharge(ctx, val.ID, 1, 20)
 		for _, user := range users {
 			astroDev = append(astroDev, userdto.GetProfileResponse{
 				Fullname: user.Fullname,
@@ -138,7 +138,7 @@ func (uc *projectUsecase) ProjectDetail(ctx context.Context, UUID string) (res d
 	}
 
 	var astroDev []userdto.GetProfileResponse
-	users, _ := uc.userProjectRepo.GetByProjectID(ctx, data.ID, 1, 20)
+	users, _ := uc.userProjectRepo.GetTalentInCharge(ctx, data.ID, 1, 20)
 	for _, user := range users {
 		astroDev = append(astroDev, userdto.GetProfileResponse{
 			Fullname: user.Fullname,

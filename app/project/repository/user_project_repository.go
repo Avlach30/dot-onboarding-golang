@@ -44,7 +44,7 @@ func (r *UserProjectRepository) CreateTx(ctx context.Context, dbTx *sql.Tx, user
 	return nil
 }
 
-func (r *UserProjectRepository) GetByProjectID(ctx context.Context, projectID int64, page, perPage int) (res []userdomain.Entity, err error) {
+func (r *UserProjectRepository) GetTalentInCharge(ctx context.Context, projectID int64, page, perPage int) (res []userdomain.Entity, err error) {
 	query := `
 		SELECT
 		     u.fullname,
@@ -54,6 +54,7 @@ func (r *UserProjectRepository) GetByProjectID(ctx context.Context, projectID in
 			user_projects up
 		JOIN users u ON up.user_id = u.id
 		WHERE up.project_id = ?
+		AND up.is_project_owner = 0
 		LIMIT ? OFFSET ?
 		`
 
@@ -68,22 +69,26 @@ func (r *UserProjectRepository) GetByProjectID(ctx context.Context, projectID in
 		if errors.Is(err, sql.ErrNoRows) {
 			return res, nil
 		}
-		return res, errors.Wrap(err, "UserProjectRepository.GetByProjectID.QueryContext")
+		return res, errors.Wrap(err, "UserProjectRepository.GetTalentInCharge.QueryContext")
 	}
 	defer list.Close()
 
 	for list.Next() {
 		var user userdomain.Entity
 
+		var projectRole sql.NullString
+		var imageUrl = sql.NullString{}
 		err = list.Scan(
 			&user.Fullname,
-			&user.ImageURL,
-			&user.Role,
+			&imageUrl,
+			&projectRole,
 		)
 		if err != nil {
-			return res, errors.Wrap(err, "UserProjectRepository.GetByProjectID.QueryContext")
+			return res, errors.Wrap(err, "UserProjectRepository.GetTalentInCharge.QueryContext")
 		}
 
+		user.ImageURL = imageUrl.String
+		user.Role = projectRole.String
 		res = append(res, user)
 	}
 
