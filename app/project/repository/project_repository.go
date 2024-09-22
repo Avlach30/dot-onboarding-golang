@@ -196,7 +196,7 @@ func (r *ProjectRepository) GetByPhoneNumber(ctx context.Context, phoneNumber st
 		JOIN user_projects up ON p.id = up.project_id
 		JOIN users u ON up.user_id = u.id
 		LEFT JOIN project_images pi ON p.id = pi.project_id AND pi.is_thumbnail = 1
-		WHERE u.phone_number = ? AND p.deleted_at = NULL
+		WHERE u.phone_number = ? AND p.deleted_at IS NULL
 		GROUP BY id, uuid, name, description, service_type, status, created_at
 		LIMIT ? OFFSET ?
 		`
@@ -254,7 +254,7 @@ func (r *ProjectRepository) GetByStatus(ctx context.Context, page, perPage int, 
 		FROM
 			projects p
 		LEFT JOIN project_images pi ON p.id = pi.project_id AND pi.is_thumbnail = 1
-		WHERE p.status = ?
+		WHERE p.status = ? AND p.deleted_at IS NULL
 		GROUP BY uuid, name, description, service_type, status, created_at
 		LIMIT ? OFFSET ?
 		`
