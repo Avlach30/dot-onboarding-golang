@@ -140,15 +140,8 @@ func (uc *projectUsecase) ProjectDetail(ctx context.Context, UUID string) (res d
 		return res, errors.WithMessage(err, "projectUsecase.ProjectDetail")
 	}
 
-	var astroDev []userdto.GetProfileResponse
-	users, _ := uc.userProjectRepo.GetTalentInCharge(ctx, data.ID, 1, 20)
-	for _, user := range users {
-		astroDev = append(astroDev, userdto.GetProfileResponse{
-			Fullname: user.Fullname,
-			ImageURL: user.ImageURL,
-			Role:     user.Role,
-		})
-	}
+	var astroDev []userdto.GetProfileTalentResponse
+	json.Unmarshal([]byte(data.Astrodevs), &astroDev)
 
 	deadline := "Not Started Yet"
 	if data.Status == enum.ON_DEVELOPMENT.Value() {
