@@ -1,7 +1,10 @@
 package middleware
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"github.com/codespace-id/codespace-x/pkg"
 	"net/http"
 	"strings"
 
@@ -22,10 +25,13 @@ type contextKey string
 const (
 	App         contextKey = "app"
 	PhoneNumber contextKey = "phoneNumber"
-	Role        contextKey = "role"
+	Roles       contextKey = "roles"
 )
 
 func Wrapper(next httprouter.Handle, middlewareType MiddlewareType) httprouter.Handle {
+
+	next = emptyArrayInterceptor(next)
+
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		ctx := context.WithValue(r.Context(), App, "codespace-x")
 
@@ -85,6 +91,45 @@ func authMiddleware(ctx context.Context, r *http.Request, w http.ResponseWriter)
 	}
 
 	ctx = context.WithValue(ctx, PhoneNumber, claims.PhoneNumber)
-	ctx = context.WithValue(ctx, Role, claims.Role)
+	ctx = context.WithValue(ctx, Roles, claims.Roles)
 	return ctx, false
+}
+
+func emptyArrayInterceptor(next httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		// Create a response writer that captures the response
+		rw := &responseWriter{ResponseWriter: w, body: &bytes.Buffer{}}
+
+		// Call the next handler, and call again after finished
+		next(rw, r, ps)
+
+		var baseResponse pkg.BaseResponse
+		json.Unmarshal(rw.body.Bytes(), &baseResponse)
+
+		if baseResponse.Meta != nil && baseResponse.Data == nil {
+			baseResponse.Data = []string{}
+			dataByte, _ := json.Marshal(baseResponse)
+			w.Write(dataByte)
+		} else {
+			dataByte, _ := json.Marshal(baseResponse)
+			w.Write(dataByte)
+		}
+	}
+}
+
+// Custom response writer to capture the response body
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
+	body       *bytes.Buffer
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
+}
+
+func (rw *responseWriter) Write(b []byte) (int, error) {
+	rw.body.Reset()
+	return rw.body.Write(b)
 }

@@ -52,6 +52,7 @@ func (h *ProjectHandler) ListProject() httprouter.Handle {
 
 		// Retrieve values from context (locals)
 		phoneNumber, _ := r.Context().Value(middleware.PhoneNumber).(string)
+		roles, _ := r.Context().Value(middleware.Roles).(string)
 
 		var err error
 		var payloadReq commondto.Pagination
@@ -77,14 +78,14 @@ func (h *ProjectHandler) ListProject() httprouter.Handle {
 		var res []dto.ListProjectResponse
 
 		if phoneNumber != "" {
-			res, err = h.projectUsecase.ListProject(r.Context(), phoneNumber, payloadReq.Page, payloadReq.PerPage)
+			res, err = h.projectUsecase.ListProject(r.Context(), phoneNumber, roles, payloadReq.Page, payloadReq.PerPage)
 			if err != nil {
 				log.Println("error getting projects: ", string(debug.Stack()))
 				httperror.SetResponse(w, 500, "internal server error")
 				return
 			}
 		} else if phoneNumber == "" {
-			res, err = h.projectPublicUsecase.ListProject(r.Context(), phoneNumber, payloadReq.Page, payloadReq.PerPage)
+			res, err = h.projectPublicUsecase.ListProject(r.Context(), phoneNumber, roles, payloadReq.Page, payloadReq.PerPage)
 			if err != nil {
 				log.Println("error getting projects: ", string(debug.Stack()))
 				httperror.SetResponse(w, 500, "internal server error")

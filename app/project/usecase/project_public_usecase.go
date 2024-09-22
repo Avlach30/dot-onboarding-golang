@@ -28,15 +28,15 @@ func NewProjectPublicUsecase(projectRepo domain.Repository, sqlTxRepo commonrepo
 	}
 }
 
-func (uc *projectPublicUsecase) ListProject(ctx context.Context, phoneNumber string, page, perPage int) (res []dto.ListProjectResponse, err error) {
-	var bannerData []domain.Entity
+func (uc *projectPublicUsecase) ListProject(ctx context.Context, phoneNumber, roles string, page, perPage int) (res []dto.ListProjectResponse, err error) {
+	var data []domain.Entity
 
-	bannerData, err = uc.projectRepo.GetByStatus(ctx, page, perPage, enum.FINISHED.Value())
+	data, err = uc.projectRepo.GetByStatus(ctx, page, perPage, enum.FINISHED.Value())
 	if err != nil {
 		return nil, errors.WithMessage(err, "projectUsecase.ListProject")
 	}
 
-	for _, val := range bannerData {
+	for _, val := range data {
 		res = append(res, dto.ListProjectResponse{
 			UUID:              val.UUID,
 			Name:              val.Name,
@@ -45,7 +45,7 @@ func (uc *projectPublicUsecase) ListProject(ctx context.Context, phoneNumber str
 			ServiceType:       enum.GetTransformServiceType(val.ServiceType),
 			Status:            val.Status,
 			CreatedAt:         val.CreatedAt.Format(time.RFC3339),
-			Astrodevs:         make([]userdto.GetProfileResponse, 0),
+			Astrodevs:         make([]userdto.GetProfileTalentResponse, 0),
 		})
 	}
 

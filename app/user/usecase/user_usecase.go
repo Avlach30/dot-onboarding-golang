@@ -61,5 +61,6 @@ func (u *userUsecase) Profile(ctx context.Context, phoneNumber string) (res user
 		Gender:         userData.Gender,
 		Email:          userData.Email,
 		ImageURL:       userData.ImageURL,
+		Roles:          userData.Roles,
 	}, nil
 }

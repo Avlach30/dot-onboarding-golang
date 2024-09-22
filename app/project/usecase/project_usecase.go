@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	commonrepo "github.com/codespace-id/codespace-x/app/common/repository"
 	"github.com/codespace-id/codespace-x/app/project/domain"
 	"github.com/codespace-id/codespace-x/app/project/dto"
@@ -12,6 +13,7 @@ import (
 	"github.com/codespace-id/codespace-x/pkg/common/enum"
 	"github.com/codespace-id/codespace-x/pkg/common/generator"
 	"github.com/pkg/errors"
+	"strings"
 	"time"
 )
 
@@ -94,7 +96,7 @@ func (uc *projectUsecase) CreateNewInquiry(ctx context.Context, phoneNumber stri
 }
 
 // ListProject implements projectdomain.Usecase.
-func (uc *projectUsecase) ListProject(ctx context.Context, phoneNumber string, page int, perPage int) (res []dto.ListProjectResponse, err error) {
+func (uc *projectUsecase) ListProject(ctx context.Context, phoneNumber, roles string, page int, perPage int) (res []dto.ListProjectResponse, err error) {
 
 	var projectData []domain.Entity
 
@@ -103,16 +105,17 @@ func (uc *projectUsecase) ListProject(ctx context.Context, phoneNumber string, p
 		return nil, errors.WithMessage(err, "projectUsecase.ListProject")
 	}
 
-	for _, val := range projectData {
-		astroDev := make([]userdto.GetProfileResponse, 0)
-		users, _ := uc.userProjectRepo.GetTalentInCharge(ctx, val.ID, 1, 20)
-		for _, user := range users {
-			astroDev = append(astroDev, userdto.GetProfileResponse{
-				Fullname: user.Fullname,
-				ImageURL: user.ImageURL,
-				Role:     user.Role,
-			})
+	if strings.Contains(roles, "admin") {
+		projectData, err = uc.projectRepo.Get(ctx, page, perPage)
+		if err != nil {
+			return nil, errors.WithMessage(err, "projectUsecase.ListProject")
 		}
+	}
+
+	for _, val := range projectData {
+
+		var astroDev []userdto.GetProfileTalentResponse
+		json.Unmarshal([]byte(val.Astrodevs), &astroDev)
 
 		res = append(res, dto.ListProjectResponse{
 			UUID:              val.UUID,

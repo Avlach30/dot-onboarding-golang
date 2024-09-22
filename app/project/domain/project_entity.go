@@ -12,4 +12,5 @@ type Entity struct {
 	Status            string
 	TargetTime        string
 	CreatedAt         time.Time
+	Astrodevs         string
 }

@@ -10,4 +10,6 @@ type Entity struct {
 	Role           string
 	ImageURL       string
 	Email          string
+
+	Roles string
 }

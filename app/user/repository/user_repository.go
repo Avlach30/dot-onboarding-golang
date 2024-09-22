@@ -54,21 +54,28 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res user
 
 	query := `
 		SELECT
-		    id,
-			fullname, 
-			identity_number, 
-			phone_number, 
-		   gender,
-		   email,
-		   image_url
+			u.id,
+			u.fullname,
+			u.identity_number,
+			u.phone_number,
+			u.gender,
+			u.email,
+			u.image_url,
+			GROUP_CONCAT(r.name) AS roles
 		FROM
-			users
+			users u
+			LEFT JOIN user_role ur ON ur.user_id = u.id
+			JOIN roles r ON r. id = ur.role_id
 		WHERE
-			phone_number = ?
+			u.phone_number = ?
+		GROUP BY
+			u.id
 		`
 
 	var email sql.NullString
 	var imageUrl sql.NullString
+	var roles sql.NullString
+
 	if err := r.db.QueryRowContext(
 		ctx,
 		query,
@@ -81,6 +88,7 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res user
 		&res.Gender,
 		&email,
 		&imageUrl,
+		&roles,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return res, nil
@@ -90,6 +98,7 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res user
 
 	res.Email = email.String
 	res.ImageURL = imageUrl.String
+	res.Roles = roles.String
 
 	return res, nil
 }

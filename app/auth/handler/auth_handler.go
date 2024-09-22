@@ -162,7 +162,13 @@ func (h *AuthHandler) OtpValidate() httprouter.Handle {
 			return
 		}
 
-		token, err := jwt.CreateToken(payloadReq.PhoneNumber, "CLIENT", "0")
+		roles := "CLIENT"
+		profile, _ := h.userUsecase.Profile(r.Context(), payloadReq.PhoneNumber)
+		if profile.Roles != "" {
+			roles = profile.Roles
+		}
+
+		token, err := jwt.CreateToken(payloadReq.PhoneNumber, roles, "0")
 		if err != nil {
 			httperror.SetResponse(w, 500, "internal server error")
 			return

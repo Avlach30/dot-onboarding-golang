@@ -10,7 +10,7 @@ import (
 )
 
 type CustomClaims struct {
-	Role            string `json:"role"`
+	Roles           string `json:"roles"`
 	PhoneNumber     string `json:"phone_number"`
 	FirebaseIdToken string `json:"firebase_id_token"`
 	jwt.RegisteredClaims
@@ -31,7 +31,7 @@ func CreateToken(phoneNumber, role, firebaseIdToken string) (res string, err err
 
 	claims := CustomClaims{
 		PhoneNumber:     phoneNumber,
-		Role:            role,
+		Roles:           role,
 		FirebaseIdToken: firebaseIdToken,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
