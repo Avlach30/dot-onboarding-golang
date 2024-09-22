@@ -137,7 +137,7 @@ func (h *ProjectHandler) DetailProject() httprouter.Handle {
 		}
 
 		if phoneNumber == "" {
-			data.Astrodevs = make([]userdto.GetProfileResponse, 0)
+			data.Astrodevs = make([]userdto.GetProfileTalentResponse, 0)
 		}
 
 		dataByte, _ := json.Marshal(pkg.BaseResponse{
