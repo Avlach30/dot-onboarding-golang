@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+
 	userdto "github.com/codespace-id/codespace-x/app/user/dto"
 	"github.com/codespace-id/codespace-x/app/user/userdomain"
 	"github.com/codespace-id/codespace-x/pkg/common/generator"
@@ -63,4 +64,14 @@ func (u *userUsecase) Profile(ctx context.Context, phoneNumber string) (res user
 		ImageURL:       userData.ImageURL,
 		Roles:          userData.Roles,
 	}, nil
+}
+
+func (u *userUsecase) Delete(ctx context.Context, phoneNumber string) error {
+	traceTag:= "UserUsecase.DeleteTx"
+
+	if err := u.userRepo.Delete(ctx, phoneNumber); err != nil {
+		return errors.WithMessage(err, traceTag)
+	}
+
+	return nil
 }

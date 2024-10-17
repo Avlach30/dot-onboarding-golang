@@ -830,6 +830,51 @@
                 }
             }
         },
+        "/api/v1/users/delete": {
+            "post": {
+                "description": "Delete",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Service-Auth-Token",
+                        "name": "X-Service-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization value",
+                        "name": "authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "error",
+                        "schema": {
+                            "$ref": "#/definitions/pkg.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/users/profile": {
             "get": {
                 "description": "Get Profile",
@@ -1052,13 +1097,27 @@
                 }
             }
         },
+        "dto.GetProfileTalentResponse": {
+            "type": "object",
+            "properties": {
+                "fullname": {
+                    "type": "string"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.ListProjectResponse": {
             "type": "object",
             "properties": {
                 "astrodevs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.GetProfileResponse"
+                        "$ref": "#/definitions/dto.GetProfileTalentResponse"
                     }
                 },
                 "created_at": {
@@ -1116,7 +1175,7 @@
                 "astrodevs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.GetProfileResponse"
+                        "$ref": "#/definitions/dto.GetProfileTalentResponse"
                     }
                 },
                 "created_at": {
@@ -1148,6 +1207,9 @@
         "dto.ProjectHistoryRes": {
             "type": "object",
             "properties": {
+                "attachment_title": {
+                    "type": "string"
+                },
                 "attachment_url": {
                     "type": "string"
                 },

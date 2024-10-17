@@ -70,11 +70,20 @@ definitions:
       role:
         type: string
     type: object
+  dto.GetProfileTalentResponse:
+    properties:
+      fullname:
+        type: string
+      image_url:
+        type: string
+      role:
+        type: string
+    type: object
   dto.ListProjectResponse:
     properties:
       astrodevs:
         items:
-          $ref: '#/definitions/dto.GetProfileResponse'
+          $ref: '#/definitions/dto.GetProfileTalentResponse'
         type: array
       created_at:
         type: string
@@ -112,7 +121,7 @@ definitions:
     properties:
       astrodevs:
         items:
-          $ref: '#/definitions/dto.GetProfileResponse'
+          $ref: '#/definitions/dto.GetProfileTalentResponse'
         type: array
       created_at:
         type: string
@@ -133,6 +142,8 @@ definitions:
     type: object
   dto.ProjectHistoryRes:
     properties:
+      attachment_title:
+        type: string
       attachment_url:
         type: string
       created_at:
@@ -713,6 +724,36 @@ paths:
       summary: Project Histories
       tags:
       - Projects
+  /api/v1/users/delete:
+    post:
+      consumes:
+      - application/json
+      description: Delete
+      parameters:
+      - description: X-Service-Auth-Token
+        in: header
+        name: X-Service-Auth-Token
+        required: true
+        type: string
+      - description: Authorization value
+        in: header
+        name: authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Delete
+      tags:
+      - User
   /api/v1/users/profile:
     get:
       consumes:
