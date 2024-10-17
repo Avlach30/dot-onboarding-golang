@@ -3,6 +3,9 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"time"
+
 	"github.com/codespace-id/codespace-x/app/user/userdomain"
 
 	"github.com/pkg/errors"
@@ -67,7 +70,7 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res user
 			LEFT JOIN user_role ur ON ur.user_id = u.id
 			LEFT JOIN roles r ON r. id = ur.role_id
 		WHERE
-			u.phone_number = ?
+			u.phone_number = ? AND u.deleted_at IS NULL			
 		GROUP BY
 			u.id
 		`
@@ -101,4 +104,30 @@ func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res user
 	res.Roles = roles.String
 
 	return res, nil
+}
+
+func (r *UserRepository) Delete(ctx context.Context, phoneNumber string) error {
+
+	now := time.Now()
+	
+	query := `
+		UPDATE 
+			users
+		SET 
+			deleted_at = ?,
+			phone_number = ?
+		WHERE
+			phone_number = ?
+		`
+	if _, err := r.db.ExecContext(
+		ctx,
+		query,
+		now,
+		fmt.Sprintf("%s-%d", phoneNumber, now.Unix()),
+		phoneNumber,
+	); err != nil {
+		return errors.Wrap(err, "UserRepository.DeleteTx.ExecContext")
+	}
+
+	return nil
 }

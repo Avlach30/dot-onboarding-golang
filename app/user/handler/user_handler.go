@@ -2,10 +2,11 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/codespace-id/codespace-x/app/user/dto"
-	userdomain "github.com/codespace-id/codespace-x/app/user/userdomain"
 	"net/http"
 	"strings"
+
+	"github.com/codespace-id/codespace-x/app/user/dto"
+	userdomain "github.com/codespace-id/codespace-x/app/user/userdomain"
 
 	httperror "github.com/codespace-id/codespace-x/pkg/common/error"
 	"github.com/codespace-id/codespace-x/pkg/common/middleware"
@@ -26,6 +27,7 @@ func NewUserHandler(router *httprouter.Router, userUsecase userdomain.Usecase) {
 
 	router.GET(basePath+"/profile", middleware.Wrapper(userHandler.Profile(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
 	router.POST(basePath+"/register", middleware.Wrapper(userHandler.Register(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
+	router.POST(basePath+"/delete", middleware.Wrapper(userHandler.Delete(), middleware.MiddlewareType{TokenAuth: true, XServiceAuthToken: true}))
 
 }
 
@@ -129,6 +131,46 @@ func (h *UserHandler) Register() httprouter.Handle {
 			Code:    200,
 			Message: "success",
 			Data:    nil,
+		})
+
+		w.Header().Set("Content-Type", "application/json")
+		_, err = w.Write(dataByte)
+		if err != nil {
+			return
+		}
+	}
+}
+
+// @Summary Delete
+// @Description Delete
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param X-Service-Auth-Token header string true "X-Service-Auth-Token"
+// @Param authorization header string true "Authorization value"
+// @Success 200 {object} pkg.BaseResponse{} "success"
+// @Failure default {object} pkg.BaseResponse "error"
+// @Router /api/v1/users/delete [post]
+func (h *UserHandler) Delete() httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	
+		var err error
+
+		phoneNumber, ok := r.Context().Value(middleware.PhoneNumber).(string)
+		if !ok {
+			httperror.SetResponse(w, 500, "invalid token")
+			return
+		}
+
+		err = h.userUsecase.Delete(r.Context(), phoneNumber)
+		if err != nil {
+			httperror.SetResponse(w, 500, "internal server error")
+			return
+		}
+
+		dataByte, _ := json.Marshal(pkg.BaseResponse{
+			Code:    200,
+			Message: "success",
 		})
 
 		w.Header().Set("Content-Type", "application/json")
