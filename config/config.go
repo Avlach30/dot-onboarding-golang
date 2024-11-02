@@ -39,6 +39,10 @@ func GetRequired(key string) string {
 var (
 	// General
 	AppMode          = Get("APP_MODE", "PROD")
+
+	SentryDSN          			= Get("SENTRY_DSN", "PROD")
+	SentrySampleTrace          	= Get("SENTRY_SAMPLE_TRACE", "1.0")
+
 	Secret           = GetRequired("JWT_SECRET")
 	JwtExpiredInDays = GetRequired("JWT_EXPIRED_IN_DAYS")
 	ServiceAuthToken = GetRequired("SERVICE_AUTH_TOKEN")

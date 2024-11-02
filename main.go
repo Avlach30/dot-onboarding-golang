@@ -24,7 +24,12 @@ import (
 	"github.com/codespace-id/codespace-x/pkg/common/enum"
 	"github.com/codespace-id/codespace-x/pkg/dbconn"
 	"log"
+	"fmt"
+	"strconv"
 	"net/http"
+
+	"github.com/getsentry/sentry-go"
+	sentryhttp "github.com/getsentry/sentry-go/http"
 
 	"github.com/codespace-id/codespace-x/config"
 	_ "github.com/codespace-id/codespace-x/docs"
@@ -48,6 +53,22 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	
+	tracesSampleRate, _ := strconv.ParseFloat(config.SentrySampleTrace, 64)
+
+	// To initialize Sentry's handler, you need to initialize Sentry itself beforehand
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn: config.SentryDSN,
+		// Set TracesSampleRate to 1.0 to capture 100%
+		// of transactions for performance monitoring.
+		// We recommend adjusting this value in production.
+		TracesSampleRate: tracesSampleRate,
+	}); err != nil {
+		fmt.Printf("Sentry initialization failed: %v\n", err)
+	}
+	
+	// Create an instance of sentryhttp
+	sentryHandler := sentryhttp.New(sentryhttp.Options{})
 
 	// 3rd parties
 	zenzivaOTP := zenziva.NewZenziva(config.ZenzivaBaseURL, config.ZenzivaPassKey, config.ZenzivaUserKey)
@@ -96,6 +117,8 @@ func main() {
 		httpSwagger.WrapHandler(w, r)
 	})
 
+	http.Handle("/", sentryHandler.Handle(router))
+	
 	userHandler.NewUserHandler(router, userUsecase)
 	authHandler.NewAuthHandler(router, userUsecase, authUsecase)
 	handler.NewBannerHandler(router, bannerUsecase)
@@ -104,6 +127,7 @@ func main() {
 	commonHandler.NewCommonHandler(router)
 	tncHandler.NewTncHandler(router)
 	webhookHandler.NewWebhookHandler(router, webhookUsecase)
+
 
 	log.Println("=== SERVER STARTED at PORT 7777 ===")
 	log.Fatal(http.ListenAndServe(":7777", router))
