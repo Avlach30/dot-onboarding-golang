@@ -56,7 +56,7 @@ jobs:
                       if [ -d app-config ]; then cd app-config && git pull origin master; else git clone --branch=master git@github-com-app:codespace-id/app-config.git && cd app-config; fi
 
                       # running stack deploy
-                      docker stack deploy --with-registry-auth -c docker-compose.yml -c docker-compose.codespace-x.yml app
+                      docker stack deploy --with-registry-auth -c docker-compose.yml -c docker-compose.codespace-x.yml codespace
 
             - name: Send notification
               uses: sarisia/actions-status-discord@v1
