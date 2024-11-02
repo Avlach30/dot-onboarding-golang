@@ -14,6 +14,7 @@ FROM alpine:3.19.0
 WORKDIR /root/
 
 COPY --from=builder /go/codespacex/main .
+COPY --from=builder /go/codespacex/.env .
 
 EXPOSE 7777
 CMD ["nohup", "./main"]
