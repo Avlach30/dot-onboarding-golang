@@ -24,11 +24,10 @@ func (r *UserProjectRepository) CreateTx(ctx context.Context, dbTx *sql.Tx, user
 		INSERT INTO 
 			user_projects(
 				user_id, 
-				project_id, 
-				is_project_owner
+				project_id
 			) 
 		VALUES 
-			(?, ?, ?)
+			(?, ?)
 		`
 
 	if _, err := dbTx.ExecContext(
@@ -36,7 +35,6 @@ func (r *UserProjectRepository) CreateTx(ctx context.Context, dbTx *sql.Tx, user
 		query,
 		userID,
 		projectID,
-		1,
 	); err != nil {
 		return errors.Wrap(err, "UserProjectRepository.CreateTx.ExecContext")
 	}
