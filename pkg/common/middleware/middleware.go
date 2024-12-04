@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/codespace-id/codespace-x/pkg"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg"
 	"net/http"
 	"strings"
 
-	"github.com/codespace-id/codespace-x/config"
-	httperror "github.com/codespace-id/codespace-x/pkg/common/error"
-	"github.com/codespace-id/codespace-x/pkg/jwt"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
+	httperror "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/error"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/jwt"
 	"github.com/julienschmidt/httprouter"
 )
 

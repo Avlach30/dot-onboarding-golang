@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"github.com/codespace-id/codespace-x/app/notification/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/domain"
 
-	"github.com/codespace-id/codespace-x/pkg/common/enum"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/enum"
 )
 
 type NotificationRepository struct {

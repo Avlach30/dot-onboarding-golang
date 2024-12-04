@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/codespace-id/codespace-x/config"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
 	"github.com/golang-jwt/jwt/v4"
 )
 

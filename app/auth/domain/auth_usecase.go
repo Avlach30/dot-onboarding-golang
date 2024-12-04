@@ -2,7 +2,7 @@ package domain
 
 import (
 	"context"
-	authdto "github.com/codespace-id/codespace-x/app/auth/dto"
+	authdto "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/dto"
 )
 
 type Usecase interface {

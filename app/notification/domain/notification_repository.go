@@ -3,7 +3,7 @@ package domain
 import (
 	"context"
 
-	"github.com/codespace-id/codespace-x/pkg/common/enum"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/enum"
 )
 
 type Repository interface {

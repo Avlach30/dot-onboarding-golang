@@ -3,8 +3,8 @@ package dbconn
 import (
 	"database/sql"
 	"errors"
-	"github.com/codespace-id/codespace-x/pkg/common/enum"
-	"github.com/codespace-id/codespace-x/pkg/dbconn/mysql"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/enum"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/dbconn/mysql"
 )
 
 func GetDb(db enum.DbType) (*sql.DB, error) {

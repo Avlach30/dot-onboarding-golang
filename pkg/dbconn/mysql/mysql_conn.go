@@ -3,7 +3,7 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
-	"github.com/codespace-id/codespace-x/config"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
 	_ "github.com/go-sql-driver/mysql"
 	"time"
 )

@@ -3,11 +3,11 @@ package usecase
 import (
 	"context"
 
-	userdto "github.com/codespace-id/codespace-x/app/user/dto"
-	"github.com/codespace-id/codespace-x/app/user/userdomain"
-	"github.com/codespace-id/codespace-x/pkg/common/generator"
+	userdto "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/dto"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/userdomain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/generator"
 
-	"github.com/codespace-id/codespace-x/pkg/common/enum"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/enum"
 	"github.com/pkg/errors"
 )
 

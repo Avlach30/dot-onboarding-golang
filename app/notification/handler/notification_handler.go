@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/codespace-id/codespace-x/pkg"
-	"github.com/codespace-id/codespace-x/pkg/common/middleware"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/middleware"
 	"github.com/julienschmidt/httprouter"
 )
 

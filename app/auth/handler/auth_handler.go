@@ -2,16 +2,16 @@ package handler
 
 import (
 	"encoding/json"
-	authdomain "github.com/codespace-id/codespace-x/app/auth/domain"
-	"github.com/codespace-id/codespace-x/app/auth/dto"
-	userdomain "github.com/codespace-id/codespace-x/app/user/userdomain"
+	authdomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/dto"
+	userdomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/userdomain"
 	"net/http"
 
-	httperror "github.com/codespace-id/codespace-x/pkg/common/error"
-	"github.com/codespace-id/codespace-x/pkg/common/middleware"
-	"github.com/codespace-id/codespace-x/pkg/jwt"
+	httperror "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/error"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/middleware"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/jwt"
 
-	"github.com/codespace-id/codespace-x/pkg"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg"
 	"github.com/julienschmidt/httprouter"
 )
 

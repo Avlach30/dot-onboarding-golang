@@ -3,14 +3,14 @@ package usecase
 import (
 	"context"
 	"database/sql"
-	"github.com/codespace-id/codespace-x/app/auth/domain"
-	authdto "github.com/codespace-id/codespace-x/app/auth/dto"
-	userdomain "github.com/codespace-id/codespace-x/app/user/userdomain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
+	authdto "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/dto"
+	userdomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/userdomain"
 	"strconv"
 	"time"
 
-	"github.com/codespace-id/codespace-x/config"
-	"github.com/codespace-id/codespace-x/pkg/Integrations/otp"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/Integrations/otp"
 	"github.com/pkg/errors"
 )
 

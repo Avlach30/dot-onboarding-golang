@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/codespace-id/codespace-x/pkg/Integrations/otp/dto"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/Integrations/otp/dto"
 )
 
 func CallAPI(httpMethod, url string, bodyPayload []byte) (apiRes *dto.OtpResponse, err error) {

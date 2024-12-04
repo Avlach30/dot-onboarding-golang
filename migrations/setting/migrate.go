@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/codespace-id/codespace-x/config"
-	"github.com/codespace-id/codespace-x/pkg/common/enum"
-	"github.com/codespace-id/codespace-x/pkg/dbconn"
-	"log"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/enum"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/dbconn"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/mysql"
@@ -13,11 +12,6 @@ import (
 )
 
 func main() {
-
-	if config.AppMode != "MIGRATE" {
-		log.Fatalf("Please recheck your DB & adjust appMode to MIGRATE")
-	}
-
 	pathToMigrationsFile := "file://migrations"
 
 	db, err := dbconn.GetDb(enum.MYSQL)

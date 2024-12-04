@@ -3,7 +3,7 @@ package userdomain
 import (
 	"context"
 
-	userdto "github.com/codespace-id/codespace-x/app/user/dto"
+	userdto "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/dto"
 )
 
 type Usecase interface {

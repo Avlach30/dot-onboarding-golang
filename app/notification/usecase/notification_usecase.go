@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"context"
-	"github.com/codespace-id/codespace-x/app/notification/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/domain"
 )
 
 type notificationUsecase struct {

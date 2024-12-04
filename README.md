@@ -6,6 +6,9 @@
 ## 🌊 Migration
 
 1. install [golang-migrate] (https://github.com/golang-migrate/migrate)
+```cli
+brew install golang-migrate
+```
 2. create migration by:
 ```cli
  migrate create -ext sql -dir migrations -seq [migration name]

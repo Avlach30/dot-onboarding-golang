@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/codespace-id/codespace-x/app/user/dto"
-	userdomain "github.com/codespace-id/codespace-x/app/user/userdomain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/dto"
+	userdomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/userdomain"
 
-	httperror "github.com/codespace-id/codespace-x/pkg/common/error"
-	"github.com/codespace-id/codespace-x/pkg/common/middleware"
+	httperror "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/error"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/middleware"
 
-	"github.com/codespace-id/codespace-x/pkg"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg"
 	"github.com/julienschmidt/httprouter"
 )
 

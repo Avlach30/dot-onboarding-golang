@@ -2,27 +2,20 @@ package main
 
 import (
 	"encoding/json"
-	authHandler "github.com/codespace-id/codespace-x/app/auth/handler"
-	"github.com/codespace-id/codespace-x/app/auth/repository"
-	authUC "github.com/codespace-id/codespace-x/app/auth/usecase"
-	"github.com/codespace-id/codespace-x/app/banner/handler"
-	bannerRepo "github.com/codespace-id/codespace-x/app/banner/repository"
-	bannerUC "github.com/codespace-id/codespace-x/app/banner/usecase"
-	commonHandler "github.com/codespace-id/codespace-x/app/common/handler"
-	"github.com/codespace-id/codespace-x/app/common/repository"
-	notifHandler "github.com/codespace-id/codespace-x/app/notification/handler"
-	projectHandler "github.com/codespace-id/codespace-x/app/project/handler"
-	projectRepo "github.com/codespace-id/codespace-x/app/project/repository"
-	projectUC "github.com/codespace-id/codespace-x/app/project/usecase"
-	tncHandler "github.com/codespace-id/codespace-x/app/tnc/handler"
-	userHandler "github.com/codespace-id/codespace-x/app/user/handler"
-	userRepo "github.com/codespace-id/codespace-x/app/user/repository"
-	userUC "github.com/codespace-id/codespace-x/app/user/usecase"
-	webhookHandler "github.com/codespace-id/codespace-x/app/webhook/handler"
-	webhookUC "github.com/codespace-id/codespace-x/app/webhook/usecase"
-	"github.com/codespace-id/codespace-x/pkg/Integrations/notifications/implementations/discord"
-	"github.com/codespace-id/codespace-x/pkg/common/enum"
-	"github.com/codespace-id/codespace-x/pkg/dbconn"
+	authHandler "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/handler"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/repository"
+	authUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/usecase"
+	commonHandler "gitlab.dot.co.id/playground/boilerplates/golang-service/app/common/handler"
+
+	// TODO: using this when need to use transaction
+	// "gitlab.dot.co.id/playground/boilerplates/golang-service/app/common/repository"
+
+	notifHandler "gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/handler"
+	userHandler "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/handler"
+	userRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/repository"
+	userUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/usecase"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/enum"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/dbconn"
 	"log"
 	"fmt"
 	"strconv"
@@ -31,10 +24,10 @@ import (
 	"github.com/getsentry/sentry-go"
 	sentryhttp "github.com/getsentry/sentry-go/http"
 
-	"github.com/codespace-id/codespace-x/config"
-	_ "github.com/codespace-id/codespace-x/docs"
-	"github.com/codespace-id/codespace-x/pkg"
-	"github.com/codespace-id/codespace-x/pkg/Integrations/otp/implementations/zenziva"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
+	_ "gitlab.dot.co.id/playground/boilerplates/golang-service/docs"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/Integrations/otp/implementations/zenziva"
 	"github.com/julienschmidt/httprouter"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
@@ -72,25 +65,17 @@ func main() {
 
 	// 3rd parties
 	zenzivaOTP := zenziva.NewZenziva(config.ZenzivaBaseURL, config.ZenzivaPassKey, config.ZenzivaUserKey)
-	discordNotif := discord.NewDiscord()
 
 	// repository
 	userRepository := userRepo.NewUserRepository(db)
 	otpRepo := repository.NewOtpRepository(db)
-	bannerRepository := bannerRepo.NewBannerRepository(db)
-	projectRepository := projectRepo.NewProjectRepository(db)
-	sqlTxRepo := commonrepo.NewSqlTx(db)
-	userProjectRepo := projectRepo.NewUserProjectRepository(db)
-	projectImagesRepo := projectRepo.NewProjectImagesRepository(db)
-	projectHistoryRepo := projectRepo.NewProjectHistoryRepository(db)
+	
+	// prepare sql for transactions
+	// sqlTxRepo := commonrepo.NewSqlTx(db)
 
 	// usecase
 	userUsecase := userUC.NewUserUsecase(userRepository)
 	authUsecase := authUC.NewAuthUsecase(zenzivaOTP, otpRepo, userRepository)
-	bannerUsecase := bannerUC.NewBannerUsecase(bannerRepository)
-	projectUsecase := projectUC.NewProjectUsecase(projectRepository, sqlTxRepo, userProjectRepo, userRepository, projectImagesRepo, projectHistoryRepo, discordNotif)
-	projectPublicUsecase := projectUC.NewProjectPublicUsecase(projectRepository, sqlTxRepo, userProjectRepo, userRepository)
-	webhookUsecase := webhookUC.NewWebhookUsecase(discordNotif)
 
 	router.GET("/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		type healthRes struct {
@@ -121,12 +106,8 @@ func main() {
 	
 	userHandler.NewUserHandler(router, userUsecase)
 	authHandler.NewAuthHandler(router, userUsecase, authUsecase)
-	handler.NewBannerHandler(router, bannerUsecase)
 	notifHandler.NewNotificationHandler(router)
-	projectHandler.NewProjectHandler(router, projectUsecase, projectPublicUsecase)
 	commonHandler.NewCommonHandler(router)
-	tncHandler.NewTncHandler(router)
-	webhookHandler.NewWebhookHandler(router, webhookUsecase)
 
 
 	log.Println("=== SERVER STARTED at PORT 7777 ===")

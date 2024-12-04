@@ -2,9 +2,9 @@ package handler
 
 import (
 	"encoding/json"
-	commondto "github.com/codespace-id/codespace-x/app/common/dto"
-	"github.com/codespace-id/codespace-x/pkg"
-	"github.com/codespace-id/codespace-x/pkg/common/middleware"
+	commondto "gitlab.dot.co.id/playground/boilerplates/golang-service/app/common/dto"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/middleware"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 )

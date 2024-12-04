@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/codespace-id/codespace-x/pkg"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg"
 )
 
 func SetResponse(w http.ResponseWriter, code int, message interface{}) {

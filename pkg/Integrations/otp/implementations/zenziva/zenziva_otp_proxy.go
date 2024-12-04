@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/codespace-id/codespace-x/config"
-	"github.com/codespace-id/codespace-x/pkg/Integrations/otp"
-	"github.com/codespace-id/codespace-x/pkg/Integrations/otp/dto"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/Integrations/otp"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/Integrations/otp/dto"
 	"github.com/pkg/errors"
 )
 

@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"github.com/codespace-id/codespace-x/app/auth/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
 	"github.com/pkg/errors"
 )
 

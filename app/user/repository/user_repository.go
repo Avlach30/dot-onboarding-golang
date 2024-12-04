@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/codespace-id/codespace-x/app/user/userdomain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/userdomain"
 
 	"github.com/pkg/errors"
 )

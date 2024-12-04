@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/codespace-id/codespace-x/pkg/Integrations/notifications"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/Integrations/notifications"
 	"net/http"
 )
 

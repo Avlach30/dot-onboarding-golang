@@ -1,0 +1,12 @@
+START TRANSACTION;
+
+DROP TABLE IF EXISTS otps;
+DROP TABLE IF EXISTS role_permissions;
+DROP TABLE IF EXISTS user_role;
+DROP TABLE IF EXISTS in_app_notifications;
+DROP TABLE IF EXISTS log_activities;
+DROP TABLE IF EXISTS `permissions`;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS roles;
+
+COMMIT;
