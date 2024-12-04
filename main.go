@@ -102,6 +102,7 @@ func main() {
 		httpSwagger.WrapHandler(w, r)
 	})
 
+	// middware at main.go
 	http.Handle("/", sentryHandler.Handle(router))
 	
 	userHandler.NewUserHandler(router, userUsecase)
