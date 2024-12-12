@@ -1,77 +1,42 @@
 package usecase
 
 import (
-	"context"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 
-	userdto "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/dto"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/userdomain"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/generator"
-
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/enum"
-	"github.com/pkg/errors"
+	"github.com/google/uuid"
 )
 
-type userUsecase struct {
-	userRepo userdomain.Repository
+type UserUsecase struct {
+	userRepo domain.UserRepository
 }
 
-func NewUserUsecase(userRepo userdomain.Repository) userdomain.Usecase {
-	return &userUsecase{
+// Create implements domain.UserUsecase.
+func (userUsecase *UserUsecase) Create(payload *domain.UserEntity) error {
+	return userUsecase.userRepo.Create(payload)
+}
+
+// Delete implements domain.UserUsecase.
+func (userUsecase *UserUsecase) Delete(id uuid.UUID) {
+	userUsecase.userRepo.Delete(id)
+}
+
+// FindById implements domain.UserUsecase.
+func (userUsecase *UserUsecase) FindById(id uuid.UUID, trashed bool) (*domain.UserEntity, error) {
+	return userUsecase.userRepo.FindById(id, trashed)
+}
+
+// ForceDelete implements domain.UserUsecase.
+func (userUsecase *UserUsecase) ForceDelete(id uuid.UUID) {
+	userUsecase.userRepo.ForceDelete(id)
+}
+
+// Update implements domain.UserUsecase.
+func (userUsecase *UserUsecase) Update(id uuid.UUID, payload *domain.UserEntity) {
+	userUsecase.userRepo.Update(id, payload)
+}
+
+func NewUserUsecase(userRepo domain.UserRepository) domain.UserUsecase {
+	return &UserUsecase{
 		userRepo: userRepo,
 	}
-}
-
-func (u *userUsecase) Create(ctx context.Context, dto userdto.RegisterRequest) error {
-	traceTag := "UserUsecase.CreateTx"
-
-	userData, err := u.userRepo.Find(ctx, dto.PhoneNumber)
-	if err != nil {
-		return errors.Wrap(err, traceTag)
-	}
-	if userData.Fullname != "" {
-		newErr := errors.New("DuplicatePhone")
-		return errors.Wrap(newErr, traceTag)
-	}
-
-	if err := u.userRepo.Create(ctx, userdomain.Entity{
-		Fullname:       dto.Fullname,
-		IdentityNumber: dto.Email,
-		PhoneNumber:    dto.PhoneNumber,
-		Gender:         enum.UNKNOWN.Value(),
-		Password:       "x",
-		ImageURL:       generator.GenerateRandomPhotoProfile(),
-		Email:          dto.Email,
-	}); err != nil {
-		return errors.WithMessage(err, traceTag)
-	}
-
-	return nil
-}
-
-func (u *userUsecase) Profile(ctx context.Context, phoneNumber string) (res userdomain.Entity, err error) {
-
-	userData, err := u.userRepo.Find(ctx, phoneNumber)
-	if err != nil {
-		return res, errors.WithMessage(err, "UserUsecase.Profile")
-	}
-
-	return userdomain.Entity{
-		Fullname:       userData.Fullname,
-		IdentityNumber: userData.IdentityNumber,
-		PhoneNumber:    userData.PhoneNumber,
-		Gender:         userData.Gender,
-		Email:          userData.Email,
-		ImageURL:       userData.ImageURL,
-		Roles:          userData.Roles,
-	}, nil
-}
-
-func (u *userUsecase) Delete(ctx context.Context, phoneNumber string) error {
-	traceTag:= "UserUsecase.DeleteTx"
-
-	if err := u.userRepo.Delete(ctx, phoneNumber); err != nil {
-		return errors.WithMessage(err, traceTag)
-	}
-
-	return nil
 }

@@ -2,51 +2,60 @@ package main
 
 import (
 	"encoding/json"
-	authHandler "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/handler"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/repository"
-	authUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/usecase"
-	commonHandler "gitlab.dot.co.id/playground/boilerplates/golang-service/app/common/handler"
+	"flag"
 
-	// TODO: using this when need to use transaction
-	// "gitlab.dot.co.id/playground/boilerplates/golang-service/app/common/repository"
+	"fmt"
+	"log"
+	"net/http"
+	"strconv"
 
-	notifHandler "gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/handler"
-	userHandler "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/handler"
+	handler "gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/handler"
+
 	userRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/repository"
 	userUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/usecase"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/enum"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/dbconn"
-	"log"
-	"fmt"
-	"strconv"
-	"net/http"
+
+	roleRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/repository"
+	roleUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/usecase"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/migration"
+
+	permissionRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/repository"
+	permissionUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/usecase"
 
 	"github.com/getsentry/sentry-go"
 	sentryhttp "github.com/getsentry/sentry-go/http"
+	"github.com/gin-gonic/gin"
 
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
-	_ "gitlab.dot.co.id/playground/boilerplates/golang-service/docs"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/Integrations/otp/implementations/zenziva"
-	"github.com/julienschmidt/httprouter"
-	httpSwagger "github.com/swaggo/http-swagger"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/dbconn"
 )
 
-// @title Codespace X REST API
-// @version 1.0
-// @description Codespace X
-// @contact.name Codespace Indonesia
-// @contact.url https://codespace.id
-// @contact.email mail@codespace.id
 func main() {
-
-	router := httprouter.New()
-
-	db, err := dbconn.GetDb(enum.MYSQL)
+	db, err := dbconn.InitDb(
+		&dbconn.DatabaseCredentials{
+			Host:     config.DBHost,
+			Username: config.DBUsername,
+			Password: config.DBPassword,
+			Port:     config.DBPort,
+			Name:     config.DBName,
+			TimeZome: config.DBTimeZone,
+		},
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
+	// migration run
+	runMigration := flag.String("migration", "none", "--")
+	autoMigration := flag.Bool("auto", false, "--")
+	flag.Parse()
+	if *runMigration == "true" {
+		migration.Run(db, *autoMigration)
+		return
+	}
+
+	router := gin.New()
+
 	tracesSampleRate, _ := strconv.ParseFloat(config.SentrySampleTrace, 64)
 
 	// To initialize Sentry's handler, you need to initialize Sentry itself beforehand
@@ -59,58 +68,47 @@ func main() {
 	}); err != nil {
 		fmt.Printf("Sentry initialization failed: %v\n", err)
 	}
-	
+
 	// Create an instance of sentryhttp
 	sentryHandler := sentryhttp.New(sentryhttp.Options{})
 
-	// 3rd parties
-	zenzivaOTP := zenziva.NewZenziva(config.ZenzivaBaseURL, config.ZenzivaPassKey, config.ZenzivaUserKey)
+	healthCheck(router)
 
 	// repository
 	userRepository := userRepo.NewUserRepository(db)
-	otpRepo := repository.NewOtpRepository(db)
-	
-	// prepare sql for transactions
-	// sqlTxRepo := commonrepo.NewSqlTx(db)
+	roleRepository := roleRepo.NewRoleRepository(db)
+	permissionRepository := permissionRepo.NewPermissionRepository(db)
 
 	// usecase
 	userUsecase := userUC.NewUserUsecase(userRepository)
-	authUsecase := authUC.NewAuthUsecase(zenzivaOTP, otpRepo, userRepository)
+	permissionUsecase := permissionUC.NewPermissionUsecase(permissionRepository)
+	roleUsecase := roleUC.NewRoleUsecase(roleRepository)
 
-	router.GET("/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		type healthRes struct {
-			Service string `json:"service"`
-			Status  string `json:"status"`
-		}
+	// middware at main.go
+	http.Handle("/", sentryHandler.Handle(router))
+
+	handler.NewUserHandler(router, userUsecase)
+	handler.NewPermissionHandler(router, permissionUsecase)
+	handler.NewRoleHandler(router, roleUsecase)
+
+	log.Println("=== SERVER STARTED at PORT 7777 ===")
+	log.Fatal(http.ListenAndServe(":7777", router))
+}
+
+func healthCheck(router *gin.Engine) {
+	router.GET("/health", func(httpContext *gin.Context) {
 		dataByte, _ := json.Marshal(pkg.BaseResponse{
 			Code:    200,
 			Message: "success",
-			Data: healthRes{
+			Data: struct {
+				Service string `json:"service"`
+				Status  string `json:"status"`
+			}{
 				Service: "Codespace X",
 				Status:  "Healthy",
 			},
 		})
 
-		w.Header().Set("Content-Type", "application/json")
-		_, err := w.Write(dataByte)
-		if err != nil {
-			return
-		}
+		httpContext.Data(200, "Content-Type: application/json", dataByte)
 	})
-
-	router.GET("/swagger/*filepath", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		httpSwagger.WrapHandler(w, r)
-	})
-
-	// middware at main.go
-	http.Handle("/", sentryHandler.Handle(router))
-	
-	userHandler.NewUserHandler(router, userUsecase)
-	authHandler.NewAuthHandler(router, userUsecase, authUsecase)
-	notifHandler.NewNotificationHandler(router)
-	commonHandler.NewCommonHandler(router)
-
-
-	log.Println("=== SERVER STARTED at PORT 7777 ===")
-	log.Fatal(http.ListenAndServe(":7777", router))
 }

@@ -19,10 +19,7 @@ cp .env.example .env
 ```
 4. do migrate up or down:
 ```cli
-make migrate-up DB_USER=root DB_PASSWORD=root DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=golang_service
-```
-```cli
-make migrate-down DB_USER=root DB_PASSWORD=root DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=golang_service
+mgo run main.go --migration true --auto true
 ```
 
 ## 🍰 The Layer

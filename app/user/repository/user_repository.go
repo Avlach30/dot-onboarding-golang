@@ -1,133 +1,66 @@
 package repository
 
 import (
-	"context"
-	"database/sql"
-	"fmt"
-	"time"
-
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/userdomain"
-
-	"github.com/pkg/errors"
+	"github.com/google/uuid"
+	permissionDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
+	roleDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
+	rolePermissionDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role_permission/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
+	userDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
+	"gorm.io/gorm"
 )
 
 type UserRepository struct {
-	db *sql.DB
+	userModel           *gorm.DB
+	permissionModel     *gorm.DB
+	roleModel           *gorm.DB
+	rolePermissionModel *gorm.DB
 }
 
-func NewUserRepository(db *sql.DB) userdomain.Repository {
+func NewUserRepository(db *gorm.DB) domain.UserRepository {
 	return &UserRepository{
-		db: db,
+		userModel:           db.Model(&userDomain.UserEntity{}),
+		permissionModel:     db.Model(&permissionDomain.PermissionEntity{}),
+		roleModel:           db.Model(&roleDomain.RoleEntity{}),
+		rolePermissionModel: db.Model(&rolePermissionDomain.RolePermissionEntity{}),
 	}
 }
 
-func (r *UserRepository) Create(ctx context.Context, payload userdomain.Entity) error {
-
-	query := `
-		INSERT INTO 
-			users(
-				fullname, 
-				identity_number, 
-				phone_number, 
-			    gender,
-			    password,
-			    image_url
-			) 
-		VALUES 
-			(?, ?, ?, ?, ?, ?)
-		`
-
-	if _, err := r.db.ExecContext(
-		ctx,
-		query,
-		payload.Fullname,
-		payload.IdentityNumber,
-		payload.PhoneNumber,
-		payload.Gender,
-		payload.Password,
-		payload.ImageURL,
-	); err != nil {
-		return errors.Wrap(err, "UserRepository.CreateTx.ExecContext")
+func (user *UserRepository) FindById(id uuid.UUID, trashed bool) (*domain.UserEntity, error) {
+	userEntity := &domain.UserEntity{}
+	if trashed {
+		user.userModel = user.userModel.Unscoped()
 	}
 
-	return nil
+	user.userModel.Where("id = ?", id).First(&userEntity)
+
+	return userEntity, nil
 }
 
-func (r *UserRepository) Find(ctx context.Context, phoneNumber string) (res userdomain.Entity, err error) {
+func (user *UserRepository) FindByNameAndKey(name string, key string) (*domain.UserEntity, error) {
 
-	query := `
-		SELECT
-			u.id,
-			u.fullname,
-			u.identity_number,
-			u.phone_number,
-			u.gender,
-			u.email,
-			u.image_url,
-			GROUP_CONCAT(r.name) AS roles
-		FROM
-			users u
-			LEFT JOIN user_role ur ON ur.user_id = u.id
-			LEFT JOIN roles r ON r. id = ur.role_id
-		WHERE
-			u.phone_number = ? AND u.deleted_at IS NULL			
-		GROUP BY
-			u.id
-		`
+	userEntity := &domain.UserEntity{}
+	user.userModel.First(&userEntity, "name = ? and key = ?", name, key)
 
-	var email sql.NullString
-	var imageUrl sql.NullString
-	var roles sql.NullString
-
-	if err := r.db.QueryRowContext(
-		ctx,
-		query,
-		phoneNumber,
-	).Scan(
-		&res.ID,
-		&res.Fullname,
-		&res.IdentityNumber,
-		&res.PhoneNumber,
-		&res.Gender,
-		&email,
-		&imageUrl,
-		&roles,
-	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return res, nil
-		}
-		return res, errors.Wrap(err, "UserRepository.CreateTx.ExecContext")
-	}
-
-	res.Email = email.String
-	res.ImageURL = imageUrl.String
-	res.Roles = roles.String
-
-	return res, nil
+	return userEntity, nil
 }
 
-func (r *UserRepository) Delete(ctx context.Context, phoneNumber string) error {
+func (user *UserRepository) Delete(id uuid.UUID) {
+	user.userModel.Where("id = ?", id).Delete(&domain.UserEntity{})
+}
 
-	now := time.Now()
-	
-	query := `
-		UPDATE 
-			users
-		SET 
-			deleted_at = ?,
-			phone_number = ?
-		WHERE
-			phone_number = ?
-		`
-	if _, err := r.db.ExecContext(
-		ctx,
-		query,
-		now,
-		fmt.Sprintf("%s-%d", phoneNumber, now.Unix()),
-		phoneNumber,
-	); err != nil {
-		return errors.Wrap(err, "UserRepository.DeleteTx.ExecContext")
-	}
+func (user *UserRepository) ForceDelete(id uuid.UUID) {
+
+	userEntity := &domain.UserEntity{}
+	user.userModel.Unscoped().Where("id = ?", id).Find(&userEntity)
+	user.userModel.Unscoped().Delete(&userEntity)
+}
+
+func (user *UserRepository) Update(id uuid.UUID, payload *domain.UserEntity) {
+	panic("unimplemented")
+}
+
+func (user *UserRepository) Create(payload *domain.UserEntity) error {
 
 	return nil
 }

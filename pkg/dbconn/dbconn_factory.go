@@ -1,15 +1,39 @@
 package dbconn
 
 import (
-	"database/sql"
-	"errors"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/common/enum"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/dbconn/mysql"
+	"fmt"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-func GetDb(db enum.DbType) (*sql.DB, error) {
-	if db == enum.MYSQL {
-		return mysql.NewMysqlDB()
+type DatabaseCredentials struct {
+	Host     string
+	Port     string
+	Username string
+	Password string
+	Name     string
+	TimeZome string
+}
+
+func InitDb(databaseCredentials *DatabaseCredentials) (*gorm.DB, error) {
+
+	connectionString := "host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=%s"
+	dsn := fmt.Sprintf(
+		connectionString,
+		databaseCredentials.Host,
+		databaseCredentials.Username,
+		databaseCredentials.Password,
+		databaseCredentials.Name,
+		databaseCredentials.Port,
+		databaseCredentials.TimeZome,
+	)
+
+	db, errors := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
+	if errors != nil {
+		panic(errors.Error())
 	}
-	return nil, errors.New("db not supported")
+
+	return db, errors
 }
