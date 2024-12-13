@@ -7,9 +7,9 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type PermissionHandler struct {
@@ -46,11 +46,7 @@ func (permissionHandler *PermissionHandler) Create() gin.HandlerFunc {
 func (permissionHandler *PermissionHandler) FindById() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		paramId := httpContext.Param("id")
-		id, err := uuid.Parse(paramId)
-		if err != nil {
-			httpContext.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
-			return
-		}
+		id := utils.UUIDChecker(paramId)
 		permissionData, _ := permissionHandler.permissionUsecase.FindById(id)
 
 		httpContext.JSON(http.StatusOK, permissionData)
@@ -70,11 +66,7 @@ func (permissionHandler *PermissionHandler) Update() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		permissionRequest := httpContext.MustGet(constant.RequestBodyJSONKey).(*dto.PermissionUpdateRequest)
 		paramId := httpContext.Param("id")
-		id, err := uuid.Parse(paramId)
-		if err != nil {
-			httpContext.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
-			return
-		}
+		id := utils.UUIDChecker(paramId)
 		updatePermission := domain.PermissionEntity{
 			Key:  permissionRequest.Key,
 			Name: permissionRequest.Name,
@@ -88,11 +80,7 @@ func (permissionHandler *PermissionHandler) Update() gin.HandlerFunc {
 func (permissionHandler *PermissionHandler) Delete() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		paramId := httpContext.Param("id")
-		id, err := uuid.Parse(paramId)
-		if err != nil {
-			httpContext.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
-			return
-		}
+		id := utils.UUIDChecker(paramId)
 		permissionHandler.permissionUsecase.Delete(id)
 
 		httpContext.JSON(http.StatusOK, nil)
