@@ -57,7 +57,7 @@ func main() {
 		return
 	}
 
-	router := gin.New()
+	router := gin.Default()
 	gin.SetMode(config.GinMode)
 
 	tracesSampleRate, _ := strconv.ParseFloat(config.SentrySampleTrace, 64)
