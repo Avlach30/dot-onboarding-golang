@@ -6,6 +6,7 @@ import (
 	domain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
@@ -17,7 +18,7 @@ type UserHandler struct {
 }
 
 func NewUserHandler(router *gin.Engine, userUsecase domain.UserUsecase) {
-	userHandlerRoute := router.Group("/v1/api/users")
+	userHandlerRoute := router.Group("/v1/api/users", guard.AuthGuard())
 
 	userHandler := &UserHandler{
 		userUsecase: userUsecase,

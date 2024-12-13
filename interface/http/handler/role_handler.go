@@ -6,6 +6,7 @@ import (
 	domain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
@@ -17,7 +18,7 @@ type RoleHandler struct {
 }
 
 func NewRoleHandler(router *gin.Engine, roleUsecase domain.RoleUsecase) {
-	roleHandlerRoute := router.Group("/v1/api/roles")
+	roleHandlerRoute := router.Group("/v1/api/roles", guard.AuthGuard())
 
 	roleHandler := &RoleHandler{
 		roleUsecase: roleUsecase,
