@@ -76,8 +76,6 @@ func main() {
 	// Create an instance of sentryhttp
 	sentryHandlerGin := sentrygin.New(sentrygin.Options{})
 
-	healthCheck(router)
-
 	// repository
 	userRepository := userRepo.NewUserRepository(db)
 	roleRepository := roleRepo.NewRoleRepository(db)
@@ -92,6 +90,8 @@ func main() {
 
 	// middware at main.go
 	router.Use(sentryHandlerGin)
+	router.Use(exception.Recovery500())
+	healthCheck(router)
 
 	router.Use(exception.Recovery500())
 
