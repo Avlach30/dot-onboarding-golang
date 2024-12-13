@@ -8,6 +8,7 @@ import (
 	"log"
 	"strconv"
 
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	handler "gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/handler"
 
 	userRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/repository"
@@ -86,6 +87,8 @@ func main() {
 
 	// middware at main.go
 	router.Use(sentryHandlerGin)
+
+	router.Use(exception.Recovery500())
 
 	handler.NewUserHandler(router, userUsecase)
 	handler.NewPermissionHandler(router, permissionUsecase)
