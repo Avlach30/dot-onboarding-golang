@@ -6,7 +6,6 @@ import (
 
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
 
 	handler "gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/handler"
@@ -22,7 +21,7 @@ import (
 	permissionUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/usecase"
 
 	"github.com/getsentry/sentry-go"
-	sentryhttp "github.com/getsentry/sentry-go/http"
+	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
 
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
@@ -55,22 +54,23 @@ func main() {
 	}
 
 	router := gin.New()
+	gin.SetMode(config.GinMode)
 
 	tracesSampleRate, _ := strconv.ParseFloat(config.SentrySampleTrace, 64)
 
 	// To initialize Sentry's handler, you need to initialize Sentry itself beforehand
 	if err := sentry.Init(sentry.ClientOptions{
-		Dsn: config.SentryDSN,
-		// Set TracesSampleRate to 1.0 to capture 100%
-		// of transactions for performance monitoring.
-		// We recommend adjusting this value in production.
+		Dsn:              config.SentryDSN,
+		EnableTracing:    true,
 		TracesSampleRate: tracesSampleRate,
 	}); err != nil {
 		fmt.Printf("Sentry initialization failed: %v\n", err)
+	} else {
+		fmt.Println("Sentry initialized")
 	}
 
 	// Create an instance of sentryhttp
-	sentryHandler := sentryhttp.New(sentryhttp.Options{})
+	sentryHandlerGin := sentrygin.New(sentrygin.Options{})
 
 	healthCheck(router)
 
@@ -85,14 +85,15 @@ func main() {
 	roleUsecase := roleUC.NewRoleUsecase(roleRepository)
 
 	// middware at main.go
-	http.Handle("/", sentryHandler.Handle(router))
+	router.Use(sentryHandlerGin)
 
 	handler.NewUserHandler(router, userUsecase)
 	handler.NewPermissionHandler(router, permissionUsecase)
 	handler.NewRoleHandler(router, roleUsecase)
 
-	log.Println("=== SERVER STARTED at PORT 7777 ===")
-	log.Fatal(http.ListenAndServe(":7777", router))
+	if err := router.Run(":" + config.AppPort); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
 
 func healthCheck(router *gin.Engine) {

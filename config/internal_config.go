@@ -39,9 +39,12 @@ func GetRequired(key string) string {
 var (
 	// General
 	AppMode = Get("APP_MODE", "PROD")
+	GinMode = Get("GIN_MODE", "release")
 
-	SentryDSN         = Get("SENTRY_DSN", "PROD")
-	SentrySampleTrace = Get("SENTRY_SAMPLE_TRACE", "1.0")
+	AppPort = Get("APP_PORT", "8080")
+
+	SentryDSN         = Get("SENTRY_DSN", "")
+	SentrySampleTrace = Get("SENTRY_SAMPLE_TRACE", "0.1")
 
 	Secret           = GetRequired("JWT_SECRET")
 	JwtExpiredInDays = GetRequired("JWT_EXPIRED_IN_DAYS")
@@ -59,17 +62,4 @@ var (
 	RedisHost     = Get("REDIS_HOST", "")
 	RedisPassword = Get("REDIS_Password", "")
 	RedisPort     = Get("REDIS_PORT", "")
-
-	// OTP
-	ZenzivaBaseURL   = Get("ZENZIVA_BASE_URL", "")
-	ZenzivaUserKey   = Get("ZENZIVA_USER_KEY", "")
-	ZenzivaPassKey   = Get("ZENZIVA_PASS_KEY", "")
-	OtpExpiredInMins = Get("OTP_EXPIRED_IN_MINS", "5")
-
-	// Xendit
-	XenditWebhookToken = Get("XENDIT_WEBHOOK_TOKEN", "")
-
-	// Tester Account
-	TestAccountPhoneNumber = Get("TEST_ACCOUNT_PHONE_NUMBER", "")
-	TestOtpNumber          = Get("TEST_ACCOUNT_OTP", "")
 )
