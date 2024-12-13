@@ -8,6 +8,7 @@ import (
 	"log"
 	"strconv"
 
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	handler "gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/handler"
 
 	userRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/repository"
@@ -19,6 +20,9 @@ import (
 
 	permissionRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/repository"
 	permissionUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/usecase"
+
+	authRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/repository"
+	authUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/usecase"
 
 	"github.com/getsentry/sentry-go"
 	sentrygin "github.com/getsentry/sentry-go/gin"
@@ -78,18 +82,23 @@ func main() {
 	userRepository := userRepo.NewUserRepository(db)
 	roleRepository := roleRepo.NewRoleRepository(db)
 	permissionRepository := permissionRepo.NewPermissionRepository(db)
+	authRepository := authRepo.NewAuthRepository(db)
 
 	// usecase
 	userUsecase := userUC.NewUserUsecase(userRepository)
 	permissionUsecase := permissionUC.NewPermissionUsecase(permissionRepository)
 	roleUsecase := roleUC.NewRoleUsecase(roleRepository)
+	authUsecase := authUC.NewAuthUsecase(authRepository)
 
 	// middware at main.go
 	router.Use(sentryHandlerGin)
 
+	router.Use(exception.Recovery500())
+
 	handler.NewUserHandler(router, userUsecase)
 	handler.NewPermissionHandler(router, permissionUsecase)
 	handler.NewRoleHandler(router, roleUsecase)
+	handler.NewAuthHandler(router, authUsecase)
 
 	if err := router.Run(":" + config.AppPort); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
@@ -101,13 +110,7 @@ func healthCheck(router *gin.Engine) {
 		dataByte, _ := json.Marshal(pkg.BaseResponse{
 			Code:    200,
 			Message: "success",
-			Data: struct {
-				Service string `json:"service"`
-				Status  string `json:"status"`
-			}{
-				Service: "Codespace X",
-				Status:  "Healthy",
-			},
+			Data:    nil,
 		})
 
 		httpContext.Data(200, "Content-Type: application/json", dataByte)

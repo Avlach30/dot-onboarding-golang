@@ -24,7 +24,7 @@ func ValidateStruct(
 	for i := 0; i < fields.NumField(); i++ {
 		field := fields.Field(i)
 		fieldValue := values.Field(i)
-		tag := field.Tag.Get("validate")
+		tag := field.Tag.Get("binding")
 
 		if tag == "" {
 			continue

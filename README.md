@@ -68,7 +68,7 @@ The **Handler** layer (also known as Controller or API) is responsible for manag
 **DTOs** (Data Transfer Objects) are used to transfer data between layers, especially between the handler and usecase layers. They help in structuring and validating data.
 
 - **Role**: Facilitate data transfer and ensure data integrity.
-- **Use**: Define and validate the structure of data being exchanged.
+- **Use**: Define and binding the structure of data being exchanged.
 
 **Responsibilities**:
 - Defining data structure.
