@@ -9,12 +9,12 @@ import (
 
 func ValidateRequestJSON[T any](obj *T) gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
-		if err := httpContext.ShouldBindJSON(obj); err != nil {
+		if err := httpContext.ShouldBind(obj); err != nil {
 			httpContext.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			httpContext.Abort()
 			return
 		}
 
-		httpContext.Set(constant.RequestBodyJSONKey, obj) // Pass the parsed struct to the handler
+		httpContext.Set(constant.RequestBodyJSONKey, obj)
 	}
 }

@@ -5,19 +5,21 @@ import (
 	"strconv"
 	"time"
 
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
 )
 
 type CustomClaims struct {
-	Roles           string `json:"roles"`
-	PhoneNumber     string `json:"phone_number"`
-	FirebaseIdToken string `json:"firebase_id_token"`
+	ID    uuid.UUID `json:"ID"`
+	Email string    `json:"email"`
+	Name  string    `json:"name"`
 	jwt.RegisteredClaims
 }
 
 // CreateToken generates a new JWT token
-func CreateToken(phoneNumber, role, firebaseIdToken string) (res string, err error) {
+func CreateToken(authEntity *domain.AuthEntity) (res string, err error) {
 	expiredInDays := config.JwtExpiredInDays
 	secret := []byte(config.Secret)
 
@@ -30,12 +32,12 @@ func CreateToken(phoneNumber, role, firebaseIdToken string) (res string, err err
 	expirationTime := time.Now().Add(expirationDuration)
 
 	claims := CustomClaims{
-		PhoneNumber:     phoneNumber,
-		Roles:           role,
-		FirebaseIdToken: firebaseIdToken,
+		ID:    authEntity.ID,
+		Email: authEntity.Email,
+		Name:  authEntity.Name,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
-			Issuer:    phoneNumber,
+			Issuer:    authEntity.Email,
 		},
 	}
 

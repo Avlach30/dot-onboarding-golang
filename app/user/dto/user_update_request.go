@@ -1,6 +1,6 @@
 package dto
 
 type UserUpdateRequest struct {
-	Name  string `json:"name" validate:"required"`
-	Email string `json:"email" validate:"required,email"`
+	Name  string `json:"name" binding:"required"`
+	Email string `json:"email" binding:"required,email"`
 }

@@ -32,17 +32,17 @@ func (user *UserRepository) FindById(id uuid.UUID, trashed bool) (*domain.UserEn
 		user.userModel = user.userModel.Unscoped()
 	}
 
-	user.userModel.Where("id = ?", id).First(&userEntity)
+	err := user.userModel.Where("id = ?", id).First(&userEntity).Error
 
-	return userEntity, nil
+	return userEntity, err
 }
 
 func (user *UserRepository) FindByNameAndKey(name string, key string) (*domain.UserEntity, error) {
 
 	userEntity := &domain.UserEntity{}
-	user.userModel.First(&userEntity, "name = ? and key = ?", name, key)
+	err := user.userModel.First(&userEntity, "name = ? and key = ?", name, key).Error
 
-	return userEntity, nil
+	return userEntity, err
 }
 
 func (user *UserRepository) Delete(id uuid.UUID) {
@@ -61,6 +61,5 @@ func (user *UserRepository) Update(id uuid.UUID, payload *domain.UserEntity) {
 }
 
 func (user *UserRepository) Create(payload *domain.UserEntity) error {
-
 	return nil
 }

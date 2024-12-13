@@ -1,6 +1,6 @@
 package dto
 
 type RoleUpdateResponse struct {
-	Name string `json:"name" validate:"required"`
-	Key  string `json:"key" validate:"required"`
+	Name string `json:"name" binding:"required"`
+	Key  string `json:"key" binding:"required"`
 }
