@@ -7,9 +7,9 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type UserHandler struct {
@@ -47,11 +47,7 @@ func (userHandler *UserHandler) Create() gin.HandlerFunc {
 func (userHandler *UserHandler) FindById() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		paramId := httpContext.Param("id")
-		id, err := uuid.Parse(paramId)
-		if err != nil {
-			httpContext.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
-			return
-		}
+		id := utils.UUIDChecker(paramId)
 		userData, _ := userHandler.userUsecase.FindById(id, false)
 
 		httpContext.JSON(http.StatusOK, userData)
@@ -62,11 +58,7 @@ func (userHandler *UserHandler) Update() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		userRequest := httpContext.MustGet(constant.RequestBodyJSONKey).(*dto.UserUpdateRequest)
 		paramId := httpContext.Param("id")
-		id, err := uuid.Parse(paramId)
-		if err != nil {
-			httpContext.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
-			return
-		}
+		id := utils.UUIDChecker(paramId)
 		updateUser := domain.UserEntity{
 			Name:  userRequest.Name,
 			Email: userRequest.Email,
@@ -80,11 +72,7 @@ func (userHandler *UserHandler) Update() gin.HandlerFunc {
 func (userHandler *UserHandler) Delete() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		paramId := httpContext.Param("id")
-		id, err := uuid.Parse(paramId)
-		if err != nil {
-			httpContext.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
-			return
-		}
+		id := utils.UUIDChecker(paramId)
 		userHandler.userUsecase.Delete(id)
 
 		httpContext.JSON(http.StatusOK, nil)
