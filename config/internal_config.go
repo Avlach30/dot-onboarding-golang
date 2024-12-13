@@ -41,6 +41,8 @@ var (
 	AppMode = Get("APP_MODE", "PROD")
 	GinMode = Get("GIN_MODE", "release")
 
+	AppPort = Get("APP_PORT", "8080")
+
 	SentryDSN         = Get("SENTRY_DSN", "")
 	SentrySampleTrace = Get("SENTRY_SAMPLE_TRACE", "0.1")
 

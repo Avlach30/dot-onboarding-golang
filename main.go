@@ -6,7 +6,6 @@ import (
 
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
 
 	handler "gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/handler"
@@ -92,8 +91,9 @@ func main() {
 	handler.NewPermissionHandler(router, permissionUsecase)
 	handler.NewRoleHandler(router, roleUsecase)
 
-	log.Println("=== SERVER STARTED at PORT 7777 ===")
-	log.Fatal(http.ListenAndServe(":7777", router))
+	if err := router.Run(":" + config.AppPort); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
 
 func healthCheck(router *gin.Engine) {
