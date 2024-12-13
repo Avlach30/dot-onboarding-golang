@@ -1,26 +1,53 @@
 package migration
 
 import (
-	permissionDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
-	roleDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
-	rolePermissionDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role_permission/domain"
-	userDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
+	"fmt"
+	"log"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
-func Run(db *gorm.DB, isAutoMigration bool) {
+func Run(db *gorm.DB, exec string) {
+	db.Exec("CREATE EXTENSION IF NOT EXISTS 'uuid-ossp'")
 
-	entities := []interface{}{
-		&userDomain.UserEntity{},
-		&roleDomain.RoleEntity{},
-		&permissionDomain.PermissionEntity{},
-		&rolePermissionDomain.RolePermissionEntity{},
+	// Extract raw SQL DB from GORM
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatalf("failed to get raw DB from GORM: %v", err)
 	}
 
-	if isAutoMigration {
-		AutoMigrate(db, entities)
-	} else {
-		// migration for existing project
-		panic("unimplemented")
+	// Initialize migrate with the PostgreSQL driver
+	driver, err := postgres.WithInstance(sqlDB, &postgres.Config{})
+	if err != nil {
+		log.Fatalf("could not create postgres driver: %v", err)
 	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://migration/files", // Path to migration files
+		"postgres",               // Database name
+		driver,
+	)
+	if err != nil {
+		log.Fatalf("could not create migrate instance: %v", err)
+	}
+
+	// Execute migration based on user input
+	switch exec {
+	case "down":
+		err = m.Down()
+		if err != nil && err != migrate.ErrNoChange {
+			log.Fatalf("failed to run down migration: %v", err)
+		}
+	default:
+		err = m.Up()
+		if err != nil && err != migrate.ErrNoChange {
+			log.Fatalf("failed to run up migration: %v", err)
+		}
+	}
+
+	fmt.Println("Migration applied successfully!")
 }

@@ -11,7 +11,7 @@ brew install golang-migrate
 ```
 2. create migration by:
 ```cli
- migrate create -ext sql -dir migrations -seq [migration name]
+ migrate create -ext sql -dir migration/files -seq [migration name]
 ```
 3. copy .env.example to .env.[folder name] and change based yours
 ```cli
@@ -19,7 +19,7 @@ cp .env.example .env
 ```
 4. do migrate up or down:
 ```cli
-mgo run main.go --migration true --auto true
+go run main.go --migration true --exec [up,down]
 ```
 
 ## 🍰 The Layer

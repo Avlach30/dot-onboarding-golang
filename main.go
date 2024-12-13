@@ -50,10 +50,10 @@ func main() {
 
 	// migration run
 	runMigration := flag.String("migration", "none", "--")
-	autoMigration := flag.Bool("auto", false, "--")
+	execMigration := flag.String("exec", "up", "--")
 	flag.Parse()
 	if *runMigration == "true" {
-		migration.Run(db, *autoMigration)
+		migration.Run(db, *execMigration)
 		return
 	}
 
