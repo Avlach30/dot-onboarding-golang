@@ -1,11 +1,14 @@
-package exception
+package handler
 
 import (
 	"io"
 	"log"
+	"net/http"
 	"net/http/httputil"
 
 	"github.com/gin-gonic/gin"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 )
 
 // Recovery ...
@@ -18,7 +21,19 @@ func Recovery500() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
-				c.JSON(500, err)
+
+				panicException := exception.Exception{}
+
+				switch v := err.(type) {
+				case exception.Exception:
+					panicException = v
+				default:
+					panicException.ErrorMessage = "Internal Server Error"
+					panicException.StatusCode = http.StatusInternalServerError
+				}
+
+				errorResponse := utils.ErrorResponse(panicException.StatusCode, panicException.ErrorMessage)
+				c.JSON(panicException.StatusCode, errorResponse)
 				c.Abort()
 			}
 		}()
