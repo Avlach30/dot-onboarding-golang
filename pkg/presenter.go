@@ -1,11 +1,17 @@
 package pkg
 
 type BaseResponse struct {
-	Code    int            `json:"code"`
-	Message string         `json:"message"`
-	Data    *interface{}   `json:"data"`
-	Errors  *[]interface{} `json:"errors"`
-	Meta    *MetaResponse  `json:"meta,omitempty"`
+	StatusCode   int                `json:"status_code"`
+	ErrorMessage string             `json:"error_message,omitempty"`
+	StackTrace   string             `json:"stack_trace"`
+	Data         *interface{}       `json:"data"`
+	Errors       *[]ErrorValidation `json:"errors"`
+	Version      string             `json:"version"`
+}
+
+type ErrorValidation struct {
+	Key     string `json:"key"`
+	Message string `json:"message"`
 }
 
 type PaginationResponse struct {

@@ -3,12 +3,12 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"net/http"
 
 	"fmt"
 	"log"
 	"strconv"
 
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	handler "gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/handler"
 
 	userRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/repository"
@@ -90,10 +90,8 @@ func main() {
 
 	// middware at main.go
 	router.Use(sentryHandlerGin)
-	router.Use(exception.Recovery500())
+	router.Use(handler.Recovery500())
 	healthCheck(router)
-
-	router.Use(exception.Recovery500())
 
 	handler.NewUserHandler(router, userUsecase)
 	handler.NewPermissionHandler(router, permissionUsecase)
@@ -108,11 +106,10 @@ func main() {
 func healthCheck(router *gin.Engine) {
 	router.GET("/health", func(httpContext *gin.Context) {
 		dataByte, _ := json.Marshal(pkg.BaseResponse{
-			Code:    200,
-			Message: "success",
-			Data:    nil,
+			StatusCode: http.StatusOK,
+			Data:       nil,
 		})
 
-		httpContext.Data(200, "Content-Type: application/json", dataByte)
+		httpContext.Data(http.StatusOK, "Content-Type: application/json", dataByte)
 	})
 }
