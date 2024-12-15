@@ -38,20 +38,19 @@ func (user *UserRepository) FindById(id uuid.UUID, trashed bool) (*domain.UserEn
 }
 
 func (user *UserRepository) Delete(id uuid.UUID) {
-	user.userModel.Where("id = ?", id).Delete(&domain.UserEntity{})
+	user.userModel.Delete(&domain.UserEntity{}, id)
 }
 
 func (user *UserRepository) ForceDelete(id uuid.UUID) {
-
 	userEntity := &domain.UserEntity{}
-	user.userModel.Unscoped().Where("id = ?", id).Find(&userEntity)
-	user.userModel.Unscoped().Delete(&userEntity)
+	user.userModel.Unscoped().Delete(&userEntity, id)
 }
 
 func (user *UserRepository) Update(id uuid.UUID, payload *domain.UserEntity) {
-	panic("unimplemented")
+	user.userModel.Where("id = ?", id).Updates(payload)
 }
 
 func (user *UserRepository) Create(payload *domain.UserEntity) error {
-	return nil
+	err := user.userModel.Create(payload).Error
+	return err
 }
