@@ -1,5 +1,5 @@
 package constant
 
 const (
-	RuntimeGlobalStateKey = "RuntimeGlobalStateKey"
+	RuntimeGlobalStateKey = "RuntimeGlobalState"
 )
