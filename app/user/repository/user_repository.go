@@ -46,25 +46,31 @@ func (user *UserRepository) ForceDelete(id uuid.UUID) {
 	user.userModel.Unscoped().Delete(&userEntity, id)
 }
 
-func (user *UserRepository) Update(id uuid.UUID, payload *domain.UserEntity) {
-	user.userModel.Where("id = ?", id).Updates(payload)
+func (user *UserRepository) Update(id uuid.UUID, payload *domain.UserEntity) error {
+	err := user.userModel.Where("id = ?", id).Updates(&payload).Error
+
+	return err
 }
 
 func (user *UserRepository) Create(payload *domain.UserEntity) error {
-	err := user.userModel.Create(payload).Error
+	err := user.userModel.Create(&payload).Error
 	return err
 }
 
 func (user *UserRepository) IsEmailExist(email string) bool {
-	var exists bool
-	user.userModel.Select("1").Where("email = ?", email).Limit(1).Find(&exists)
-
-	return exists
+	var count int64
+	user.userModel.
+		Where("email = ?", email).
+		Count(&count)
+	return count > 0
 }
 
 func (user *UserRepository) IsEmailExistExceptUserId(email string, id uuid.UUID) bool {
-	var exists bool
-	user.userModel.Select("1").Where("email = ? AND id != ?", email, id).Limit(1).Find(&exists)
+	var count int64
+	user.userModel.
+		Session(&gorm.Session{}).
+		Where("email = ? AND id != ?", email, id).
+		Count(&count)
 
-	return exists
+	return count > 0
 }

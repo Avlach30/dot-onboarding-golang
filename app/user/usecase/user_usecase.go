@@ -56,13 +56,14 @@ func (userUsecase *UserUsecase) ForceDelete(id uuid.UUID) {
 
 // Update implements domain.UserUsecase.
 func (userUsecase *UserUsecase) Update(id uuid.UUID, payload *domain.UserEntity) {
-	isEmailExist := userUsecase.userRepo.IsEmailExistExceptUserId(payload.Email, id)
-
-	if isEmailExist {
+	if userUsecase.userRepo.IsEmailExistExceptUserId(payload.Email, id) {
 		panic(*exception.BussinessException("Email already exist"))
 	}
 
-	userUsecase.userRepo.Update(id, payload)
+	err := userUsecase.userRepo.Update(id, payload)
+	if err != nil {
+		panic(*exception.ServerErrorException("Failed to update user"))
+	}
 }
 
 func NewUserUsecase(userRepo domain.UserRepository) domain.UserUsecase {

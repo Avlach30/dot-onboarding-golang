@@ -7,7 +7,7 @@ import (
 type UserRepository interface {
 	Create(payload *UserEntity) error
 	FindById(id uuid.UUID, trashed bool) (*UserEntity, error)
-	Update(id uuid.UUID, payload *UserEntity)
+	Update(id uuid.UUID, payload *UserEntity) error
 	Delete(id uuid.UUID)
 	ForceDelete(id uuid.UUID)
 	IsEmailExist(email string) bool
