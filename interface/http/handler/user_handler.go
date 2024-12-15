@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/immutable"
 	domain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
@@ -18,7 +19,7 @@ type UserHandler struct {
 }
 
 func NewUserHandler(router *gin.Engine, userUsecase domain.UserUsecase) {
-	userHandlerRoute := router.Group("/v1/api/users", guard.AuthGuard())
+	userHandlerRoute := router.Group("/v1/api/users", guard.AuthGuard(), guard.PermissionGuard(immutable.PermissionCreate))
 
 	userHandler := &UserHandler{
 		userUsecase: userUsecase,

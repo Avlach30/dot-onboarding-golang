@@ -23,7 +23,7 @@ func ServerErrorException(errorMessage string) *Exception {
 	return panic
 }
 
-func UnathorizedException(errorMessage string) *Exception {
+func UnauthorizedException(errorMessage string) *Exception {
 	panic := &Exception{}
 	panic.ErrorMessage = errorMessage
 	panic.StatusCode = http.StatusUnauthorized

@@ -57,7 +57,7 @@ func main() {
 		return
 	}
 
-	router := gin.Default()
+	router := gin.New()
 	gin.SetMode(config.GinMode)
 
 	tracesSampleRate, _ := strconv.ParseFloat(config.SentrySampleTrace, 64)
@@ -68,7 +68,7 @@ func main() {
 		EnableTracing:    true,
 		TracesSampleRate: tracesSampleRate,
 	}); err != nil {
-		fmt.Printf("Sentry initialization failed: %v\n", err)
+		fmt.Printf("Sentry initialization failed : %v\n", err)
 	} else {
 		fmt.Println("Sentry initialized")
 	}
@@ -88,9 +88,11 @@ func main() {
 	roleUsecase := roleUC.NewRoleUsecase(roleRepository)
 	authUsecase := authUC.NewAuthUsecase(authRepository)
 
+	// set global state for local
 	// middware at main.go
 	router.Use(sentryHandlerGin)
-	router.Use(handler.Recovery500())
+	router.Use(handler.RecoverPanic())
+
 	healthCheck(router)
 
 	handler.NewUserHandler(router, userUsecase)
@@ -99,7 +101,7 @@ func main() {
 	handler.NewAuthHandler(router, authUsecase)
 
 	if err := router.Run(":" + config.AppPort); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		log.Fatalf("Failed to start server : %v", err)
 	}
 }
 
