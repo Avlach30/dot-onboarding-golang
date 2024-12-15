@@ -1,10 +1,11 @@
 package usecase
 
 import (
+	"fmt"
+
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/jwt"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthUsecase struct {
@@ -18,9 +19,11 @@ func (authUseCase *AuthUsecase) SignInJWT(email string, password string) string 
 		panic(*exception.BussinessException("Email and Password did not match"))
 	}
 
-	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		panic(*exception.BussinessException("Email and Password did not match"))
-	}
+	fmt.Println(user)
+
+	// if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+	// 	panic(*exception.BussinessException("Email and Password did not match"))
+	// }
 
 	// Generate JWT token
 	authInformation := &domain.AuthEntity{

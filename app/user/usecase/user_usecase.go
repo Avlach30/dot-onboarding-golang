@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	"gorm.io/gorm"
 
 	"github.com/google/uuid"
 )
@@ -22,7 +24,13 @@ func (userUsecase *UserUsecase) Delete(id uuid.UUID) {
 
 // FindById implements domain.UserUsecase.
 func (userUsecase *UserUsecase) FindById(id uuid.UUID, trashed bool) (*domain.UserEntity, error) {
-	return userUsecase.userRepo.FindById(id, trashed)
+	user, err := userUsecase.userRepo.FindById(id, trashed)
+
+	if err == gorm.ErrRecordNotFound {
+		panic(*exception.NotFoundException("User not found"))
+	}
+
+	return user, err
 }
 
 // ForceDelete implements domain.UserUsecase.

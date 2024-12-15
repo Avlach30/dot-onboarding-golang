@@ -37,14 +37,6 @@ func (user *UserRepository) FindById(id uuid.UUID, trashed bool) (*domain.UserEn
 	return userEntity, err
 }
 
-func (user *UserRepository) FindByNameAndKey(name string, key string) (*domain.UserEntity, error) {
-
-	userEntity := &domain.UserEntity{}
-	err := user.userModel.First(&userEntity, "name = ? and key = ?", name, key).Error
-
-	return userEntity, err
-}
-
 func (user *UserRepository) Delete(id uuid.UUID) {
 	user.userModel.Where("id = ?", id).Delete(&domain.UserEntity{})
 }
