@@ -54,3 +54,17 @@ func (user *UserRepository) Create(payload *domain.UserEntity) error {
 	err := user.userModel.Create(payload).Error
 	return err
 }
+
+func (user *UserRepository) IsEmailExist(email string) bool {
+	var exists bool
+	user.userModel.Select("1").Where("email = ?", email).Limit(1).Find(&exists)
+
+	return exists
+}
+
+func (user *UserRepository) IsEmailExistExceptUserId(email string, id uuid.UUID) bool {
+	var exists bool
+	user.userModel.Select("1").Where("email = ? AND id != ?", email, id).Limit(1).Find(&exists)
+
+	return exists
+}

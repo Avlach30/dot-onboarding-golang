@@ -10,4 +10,6 @@ type UserRepository interface {
 	Update(id uuid.UUID, payload *UserEntity)
 	Delete(id uuid.UUID)
 	ForceDelete(id uuid.UUID)
+	IsEmailExist(email string) bool
+	IsEmailExistExceptUserId(email string, id uuid.UUID) bool
 }

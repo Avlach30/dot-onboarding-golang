@@ -3,6 +3,7 @@ package usecase
 import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
 	"github.com/google/uuid"
@@ -14,6 +15,21 @@ type UserUsecase struct {
 
 // Create implements domain.UserUsecase.
 func (userUsecase *UserUsecase) Create(payload *domain.UserEntity) error {
+	isUserExist := userUsecase.userRepo.IsEmailExist(payload.Email)
+
+	if isUserExist {
+		panic(*exception.BussinessException("Email already exist"))
+	}
+
+	// Hash password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
+
+	if err != nil {
+		panic(*exception.ServerErrorException("Failed to hash password"))
+	}
+
+	payload.Password = string(hashedPassword)
+
 	return userUsecase.userRepo.Create(payload)
 }
 
@@ -40,6 +56,12 @@ func (userUsecase *UserUsecase) ForceDelete(id uuid.UUID) {
 
 // Update implements domain.UserUsecase.
 func (userUsecase *UserUsecase) Update(id uuid.UUID, payload *domain.UserEntity) {
+	isEmailExist := userUsecase.userRepo.IsEmailExistExceptUserId(payload.Email, id)
+
+	if isEmailExist {
+		panic(*exception.BussinessException("Email already exist"))
+	}
+
 	userUsecase.userRepo.Update(id, payload)
 }
 
