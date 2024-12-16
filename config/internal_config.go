@@ -28,4 +28,8 @@ var (
 	RedisHost     = Get("REDIS_HOST", "")
 	RedisPassword = Get("REDIS_PASS", "")
 	RedisPort     = Get("REDIS_PORT", "")
+
+	MaxWorkerQueue        = Get("MAX_WORKER_QUEUE", "3")
+	MaxParalelWorkerQueue = Get("MAX_PARALEL_WORKER_QUEUE", "3")
+	MaxTriesQueue         = Get("MAX_TRIES", "3")
 )
