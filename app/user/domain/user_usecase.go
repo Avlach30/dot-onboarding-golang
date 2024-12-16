@@ -1,13 +1,15 @@
 package domain
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 )
 
 type UserUsecase interface {
-	Create(payload *UserEntity) error
-	FindById(id uuid.UUID, trashed bool) (*UserEntity, error)
-	Update(id uuid.UUID, payload *UserEntity)
-	Delete(id uuid.UUID)
-	ForceDelete(id uuid.UUID)
+	Create(context *context.Context, payload *UserEntity) error
+	FindById(context *context.Context, id uuid.UUID, trashed bool) (*UserEntity, error)
+	Update(context *context.Context, id uuid.UUID, payload *UserEntity)
+	Delete(context *context.Context, id uuid.UUID)
+	ForceDelete(context *context.Context, id uuid.UUID)
 }

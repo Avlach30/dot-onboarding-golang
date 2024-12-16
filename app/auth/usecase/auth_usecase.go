@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"log"
 	"strconv"
 	"time"
@@ -24,7 +25,7 @@ type AuthUsecase struct {
 }
 
 // SignInURLOpenIDClient implements domain.AuthUsecase.
-func (authUseCase *AuthUsecase) SignInByOIDCCode(code string) (token string, expiredAt time.Time) {
+func (authUseCase *AuthUsecase) SignInByOIDCCode(context *context.Context, code string) (token string, expiredAt time.Time) {
 
 	// get email from token
 	emailSSO, err := oidc.GetEmailByCode(code)
@@ -34,7 +35,7 @@ func (authUseCase *AuthUsecase) SignInByOIDCCode(code string) (token string, exp
 
 	log.Println(emailSSO)
 
-	user, err := authUseCase.authRepo.FindUserByEmail(emailSSO)
+	user, err := authUseCase.authRepo.FindUserByEmail(context, emailSSO)
 	if err != nil || user.ID == uuid.Nil {
 		panic(*exception.BussinessException("Email Not Found"))
 	}
@@ -44,8 +45,8 @@ func (authUseCase *AuthUsecase) SignInByOIDCCode(code string) (token string, exp
 }
 
 // SignIn implements domain.AuthUsecase.
-func (authUseCase *AuthUsecase) SignInBasic(email string, password string) (token string, expirationTime time.Time) {
-	user, err := authUseCase.authRepo.FindUserByEmail(email)
+func (authUseCase *AuthUsecase) SignInBasic(context *context.Context, email string, password string) (token string, expirationTime time.Time) {
+	user, err := authUseCase.authRepo.FindUserByEmail(context, email)
 	if err != nil {
 		panic(*exception.BussinessException("Email and Password did not match"))
 	}
@@ -58,13 +59,13 @@ func (authUseCase *AuthUsecase) SignInBasic(email string, password string) (toke
 }
 
 // SignIn implements domain.AuthUsecase.
-func (authUseCase *AuthUsecase) SignInLDAP(username string, password string) (token string, expirationTime time.Time) {
+func (authUseCase *AuthUsecase) SignInLDAP(context *context.Context, username string, password string) (token string, expirationTime time.Time) {
 	userLDAP, err := ldap.AuthUsingLDAP(username, password)
 	if err != nil {
 		panic(*exception.UnauthorizedException("Email Not Found"))
 	}
 
-	user, err := authUseCase.authRepo.FindUserByEmail(userLDAP.Email)
+	user, err := authUseCase.authRepo.FindUserByEmail(context, userLDAP.Email)
 	if err != nil {
 		panic(*exception.UnauthorizedException("Email Not Found"))
 	}

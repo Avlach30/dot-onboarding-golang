@@ -1,15 +1,19 @@
 package domain
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 )
 
 type RoleRepository interface {
-	Create(payload *RoleEntity) error
-	FindById(id uuid.UUID, trashed bool) (*RoleEntity, error)
-	FindByKey(key string, trashed bool) (*RoleEntity, error)
-	FindByNameAndKey(name string, key string) (*RoleEntity, error)
-	Update(id uuid.UUID, payload *RoleEntity)
-	Delete(id uuid.UUID)
-	ForceDelete(id uuid.UUID)
+	Create(context *context.Context, payload *RoleEntity) error
+	FindById(context *context.Context, id uuid.UUID, trashed bool) (*RoleEntity, error)
+	FindByKey(context *context.Context, key string, trashed bool) (*RoleEntity, error)
+	FindByNameAndKey(context *context.Context, name string, key string) (*RoleEntity, error)
+	Update(context *context.Context, id uuid.UUID, payload *RoleEntity) error
+	Delete(context *context.Context, id uuid.UUID)
+	ForceDelete(context *context.Context, id uuid.UUID)
+	IsKeyExist(context *context.Context, key string) bool
+	IsKeyExistExceptRoleId(context *context.Context, key string, id uuid.UUID) bool
 }
