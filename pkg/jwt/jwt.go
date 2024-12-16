@@ -1,8 +1,6 @@
 package jwt
 
 import (
-	"errors"
-	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -19,17 +17,8 @@ type CustomClaims struct {
 }
 
 // CreateToken generates a new JWT token
-func CreateToken(authEntity *domain.AuthEntity) (res string, err error) {
-	expiredInDays := config.JwtExpiredInDays
+func CreateToken(authEntity *domain.AuthEntity, expirationTime time.Time) (res string, err error) {
 	secret := []byte(config.Secret)
-
-	expInDays, err := strconv.Atoi(expiredInDays)
-	if err != nil {
-		return res, errors.New("CreateToken.Strconv.AtoiFailed")
-	}
-
-	expirationDuration := time.Duration(expInDays) * 24 * time.Hour
-	expirationTime := time.Now().Add(expirationDuration)
 
 	claims := CustomClaims{
 		ID:    authEntity.ID,
