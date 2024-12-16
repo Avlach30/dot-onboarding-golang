@@ -1,4 +1,4 @@
-package domain
+package task
 
 type JobTask interface {
 	Handle(payload interface{}) error

@@ -44,11 +44,13 @@ The **Scheduler** running in diff goroutine, set your schedule of task inside pk
     ```
 
 The **Queue** running in diff goroutine, set your task global using this example code
-1. create your tasks `app/[domain]/job/your_job/task.go`
+1. create your tasks `app/[domain]/job/task/[action]_task`
 2. create your job to queue `[domain]_job.go`
 3. register your job in `main.go`
 4. now you can use your job anywhere
     ```
     singleton.Delegate(taskName, payload)
+    ## or using standalone
+    singleton.DelegateStandalone("AuthSomeStandaonle", "string", &authTask.StandaloneJobTask{})
     ```
 Note: Remember the payload type, example can be found at `app/auth/job`

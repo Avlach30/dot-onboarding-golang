@@ -1,35 +1,34 @@
 package job
 
 import (
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/job/complete_job"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/job/start_job"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/task/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/job/task"
+	globalTask "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/task"
 )
 
 type JobDictionary struct {
-	listJob map[string]domain.JobTask
+	listJob map[string]globalTask.JobTask
 }
 
-// AddJob implements domain.JobDictionary.
-func (jobDictionary *JobDictionary) AddJob(taskName string, job domain.JobTask) {
+// AddJob implements globalTask.JobDictionary.
+func (jobDictionary *JobDictionary) AddJob(taskName string, job globalTask.JobTask) {
 	jobDictionary.listJob[taskName] = job
 }
 
-// GetAllJob implements domain.JobDictionary.
-func (jobDictionary *JobDictionary) GetAllJob() map[string]domain.JobTask {
+// GetAllJob implements globalTask.JobDictionary.
+func (jobDictionary *JobDictionary) GetAllJob() map[string]globalTask.JobTask {
 	return jobDictionary.listJob
 }
 
-func NewAuthJobDictionary(listJob map[string]domain.JobTask) domain.JobDictionary {
+func NewAuthJobDictionary(listJob map[string]globalTask.JobTask) globalTask.JobDictionary {
 	return &JobDictionary{
 		listJob: listJob,
 	}
 }
 
-func InitJob() domain.JobDictionary {
-	jobDictionary := NewAuthJobDictionary(map[string]domain.JobTask{})
-	jobDictionary.AddJob(complete_job.TaskName, complete_job.AuthCompleteJobTask())
-	jobDictionary.AddJob(start_job.TaskName, start_job.AuthStartJobTask())
+func InitJob() globalTask.JobDictionary {
+	jobDictionary := NewAuthJobDictionary(map[string]globalTask.JobTask{})
+	jobDictionary.AddJob(task.CompleteTaskName, task.AuthCompleteJobTask())
+	jobDictionary.AddJob(task.StartTaskName, task.AuthStartJobTask())
 
 	return jobDictionary
 }

@@ -9,14 +9,13 @@ import (
 
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/task/domain"
 )
 
 type Job struct {
 	ID      uuid.UUID
 	Name    string
 	Payload interface{}
-	Task    domain.JobTask
+	Task    JobTask
 }
 
 type Worker struct {
@@ -28,16 +27,28 @@ type Worker struct {
 
 type Workers []Worker
 
-type ListRegisteredJob map[string]domain.JobTask
+type ListRegisteredJob map[string]JobTask
 
-func (listRegisteredJob *ListRegisteredJob) RegisterJob(jobDictionary domain.JobDictionary) {
+func (listRegisteredJob *ListRegisteredJob) RegisterJob(jobDictionary JobDictionary) {
 	listAllJob := jobDictionary.GetAllJob()
-	merged := make(map[string]domain.JobTask)
+
+	merged := make(map[string]JobTask)
 	for key, value := range *listRegisteredJob {
 		merged[key] = value
 	}
 
 	for key, value := range listAllJob {
+		merged[key] = value
+	}
+
+	*listRegisteredJob = merged
+}
+
+func (listRegisteredJob *ListRegisteredJob) RegisterSingleJob(taskName string, jobDictionary JobTask) {
+	merged := make(map[string]JobTask)
+	merged[taskName] = jobDictionary
+
+	for key, value := range *listRegisteredJob {
 		merged[key] = value
 	}
 
