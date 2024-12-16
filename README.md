@@ -81,6 +81,10 @@ The **Domain** layer contains the core business logic and domain entities. It is
 - **Components**: Entities, value objects, and domain services.
 - **Role**: Encapsulates the core logic and rules of the application.
 
+**Responsibilities**:
+- Defining business rules.
+- Implementing domain-specific logic.
+
 The **Scheduler** running in diff goroutine, set your schedule of task inside pkg/task/manager_task.go
 - e.g
     ```
@@ -102,7 +106,3 @@ The **Queue** running in diff goroutine, set your task global using this example
     singleton.Delegate(taskName, payload)
     ```
 Note: Remember the payload type, example can be found at `app/auth/job`
-
-**Responsibilities**:
-- Defining business rules.
-- Implementing domain-specific logic.
