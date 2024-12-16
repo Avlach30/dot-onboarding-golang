@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"flag"
 	"net/http"
+	"strings"
 
 	"fmt"
 	"log"
 	"strconv"
 
 	handler "gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/handler"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/seeder"
 
 	userRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/repository"
 	userUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/usecase"
@@ -52,11 +54,23 @@ func main() {
 	}
 
 	// migration run
-	runMigration := flag.String("migration", "none", "--")
-	execMigration := flag.String("exec", "up", "--")
+	runMigration := flag.String("migration", "none", "")
+	runSeeder := flag.String("dbseed", "none", "")
+
+	argsSeedClass := flag.String("class", "", "Add multiple values (e.g., --class UserSeed,RoleSeeder)")
+	execMigration := flag.String("exec", "up", "")
+
 	flag.Parse()
+
 	if *runMigration == "true" {
 		migration.Run(db, *execMigration)
+		return
+	}
+
+	if *runSeeder == "true" {
+		if err := seeder.Run(db, strings.Split(*argsSeedClass, ",")); err != nil {
+			log.Fatal(err)
+		}
 		return
 	}
 
