@@ -59,10 +59,13 @@ func main() {
 		migration.Run(db, *execMigration)
 		return
 	}
+
+	// init worker
 	workers := task.InitQueueWorkerTask()
 	singleton.InitGlobal(workers, db)
-	authJobDictionary := authJob.InitJob()
-	singleton.AddJobDictionary(authJobDictionary)
+
+	// init all jobs as you want
+	singleton.AddJobDictionary(authJob.InitJob())
 
 	go singleton.ExecuteJobTaskByDB()
 
