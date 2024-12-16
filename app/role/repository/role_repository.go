@@ -65,10 +65,10 @@ func (role *RoleRepository) Create(payload *domain.RoleEntity) error {
 	return err
 }
 
-func (user *RoleRepository) IsKeyExist(email string) bool {
+func (user *RoleRepository) IsKeyExist(key string) bool {
 	var count int64
 	user.model.
-		Where("key = ?", email).
+		Where("key = ?", key).
 		Count(&count)
 	return count > 0
 }
@@ -79,5 +79,6 @@ func (role *RoleRepository) IsKeyExistExceptRoleId(key string, id uuid.UUID) boo
 		Session(&gorm.Session{}).
 		Where("key = ? AND id != ?", key, id).
 		Count(&count)
+
 	return count > 0
 }
