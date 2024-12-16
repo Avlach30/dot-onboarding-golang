@@ -37,29 +37,40 @@ func (user *UserRepository) FindById(id uuid.UUID, trashed bool) (*domain.UserEn
 	return userEntity, err
 }
 
-func (user *UserRepository) FindByNameAndKey(name string, key string) (*domain.UserEntity, error) {
-
-	userEntity := &domain.UserEntity{}
-	err := user.userModel.First(&userEntity, "name = ? and key = ?", name, key).Error
-
-	return userEntity, err
-}
-
 func (user *UserRepository) Delete(id uuid.UUID) {
-	user.userModel.Where("id = ?", id).Delete(&domain.UserEntity{})
+	user.userModel.Delete(&domain.UserEntity{}, id)
 }
 
 func (user *UserRepository) ForceDelete(id uuid.UUID) {
-
 	userEntity := &domain.UserEntity{}
-	user.userModel.Unscoped().Where("id = ?", id).Find(&userEntity)
-	user.userModel.Unscoped().Delete(&userEntity)
+	user.userModel.Unscoped().Delete(&userEntity, id)
 }
 
-func (user *UserRepository) Update(id uuid.UUID, payload *domain.UserEntity) {
-	panic("unimplemented")
+func (user *UserRepository) Update(id uuid.UUID, payload *domain.UserEntity) error {
+	err := user.userModel.Where("id = ?", id).Updates(&payload).Error
+
+	return err
 }
 
 func (user *UserRepository) Create(payload *domain.UserEntity) error {
-	return nil
+	err := user.userModel.Create(&payload).Error
+	return err
+}
+
+func (user *UserRepository) IsEmailExist(email string) bool {
+	var count int64
+	user.userModel.
+		Where("email = ?", email).
+		Count(&count)
+	return count > 0
+}
+
+func (user *UserRepository) IsEmailExistExceptUserId(email string, id uuid.UUID) bool {
+	var count int64
+	user.userModel.
+		Session(&gorm.Session{}).
+		Where("email = ? AND id != ?", email, id).
+		Count(&count)
+
+	return count > 0
 }
