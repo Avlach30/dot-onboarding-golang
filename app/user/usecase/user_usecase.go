@@ -2,6 +2,9 @@ package usecase
 
 import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 
 	"github.com/google/uuid"
 )
@@ -12,6 +15,21 @@ type UserUsecase struct {
 
 // Create implements domain.UserUsecase.
 func (userUsecase *UserUsecase) Create(payload *domain.UserEntity) error {
+	isUserExist := userUsecase.userRepo.IsEmailExist(payload.Email)
+
+	if isUserExist {
+		panic(*exception.BussinessException("Email already exist"))
+	}
+
+	// Hash password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
+
+	if err != nil {
+		panic(*exception.ServerErrorException("Failed to hash password"))
+	}
+
+	payload.Password = string(hashedPassword)
+
 	return userUsecase.userRepo.Create(payload)
 }
 
@@ -22,7 +40,13 @@ func (userUsecase *UserUsecase) Delete(id uuid.UUID) {
 
 // FindById implements domain.UserUsecase.
 func (userUsecase *UserUsecase) FindById(id uuid.UUID, trashed bool) (*domain.UserEntity, error) {
-	return userUsecase.userRepo.FindById(id, trashed)
+	user, err := userUsecase.userRepo.FindById(id, trashed)
+
+	if err == gorm.ErrRecordNotFound {
+		panic(*exception.NotFoundException("User not found"))
+	}
+
+	return user, err
 }
 
 // ForceDelete implements domain.UserUsecase.
@@ -32,7 +56,14 @@ func (userUsecase *UserUsecase) ForceDelete(id uuid.UUID) {
 
 // Update implements domain.UserUsecase.
 func (userUsecase *UserUsecase) Update(id uuid.UUID, payload *domain.UserEntity) {
-	userUsecase.userRepo.Update(id, payload)
+	if userUsecase.userRepo.IsEmailExistExceptUserId(payload.Email, id) {
+		panic(*exception.BussinessException("Email already exist"))
+	}
+
+	err := userUsecase.userRepo.Update(id, payload)
+	if err != nil {
+		panic(*exception.ServerErrorException("Failed to update user"))
+	}
 }
 
 func NewUserUsecase(userRepo domain.UserRepository) domain.UserUsecase {

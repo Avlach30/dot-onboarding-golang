@@ -12,7 +12,7 @@ import (
 )
 
 func Run(db *gorm.DB, exec string) {
-	db.Exec("CREATE EXTENSION IF NOT EXISTS 'uuid-ossp'")
+	db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"") // Create UUID extension
 
 	// Extract raw SQL DB from GORM
 	sqlDB, err := db.DB()
