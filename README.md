@@ -83,15 +83,15 @@ The **Domain** layer contains the core business logic and domain entities. It is
 
 The **Scheduler** running in diff goroutine, set your schedule of task inside pkg/task/manager_task.go
 - e.g
-```
-// ... existing code ...
+    ```
+    // ... existing code ...
 
-schedulerExcutor.ScheduleEveryMinute(func() {
-    job.MonitorResources()
-})
+    schedulerExcutor.ScheduleEveryMinute(func() {
+        job.MonitorResources()
+    })
 
-// ... existing code ...
-```
+    // ... existing code ...
+    ```
 
 The **Queue** running in diff goroutine, set your task global using this example code
 1. create your tasks `app/job/your_job/task.go`
