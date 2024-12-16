@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func Run(db *gorm.DB, seederCommand []string) error {
+func Run(db *gorm.DB, seederCommands []string) error {
 
 	listSeeders := make(map[string]Seeder)
 
@@ -14,9 +14,8 @@ func Run(db *gorm.DB, seederCommand []string) error {
 	listSeeders["PermissionSeeder"] = NewRoleSeeder()
 	listSeeders["RoleSeeder"] = NewPermissionSeeder()
 
-
-	if len(seederCommand) > 0 {
-		for _, seederCommand := range seederCommand {
+	if len(seederCommands) > 0 {
+		for _, seederCommand := range seederCommands {
 			err := listSeeders[seederCommand].Handle(db)
 			if err != nil {
 				return err

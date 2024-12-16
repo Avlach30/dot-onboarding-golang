@@ -69,6 +69,10 @@ func main() {
 
 	if *runSeeder == "true" {
 		classes := strings.Split(*argsSeedClass, ",")
+		if *argsSeedClass == "" {
+			classes = nil
+		}
+
 		if err := seeder.Run(db, classes); err != nil {
 			log.Fatal(err)
 		}
