@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 	"runtime/debug"
 
@@ -31,6 +32,9 @@ func RecoverPanic() gin.HandlerFunc {
 				if isDebugMode {
 					stackTrace = string(debug.Stack())
 				}
+
+				log.Println(err)
+				log.Println(stackTrace)
 
 				errorResponse := utils.ErrorResponse(panicException.StatusCode, panicException.ErrorMessage, stackTrace)
 				c.JSON(panicException.StatusCode, errorResponse)

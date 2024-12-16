@@ -21,6 +21,7 @@ import (
 	permissionRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/repository"
 	permissionUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/usecase"
 
+	authJob "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/job"
 	authRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/repository"
 	authUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/usecase"
 
@@ -31,6 +32,8 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/dbconn"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/task"
 )
 
 func main() {
@@ -56,6 +59,19 @@ func main() {
 		migration.Run(db, *execMigration)
 		return
 	}
+	workers := task.InitQueueWorkerTask()
+	singleton.InitGlobal(workers, db)
+	authJobDictionary := authJob.InitJob()
+	singleton.AddJobDictionary(authJobDictionary)
+
+	go singleton.ExecuteJobTaskByDB()
+
+	// exec in diff goroutine
+	schedulerExecutor := task.InitAllSchedulerTask()
+	go schedulerExecutor.RunScheduler()
+
+	// exec in diff goroutine
+	go task.RunAllActiveWorker(workers)
 
 	router := gin.New()
 	gin.SetMode(config.GinMode)
@@ -88,7 +104,6 @@ func main() {
 	roleUsecase := roleUC.NewRoleUsecase(roleRepository)
 	authUsecase := authUC.NewAuthUsecase(authRepository)
 
-	// set global state for local
 	// middware at main.go
 	router.Use(sentryHandlerGin)
 	router.Use(handler.RecoverPanic())
