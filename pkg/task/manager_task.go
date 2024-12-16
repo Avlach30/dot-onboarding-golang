@@ -12,7 +12,7 @@ import (
 func InitAllSchedulerTask() *SchedulerExecutor {
 	schedulerExcutor := NewSchedulerExecutor()
 
-	schedulerExcutor.ScheduleEveryMinute(func() {
+	schedulerExcutor.ScheduleEveryHour(func() {
 		job.MonitorResources()
 	})
 
