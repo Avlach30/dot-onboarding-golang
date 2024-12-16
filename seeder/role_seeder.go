@@ -37,9 +37,9 @@ func (roleSeeder *RoleSeeder) Handle(db *gorm.DB) error {
 	}
 
 	// Insert each role into the database
+	db.Exec(`DELETE FROM role_entities`)
 	for _, role := range roles {
 		log.Println(role)
-		db.Exec(`DELETE FROM role_entities`)
 		db.Exec(`INSERT INTO role_entities (name, key) VALUES (?, ?)`, role.Name, role.Key)
 	}
 
