@@ -67,7 +67,7 @@ func main() {
 	// init all jobs as you want
 	singleton.AddJobDictionary(authJob.InitJob())
 
-	go singleton.ExecuteJobTaskByDB()
+	go singleton.ExecuteJobTask()
 
 	// exec in diff goroutine
 	schedulerExecutor := task.InitAllSchedulerTask()

@@ -49,7 +49,7 @@ func Delegate(taskName string, payload interface{}) {
 }
 
 // GetKeyPairs returns the singleton instance with a slice of key pairs
-func ExecuteJobTaskByDB() {
+func ExecuteJobTask() {
 	for {
 		time.Sleep(5 * time.Second)
 
