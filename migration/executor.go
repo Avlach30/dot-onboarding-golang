@@ -17,13 +17,13 @@ func Run(db *gorm.DB, exec string) {
 	// Extract raw SQL DB from GORM
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Fatalf("failed to get raw DB from GORM: %v", err)
+		log.Fatalf("failed to get raw DB from GORM : %v", err)
 	}
 
 	// Initialize migrate with the PostgreSQL driver
 	driver, err := postgres.WithInstance(sqlDB, &postgres.Config{})
 	if err != nil {
-		log.Fatalf("could not create postgres driver: %v", err)
+		log.Fatalf("could not create postgres driver : %v", err)
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
@@ -32,7 +32,7 @@ func Run(db *gorm.DB, exec string) {
 		driver,
 	)
 	if err != nil {
-		log.Fatalf("could not create migrate instance: %v", err)
+		log.Fatalf("could not create migrate instance : %v", err)
 	}
 
 	// Execute migration based on user input
@@ -40,12 +40,12 @@ func Run(db *gorm.DB, exec string) {
 	case "down":
 		err = m.Down()
 		if err != nil && err != migrate.ErrNoChange {
-			log.Fatalf("failed to run down migration: %v", err)
+			log.Fatalf("failed to run down migration : %v", err)
 		}
 	default:
 		err = m.Up()
 		if err != nil && err != migrate.ErrNoChange {
-			log.Fatalf("failed to run up migration: %v", err)
+			log.Fatalf("failed to run up migration : %v", err)
 		}
 	}
 

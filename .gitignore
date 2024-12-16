@@ -1,2 +1,10 @@
 .env
 .idea
+
+**.cert
+**.crt
+**.cer
+**.p12
+**.pem
+**.jks
+**.bcfks

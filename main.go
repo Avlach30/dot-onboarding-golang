@@ -21,6 +21,7 @@ import (
 	permissionRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/repository"
 	permissionUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/usecase"
 
+	authJob "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/job"
 	authRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/repository"
 	authUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/usecase"
 
@@ -31,6 +32,8 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/dbconn"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/task"
 )
 
 func main() {
@@ -56,6 +59,19 @@ func main() {
 		migration.Run(db, *execMigration)
 		return
 	}
+	workers := task.InitQueueWorkerTask()
+	singleton.InitGlobal(workers, db)
+	authJobDictionary := authJob.InitJob()
+	singleton.AddJobDictionary(authJobDictionary)
+
+	go singleton.ExecuteJobTaskByDB()
+
+	// exec in diff goroutine
+	schedulerExecutor := task.InitAllSchedulerTask()
+	go schedulerExecutor.RunScheduler()
+
+	// exec in diff goroutine
+	go task.RunAllActiveWorker(workers)
 
 	router := gin.New()
 	gin.SetMode(config.GinMode)
@@ -68,7 +84,7 @@ func main() {
 		EnableTracing:    true,
 		TracesSampleRate: tracesSampleRate,
 	}); err != nil {
-		fmt.Printf("Sentry initialization failed: %v\n", err)
+		fmt.Printf("Sentry initialization failed : %v\n", err)
 	} else {
 		fmt.Println("Sentry initialized")
 	}
@@ -90,7 +106,8 @@ func main() {
 
 	// middware at main.go
 	router.Use(sentryHandlerGin)
-	router.Use(handler.Recovery500())
+	router.Use(handler.RecoverPanic())
+
 	healthCheck(router)
 
 	handler.NewUserHandler(router, userUsecase)
@@ -99,7 +116,7 @@ func main() {
 	handler.NewAuthHandler(router, authUsecase)
 
 	if err := router.Run(":" + config.AppPort); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		log.Fatalf("Failed to start server : %v", err)
 	}
 }
 

@@ -14,9 +14,10 @@ func SucessResponse(data interface{}) *pkg.BaseResponse {
 	})
 }
 
-func ErrorResponse(statusCode int, errorMessage string) *pkg.BaseResponse {
+func ErrorResponse(statusCode int, errorMessage string, stackTrace string) *pkg.BaseResponse {
 	return &(pkg.BaseResponse{
 		StatusCode:   statusCode,
+		StackTrace:   stackTrace,
 		ErrorMessage: errorMessage,
 		Version:      "1.0.0",
 	})

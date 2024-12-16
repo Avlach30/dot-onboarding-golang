@@ -1,41 +1,5 @@
 package config
 
-import (
-	"log"
-	"os"
-
-	"github.com/joho/godotenv"
-)
-
-func LoadConfig() error {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
-	return nil
-}
-
-func Get(key, defaultValue string) string {
-	LoadConfig()
-
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	return value
-}
-
-func GetRequired(key string) string {
-	LoadConfig()
-
-	value := os.Getenv(key)
-	if value == "" {
-		log.Fatalf("Environment variable %s is required but not set", key)
-	}
-	return value
-}
-
 var (
 	// General
 	AppMode = Get("APP_MODE", "PROD")
@@ -58,8 +22,14 @@ var (
 	DBName     = GetRequired("DB_NAME")
 	DBTimeZone = GetRequired("DB_TIMEZONE")
 
+	GlobalStateDriver = Get("GLOBAl_STATE_DRIVER", "runtime")
+
 	// REDIS
 	RedisHost     = Get("REDIS_HOST", "")
-	RedisPassword = Get("REDIS_Password", "")
+	RedisPassword = Get("REDIS_PASS", "")
 	RedisPort     = Get("REDIS_PORT", "")
+
+	MaxWorkerQueue        = Get("MAX_WORKER_QUEUE", "3")
+	MaxParalelWorkerQueue = Get("MAX_PARALEL_WORKER_QUEUE", "3")
+	MaxTriesQueue         = Get("MAX_TRIES", "3")
 )

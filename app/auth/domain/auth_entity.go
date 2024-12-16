@@ -12,3 +12,9 @@ type AuthEntity struct {
 	Email          string
 	ExpirationTime time.Time
 }
+
+type AuthPermissionEntity struct {
+	ID   uuid.UUID
+	Name string
+	Key  string
+}

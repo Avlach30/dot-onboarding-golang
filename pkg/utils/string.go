@@ -2,9 +2,11 @@ package utils
 
 import (
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	"golang.org/x/exp/rand"
 )
 
 func ToSnakeCase(s string) string {
@@ -19,6 +21,18 @@ func ToSnakeCase(s string) string {
 	}
 
 	return strings.ToLower(result.String())
+}
+
+func GenerateRandomString(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	var result = make([]byte, length)
+	rand.Seed(uint64(time.Now().UnixNano())) // Seed the random number generator
+
+	for i := range result {
+		result[i] = charset[rand.Intn(len(charset))] // Pick random character from charset
+	}
+
+	return string(result)
 }
 
 func UUIDChecker(uuidString string) uuid.UUID {

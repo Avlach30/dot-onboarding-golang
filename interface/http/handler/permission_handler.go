@@ -6,6 +6,7 @@ import (
 	domain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
@@ -17,7 +18,7 @@ type PermissionHandler struct {
 }
 
 func NewPermissionHandler(router *gin.Engine, permissionUsecase domain.PermissionUsecase) {
-	permissionHandlerRoute := router.Group("/v1/api/permissions")
+	permissionHandlerRoute := router.Group("/v1/api/permissions", guard.AuthGuard())
 
 	permissionHandler := &PermissionHandler{
 		permissionUsecase: permissionUsecase,

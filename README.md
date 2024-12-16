@@ -81,6 +81,36 @@ The **Domain** layer contains the core business logic and domain entities. It is
 - **Components**: Entities, value objects, and domain services.
 - **Role**: Encapsulates the core logic and rules of the application.
 
+The **Scheduler** running in diff goroutine, set your schedule of task inside pkg/task/manager_task.go
+- e.g
+```
+// ... existing code ...
+
+schedulerExcutor.ScheduleEveryMinute(func() {
+    job.MonitorResources()
+})
+
+// ... existing code ...
+```
+
+The **Queue** running in diff goroutine, set your task global using this example code
+- e.g
+```
+// ... existing code ...
+
+job := singleton.GetGlobalWorkerUtils()
+
+dummyFunc := func() error {
+    log.Println("Executed In Worker")
+
+    return fmt.Errorf("Error Happen!!")
+}
+
+job.Workers.Push("Test Some In Worker", dummyFunc)
+
+// ... existing code ...
+```
+
 **Responsibilities**:
 - Defining business rules.
 - Implementing domain-specific logic.
