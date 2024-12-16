@@ -9,7 +9,9 @@ type RoleRepository interface {
 	FindById(id uuid.UUID, trashed bool) (*RoleEntity, error)
 	FindByKey(key string, trashed bool) (*RoleEntity, error)
 	FindByNameAndKey(name string, key string) (*RoleEntity, error)
-	Update(id uuid.UUID, payload *RoleEntity)
+	Update(id uuid.UUID, payload *RoleEntity) error
 	Delete(id uuid.UUID)
 	ForceDelete(id uuid.UUID)
+	IsKeyExist(key string) bool
+	IsKeyExistExceptRoleId(key string, id uuid.UUID) bool
 }

@@ -9,7 +9,9 @@ type PermissionRepository interface {
 	FindById(id uuid.UUID, trashed bool) (*PermissionEntity, error)
 	FindByKey(key string, trashed bool) (*PermissionEntity, error)
 	FindByNameAndKey(name string, key string) (*PermissionEntity, error)
-	Update(id uuid.UUID, payload *PermissionEntity)
+	Update(id uuid.UUID, payload *PermissionEntity) error
 	Delete(id uuid.UUID)
 	ForceDelete(id uuid.UUID)
+	IsKeyExist(key string) bool
+	IsKeyExistExceptPermissionId(key string, id uuid.UUID) bool
 }

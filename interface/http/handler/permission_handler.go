@@ -24,10 +24,9 @@ func NewPermissionHandler(router *gin.Engine, permissionUsecase domain.Permissio
 		permissionUsecase: permissionUsecase,
 	}
 
-	permissionHandlerRoute.DELETE("/", permissionHandler.Delete())
+	permissionHandlerRoute.DELETE("/:id", permissionHandler.Delete())
 	permissionHandlerRoute.PATCH("/:id", middleware.ValidateRequestJSON(&dto.PermissionUpdateRequest{}), permissionHandler.Update())
 	permissionHandlerRoute.GET("/:id", permissionHandler.FindById())
-	permissionHandlerRoute.GET("/key/:key", permissionHandler.Create())
 	permissionHandlerRoute.POST("/", middleware.ValidateRequestJSON(&dto.PermissionCreateRequest{}), permissionHandler.Create())
 }
 

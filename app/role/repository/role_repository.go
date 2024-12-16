@@ -23,9 +23,9 @@ func (role *RoleRepository) FindByKey(key string, trashed bool) (*domain.RoleEnt
 		role.model = role.model.Unscoped()
 	}
 
-	role.model.Where("key = ?", key).First(&roleEntity)
+	err := role.model.Where("key = ?", key).First(&roleEntity).Error
 
-	return roleEntity, nil
+	return roleEntity, err
 }
 
 func (role *RoleRepository) FindById(id uuid.UUID, trashed bool) (*domain.RoleEntity, error) {
@@ -34,13 +34,12 @@ func (role *RoleRepository) FindById(id uuid.UUID, trashed bool) (*domain.RoleEn
 		role.model = role.model.Unscoped()
 	}
 
-	role.model.Where("id = ?", id).First(&roleEntity)
+	err := role.model.Where("id = ?", id).First(&roleEntity).Error
 
-	return roleEntity, nil
+	return roleEntity, err
 }
 
 func (role *RoleRepository) FindByNameAndKey(name string, key string) (*domain.RoleEntity, error) {
-
 	roleEntity := &domain.RoleEntity{}
 	role.model.First(&roleEntity, "name = ? and key = ?", name, key)
 
@@ -48,21 +47,38 @@ func (role *RoleRepository) FindByNameAndKey(name string, key string) (*domain.R
 }
 
 func (role *RoleRepository) Delete(id uuid.UUID) {
-	role.model.Where("id = ?", id).Delete(&domain.RoleEntity{})
+	role.model.Delete(&domain.RoleEntity{}, id)
 }
 
 func (role *RoleRepository) ForceDelete(id uuid.UUID) {
 	roleEntity := &domain.RoleEntity{}
-	role.model.Unscoped().Where("id = ?", id).Find(&roleEntity)
-	role.model.Unscoped().Delete(&roleEntity)
+	role.model.Unscoped().Delete(&roleEntity, id)
 }
 
-func (role *RoleRepository) Update(id uuid.UUID, payload *domain.RoleEntity) {
-	role.model.Where("id = ?", id).Updates(&payload)
+func (role *RoleRepository) Update(id uuid.UUID, payload *domain.RoleEntity) error {
+	err := role.model.Where("id = ?", id).Updates(&payload).Error
+	return err
 }
 
 func (role *RoleRepository) Create(payload *domain.RoleEntity) error {
-	role.model.Create(payload)
+	err := role.model.Create(&payload).Error
+	return err
+}
 
-	return nil
+func (role *RoleRepository) IsKeyExist(key string) bool {
+	var count int64
+	role.model.
+		Where("key = ?", key).
+		Count(&count)
+	return count > 0
+}
+
+func (role *RoleRepository) IsKeyExistExceptRoleId(key string, id uuid.UUID) bool {
+	var count int64
+	role.model.
+		Session(&gorm.Session{}).
+		Where("key = ? AND id != ?", key, id).
+		Count(&count)
+
+	return count > 0
 }

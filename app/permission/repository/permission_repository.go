@@ -34,13 +34,12 @@ func (permission *PermissionRepository) FindById(id uuid.UUID, trashed bool) (*d
 		permission.model = permission.model.Unscoped()
 	}
 
-	permission.model.Where("id = ?", id).First(&permissionEntity)
+	err := permission.model.Where("id = ?", id).First(&permissionEntity).Error
 
-	return permissionEntity, nil
+	return permissionEntity, err
 }
 
 func (permission *PermissionRepository) FindByNameAndKey(name string, key string) (*domain.PermissionEntity, error) {
-
 	permissionEntity := &domain.PermissionEntity{}
 	permission.model.First(&permissionEntity, "name = ? and key = ?", name, key)
 
@@ -48,7 +47,7 @@ func (permission *PermissionRepository) FindByNameAndKey(name string, key string
 }
 
 func (permission *PermissionRepository) Delete(id uuid.UUID) {
-	permission.model.Where("id = ?", id).Delete(&domain.PermissionEntity{})
+	permission.model.Delete(&domain.PermissionEntity{}, id)
 }
 
 func (permission *PermissionRepository) ForceDelete(id uuid.UUID) {
@@ -57,12 +56,30 @@ func (permission *PermissionRepository) ForceDelete(id uuid.UUID) {
 	permission.model.Unscoped().Delete(&permissionEntity)
 }
 
-func (permission *PermissionRepository) Update(id uuid.UUID, payload *domain.PermissionEntity) {
-	permission.model.Where("id = ?", id).Updates(&payload)
+func (permission *PermissionRepository) Update(id uuid.UUID, payload *domain.PermissionEntity) error {
+	err := permission.model.Where("id = ?", id).Updates(&payload).Error
+	return err
 }
 
 func (permission *PermissionRepository) Create(payload *domain.PermissionEntity) error {
-	permission.model.Create(payload)
+	err := permission.model.Create(&payload).Error
+	return err
+}
 
-	return nil
+func (permission *PermissionRepository) IsKeyExist(key string) bool {
+	var count int64
+	permission.model.
+		Where("key = ?", key).
+		Count(&count)
+	return count > 0
+}
+
+func (permission *PermissionRepository) IsKeyExistExceptPermissionId(key string, id uuid.UUID) bool {
+	var count int64
+	permission.model.
+		Session(&gorm.Session{}).
+		Where("key = ? AND id != ?", key, id).
+		Count(&count)
+
+	return count > 0
 }

@@ -28,7 +28,6 @@ func NewUserHandler(router *gin.Engine, userUsecase domain.UserUsecase) {
 	userHandlerRoute.DELETE("/:id", userHandler.Delete())
 	userHandlerRoute.PATCH("/:id", middleware.ValidateRequestJSON(&dto.UserUpdateRequest{}), userHandler.Update())
 	userHandlerRoute.GET("/:id", userHandler.FindById())
-	userHandlerRoute.GET("/key/:key", userHandler.Create())
 	userHandlerRoute.POST("/", middleware.ValidateRequestJSON(&dto.UserCreateRequest{}), userHandler.Create())
 }
 

@@ -24,10 +24,9 @@ func NewRoleHandler(router *gin.Engine, roleUsecase domain.RoleUsecase) {
 		roleUsecase: roleUsecase,
 	}
 
-	roleHandlerRoute.DELETE("/", roleHandler.Delete())
+	roleHandlerRoute.DELETE("/:id", roleHandler.Delete())
 	roleHandlerRoute.PATCH("/:id", middleware.ValidateRequestJSON(&dto.RoleUpdateRequest{}), roleHandler.Update())
 	roleHandlerRoute.GET("/:id", roleHandler.FindById())
-	roleHandlerRoute.GET("/key/:key", roleHandler.Create())
 	roleHandlerRoute.POST("/", middleware.ValidateRequestJSON(&dto.RoleCreateRequest{}), roleHandler.Create())
 }
 
