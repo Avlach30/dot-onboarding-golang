@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	"gorm.io/gorm"
 )
 
 type RoleUsecase struct {
@@ -28,7 +29,13 @@ func (roleUsecase *RoleUsecase) Delete(id uuid.UUID) {
 
 // FindById implements domain.RoleUsecase.
 func (roleUsecase *RoleUsecase) FindById(id uuid.UUID) (*domain.RoleEntity, error) {
-	return roleUsecase.roleRepo.FindById(id, false)
+	user, err := roleUsecase.roleRepo.FindById(id, false)
+
+	if err == gorm.ErrRecordNotFound {
+		panic(*exception.NotFoundException("User not found"))
+	}
+
+	return user, err
 }
 
 // FindByKey implements domain.RoleUsecase.
