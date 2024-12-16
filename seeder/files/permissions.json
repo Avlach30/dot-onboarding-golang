@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Create User",
+    "key": "create-user"
+  },
+  {
+    "name": "Read User",
+    "key": "read-user"
+  },
+  {
+    "name": "Update User",
+    "key": "update-user"
+  },
+  {
+    "name": "Delete User",
+    "key": "delete-user"
+  },
+  {
+    "name": "Create Role",
+    "key": "create-role"
+  },
+  {
+    "name": "Read Role",
+    "key": "read-role"
+  },
+  {
+    "name": "Update Role",
+    "key": "update-role"
+  },
+  {
+    "name": "Delete Role",
+    "key": "delete-role"
+  },
+  {
+    "name": "Create Permission",
+    "key": "create-permission"
+  },
+  {
+    "name": "Read Permission",
+    "key": "read-permission"
+  },
+  {
+    "name": "Update Permission",
+    "key": "update-permission"
+  },
+  {
+    "name": "Delete Permission",
+    "key": "delete-permission"
+  }
+]

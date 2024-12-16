@@ -1,0 +1,22 @@
+[
+    {
+        "name": "Super Administrator",
+        "key": "super-admin"
+    },
+    {
+        "name": "Content Manager",
+        "key": "content-manager"
+    },
+    {
+        "name": "User Moderator",
+        "key": "user-mod"
+    },
+    {
+        "name": "Analytics Specialist",
+        "key": "analytics-spec"
+    },
+    {
+        "name": "Support Agent",
+        "key": "support-agent"
+    }
+]

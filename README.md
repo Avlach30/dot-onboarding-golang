@@ -6,21 +6,28 @@
 ## 🌊 Migration
 
 1. install [golang-migrate] (https://github.com/golang-migrate/migrate)
-```cli
-brew install golang-migrate
-```
+    ```cli
+    brew install golang-migrate
+    ```
 2. create migration by:
-```cli
- migrate create -ext sql -dir migration/files -seq [migration name]
-```
+    ```cli
+    migrate create -ext sql -dir migration/files -seq [migration name]
+    ```
 3. copy .env.example to .env.[folder name] and change based yours
-```cli
-cp .env.example .env
-```
+    ```cli
+    cp .env.example .env
+    ```
 4. do migrate up or down:
-```cli
-go run main.go --migration true --exec [up,down]
-```
+    ```cli
+    go run main.go --migration true --exec [up,down]
+    ```
+5. do seed your data:
+    ```cli
+    go run main.go --dbseed true
+    ```
+    ```cli
+    go run main.go --dbseed true --class UserSeeder,RoleSeeder
+    ```
 
 ## 🍰 The Layer
 
