@@ -94,22 +94,14 @@ schedulerExcutor.ScheduleEveryMinute(func() {
 ```
 
 The **Queue** running in diff goroutine, set your task global using this example code
-- e.g
-```
-// ... existing code ...
-
-job := singleton.GetGlobalWorkerUtils()
-
-dummyFunc := func() error {
-    log.Println("Executed In Worker")
-
-    return fmt.Errorf("Error Happen!!")
-}
-
-job.Workers.Push("Test Some In Worker", dummyFunc)
-
-// ... existing code ...
-```
+1. create your tasks `app/job/your_job/task.go`
+2. create your job to queue `[domain]_job.go`
+3. register your job in `main.go`
+4. now you can use your job anywhere
+    ```
+    singleton.Delegate(taskName, payload)
+    ```
+Note: Remember the payload type, example can be found at `app/auth/job`
 
 **Responsibilities**:
 - Defining business rules.
