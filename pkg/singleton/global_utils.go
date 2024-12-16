@@ -49,6 +49,34 @@ func Delegate(taskName string, payload interface{}) {
 }
 
 // GetKeyPairs returns the singleton instance with a slice of key pairs
+func DelegateStandalone(taskName string, payload interface{}, jobTask task.JobTask) {
+
+	utilsSingleton.ListRegisteredJob.RegisterSingleJob(taskName, jobTask)
+
+	convertedPayload := func() string {
+		switch v := payload.(type) {
+		case map[string]any:
+			jsonBytes, err := json.Marshal(v)
+			if err != nil {
+				// If marshaling fails, fall back to string representation
+				return fmt.Sprintf("%v", v)
+			}
+			return string(jsonBytes)
+		default:
+			return fmt.Sprintf("%v", v)
+		}
+	}()
+
+	jobEntity := &domain.JobEntity{
+		Booked:   false,
+		Payload:  convertedPayload,
+		TaskName: taskName,
+	}
+
+	dbUtil.Save(&jobEntity)
+}
+
+// GetKeyPairs returns the singleton instance with a slice of key pairs
 func ExecuteJobTask() {
 	for {
 		time.Sleep(5 * time.Second)
@@ -113,6 +141,6 @@ func ExecuteJobTask() {
 	}
 }
 
-func AddJobDictionary(jobDictionary domain.JobDictionary) {
+func AddJobDictionary(jobDictionary task.JobDictionary) {
 	utilsSingleton.ListRegisteredJob.RegisterJob(jobDictionary)
 }
