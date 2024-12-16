@@ -6,8 +6,8 @@ import (
 	domain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +18,8 @@ type RoleHandler struct {
 }
 
 func NewRoleHandler(router *gin.Engine, roleUsecase domain.RoleUsecase) {
-	roleHandlerRoute := router.Group("/v1/api/roles", guard.AuthGuard())
+	// roleHandlerRoute := router.Group("/v1/api/roles", guard.AuthGuard())
+	roleHandlerRoute := router.Group("/v1/api/roles")
 
 	roleHandler := &RoleHandler{
 		roleUsecase: roleUsecase,
@@ -37,7 +38,8 @@ func (roleHandler *RoleHandler) Create() gin.HandlerFunc {
 			Key:  roleRequest.Key,
 			Name: roleRequest.Name,
 		}
-		roleHandler.roleUsecase.Create(&newRole)
+
+		roleHandler.roleUsecase.Create(singleton.GetContextFromGinContext(httpContext), &newRole)
 
 		httpContext.JSON(http.StatusOK, nil)
 	}
@@ -47,7 +49,7 @@ func (roleHandler *RoleHandler) FindById() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
-		roleData, _ := roleHandler.roleUsecase.FindById(id)
+		roleData, _ := roleHandler.roleUsecase.FindById(singleton.GetContextFromGinContext(httpContext), id)
 
 		httpContext.JSON(http.StatusOK, roleData)
 	}
@@ -56,7 +58,7 @@ func (roleHandler *RoleHandler) FindById() gin.HandlerFunc {
 func (roleHandler *RoleHandler) FindByKey() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		paramKey := httpContext.Param("key")
-		roleData, _ := roleHandler.roleUsecase.FindByKey(paramKey)
+		roleData, _ := roleHandler.roleUsecase.FindByKey(singleton.GetContextFromGinContext(httpContext), paramKey)
 
 		httpContext.JSON(http.StatusOK, roleData)
 	}
@@ -71,7 +73,7 @@ func (roleHandler *RoleHandler) Update() gin.HandlerFunc {
 			Key:  roleRequest.Key,
 			Name: roleRequest.Name,
 		}
-		roleHandler.roleUsecase.Update(id, &updateRole)
+		roleHandler.roleUsecase.Update(singleton.GetContextFromGinContext(httpContext), id, &updateRole)
 
 		httpContext.JSON(http.StatusOK, nil)
 	}
@@ -81,7 +83,7 @@ func (roleHandler *RoleHandler) Delete() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
-		roleHandler.roleUsecase.Delete(id)
+		roleHandler.roleUsecase.Delete(singleton.GetContextFromGinContext(httpContext), id)
 
 		httpContext.JSON(http.StatusOK, nil)
 	}
