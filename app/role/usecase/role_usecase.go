@@ -29,13 +29,13 @@ func (roleUsecase *RoleUsecase) Delete(id uuid.UUID) {
 
 // FindById implements domain.RoleUsecase.
 func (roleUsecase *RoleUsecase) FindById(id uuid.UUID) (*domain.RoleEntity, error) {
-	user, err := roleUsecase.roleRepo.FindById(id, false)
+	role, err := roleUsecase.roleRepo.FindById(id, false)
 
 	if err == gorm.ErrRecordNotFound {
-		panic(*exception.NotFoundException("User not found"))
+		panic(*exception.NotFoundException("Role not found"))
 	}
 
-	return user, err
+	return role, err
 }
 
 // FindByKey implements domain.RoleUsecase.

@@ -65,9 +65,9 @@ func (role *RoleRepository) Create(payload *domain.RoleEntity) error {
 	return err
 }
 
-func (user *RoleRepository) IsKeyExist(key string) bool {
+func (role *RoleRepository) IsKeyExist(key string) bool {
 	var count int64
-	user.model.
+	role.model.
 		Where("key = ?", key).
 		Count(&count)
 	return count > 0
