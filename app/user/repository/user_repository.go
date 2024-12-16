@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	permissionDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
 	roleDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
@@ -26,7 +28,8 @@ func NewUserRepository(db *gorm.DB) domain.UserRepository {
 	}
 }
 
-func (user *UserRepository) FindById(id uuid.UUID, trashed bool) (*domain.UserEntity, error) {
+func (user *UserRepository) FindById(context *context.Context, id uuid.UUID, trashed bool) (*domain.UserEntity, error) {
+	user.userModel = user.userModel.WithContext(*context)
 	userEntity := &domain.UserEntity{}
 	if trashed {
 		user.userModel = user.userModel.Unscoped()
@@ -37,27 +40,32 @@ func (user *UserRepository) FindById(id uuid.UUID, trashed bool) (*domain.UserEn
 	return userEntity, err
 }
 
-func (user *UserRepository) Delete(id uuid.UUID) {
+func (user *UserRepository) Delete(context *context.Context, id uuid.UUID) {
+	user.userModel = user.userModel.WithContext(*context)
 	user.userModel.Delete(&domain.UserEntity{}, id)
 }
 
-func (user *UserRepository) ForceDelete(id uuid.UUID) {
+func (user *UserRepository) ForceDelete(context *context.Context, id uuid.UUID) {
+	user.userModel = user.userModel.WithContext(*context)
 	userEntity := &domain.UserEntity{}
 	user.userModel.Unscoped().Delete(&userEntity, id)
 }
 
-func (user *UserRepository) Update(id uuid.UUID, payload *domain.UserEntity) error {
+func (user *UserRepository) Update(context *context.Context, id uuid.UUID, payload *domain.UserEntity) error {
+	user.userModel = user.userModel.WithContext(*context)
 	err := user.userModel.Where("id = ?", id).Updates(&payload).Error
 
 	return err
 }
 
-func (user *UserRepository) Create(payload *domain.UserEntity) error {
+func (user *UserRepository) Create(context *context.Context, payload *domain.UserEntity) error {
+	user.userModel = user.userModel.WithContext(*context)
 	err := user.userModel.Create(&payload).Error
 	return err
 }
 
-func (user *UserRepository) IsEmailExist(email string) bool {
+func (user *UserRepository) IsEmailExist(context *context.Context, email string) bool {
+	user.userModel = user.userModel.WithContext(*context)
 	var count int64
 	user.userModel.
 		Where("email = ?", email).
@@ -65,10 +73,10 @@ func (user *UserRepository) IsEmailExist(email string) bool {
 	return count > 0
 }
 
-func (user *UserRepository) IsEmailExistExceptUserId(email string, id uuid.UUID) bool {
+func (user *UserRepository) IsEmailExistExceptUserId(context *context.Context, email string, id uuid.UUID) bool {
+	user.userModel = user.userModel.WithContext(*context)
 	var count int64
 	user.userModel.
-		Session(&gorm.Session{}).
 		Where("email = ? AND id != ?", email, id).
 		Count(&count)
 

@@ -1,11 +1,13 @@
 package singleton
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/task"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/task/domain"
 	"gorm.io/gorm/clause"
@@ -20,6 +22,11 @@ type UtilsSingleton struct {
 // GetKeyPairs returns the singleton instance with a slice of key pairs
 func GetGlobalUtils() *UtilsSingleton {
 	return utilsSingleton
+}
+
+func GetContextFromGinContext(httpContext *gin.Context) *context.Context {
+	context := httpContext.Request.Context()
+	return &context
 }
 
 // GetKeyPairs returns the singleton instance with a slice of key pairs

@@ -9,6 +9,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
 	"github.com/gin-gonic/gin"
@@ -39,7 +40,7 @@ func (userHandler *UserHandler) Create() gin.HandlerFunc {
 			Email:    userRequest.Email,
 			Password: userRequest.Password,
 		}
-		userHandler.userUsecase.Create(&newUser)
+		userHandler.userUsecase.Create(singleton.GetContextFromGinContext(httpContext), &newUser)
 
 		httpContext.JSON(http.StatusOK, nil)
 	}
@@ -49,7 +50,7 @@ func (userHandler *UserHandler) FindById() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
-		userData, _ := userHandler.userUsecase.FindById(id, false)
+		userData, _ := userHandler.userUsecase.FindById(singleton.GetContextFromGinContext(httpContext), id, false)
 
 		httpContext.JSON(http.StatusOK, userData)
 	}
@@ -64,7 +65,7 @@ func (userHandler *UserHandler) Update() gin.HandlerFunc {
 			Name:  userRequest.Name,
 			Email: userRequest.Email,
 		}
-		userHandler.userUsecase.Update(id, &updateUser)
+		userHandler.userUsecase.Update(singleton.GetContextFromGinContext(httpContext), id, &updateUser)
 
 		httpContext.JSON(http.StatusOK, nil)
 	}
@@ -74,7 +75,7 @@ func (userHandler *UserHandler) Delete() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
-		userHandler.userUsecase.Delete(id)
+		userHandler.userUsecase.Delete(singleton.GetContextFromGinContext(httpContext), id)
 
 		httpContext.JSON(http.StatusOK, nil)
 	}

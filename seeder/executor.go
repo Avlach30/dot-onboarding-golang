@@ -14,6 +14,7 @@ func Run(db *gorm.DB, seederCommand []string) error {
 	listSeeders["PermissionSeeder"] = NewRoleSeeder()
 	listSeeders["RoleSeeder"] = NewPermissionSeeder()
 
+
 	if len(seederCommand) > 0 {
 		for _, seederCommand := range seederCommand {
 			err := listSeeders[seederCommand].Handle(db)

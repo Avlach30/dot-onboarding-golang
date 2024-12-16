@@ -1,13 +1,15 @@
 package domain
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 )
 
 type PermissionUsecase interface {
-	Create(schema *PermissionEntity) error
-	FindById(id uuid.UUID) (*PermissionEntity, error)
-	FindByKey(key string) (*PermissionEntity, error)
-	Update(id uuid.UUID, schema *PermissionEntity)
-	Delete(id uuid.UUID)
+	Create(context *context.Context, schema *PermissionEntity) error
+	FindById(context *context.Context, id uuid.UUID) (*PermissionEntity, error)
+	FindByKey(context *context.Context, key string) (*PermissionEntity, error)
+	Update(context *context.Context, id uuid.UUID, schema *PermissionEntity)
+	Delete(context *context.Context, id uuid.UUID)
 }
