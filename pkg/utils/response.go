@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"math"
 	"net/http"
+	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg"
 )
 
@@ -32,9 +35,30 @@ func ErrorValidationResponse(statusCode int, errors []pkg.ErrorValidation) *pkg.
 	})
 }
 
-func PaginationBuilder(items []interface{}, meta pkg.MetaResponse) *pkg.PaginationResponse {
-	return &(pkg.PaginationResponse{
+type PaginationResponse[T any] struct {
+	Items *[]T              `json:"items"`
+	Meta  *pkg.MetaResponse `json:"meta"`
+}
+
+func PaginationBuilder[T any](items []T, meta pkg.MetaResponse) *PaginationResponse[T] {
+	return &(PaginationResponse[T]{
 		Items: &items,
 		Meta:  &meta,
+	})
+}
+
+func PaginationMetaBuilder(ctx *gin.Context, total int) *pkg.MetaResponse {
+	// Get query params
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	perPage, _ := strconv.Atoi(ctx.DefaultQuery("per_page", "10"))
+
+	// Calculate total page
+	totalPage := int(math.Ceil(float64(total) / float64(perPage)))
+
+	return &(pkg.MetaResponse{
+		Page:      page,
+		PerPage:   perPage,
+		Total:     total,
+		TotalPage: totalPage,
 	})
 }

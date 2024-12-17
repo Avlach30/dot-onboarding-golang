@@ -1,13 +1,12 @@
 package usecase
 
 import (
-	"context"
-
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
@@ -15,9 +14,14 @@ type UserUsecase struct {
 	userRepo domain.UserRepository
 }
 
+// Pagination implements domain.UserUsecase.
+func (userUsecase *UserUsecase) Pagination(ctx *gin.Context) ([]domain.UserEntity, int) {
+	return userUsecase.userRepo.Pagination(ctx)
+}
+
 // Create implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Create(context *context.Context, payload *domain.UserEntity) error {
-	isUserExist := userUsecase.userRepo.IsEmailExist(context, payload.Email)
+func (userUsecase *UserUsecase) Create(ctx *gin.Context, payload *domain.UserEntity) error {
+	isUserExist := userUsecase.userRepo.IsEmailExist(ctx, payload.Email)
 
 	if isUserExist {
 		panic(*exception.BussinessException("Email already exist"))
@@ -32,17 +36,17 @@ func (userUsecase *UserUsecase) Create(context *context.Context, payload *domain
 
 	payload.Password = string(hashedPassword)
 
-	return userUsecase.userRepo.Create(context, payload)
+	return userUsecase.userRepo.Create(ctx, payload)
 }
 
 // Delete implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Delete(context *context.Context, id uuid.UUID) {
-	userUsecase.userRepo.Delete(context, id)
+func (userUsecase *UserUsecase) Delete(ctx *gin.Context, id uuid.UUID) {
+	userUsecase.userRepo.Delete(ctx, id)
 }
 
 // FindById implements domain.UserUsecase.
-func (userUsecase *UserUsecase) FindById(context *context.Context, id uuid.UUID, trashed bool) (*domain.UserEntity, error) {
-	user, err := userUsecase.userRepo.FindById(context, id, trashed)
+func (userUsecase *UserUsecase) FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*domain.UserEntity, error) {
+	user, err := userUsecase.userRepo.FindById(ctx, id, trashed)
 
 	if err == gorm.ErrRecordNotFound {
 		panic(*exception.NotFoundException("User not found"))
@@ -52,17 +56,17 @@ func (userUsecase *UserUsecase) FindById(context *context.Context, id uuid.UUID,
 }
 
 // ForceDelete implements domain.UserUsecase.
-func (userUsecase *UserUsecase) ForceDelete(context *context.Context, id uuid.UUID) {
-	userUsecase.userRepo.ForceDelete(context, id)
+func (userUsecase *UserUsecase) ForceDelete(ctx *gin.Context, id uuid.UUID) {
+	userUsecase.userRepo.ForceDelete(ctx, id)
 }
 
 // Update implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Update(context *context.Context, id uuid.UUID, payload *domain.UserEntity) {
-	if userUsecase.userRepo.IsEmailExistExceptUserId(context, payload.Email, id) {
+func (userUsecase *UserUsecase) Update(ctx *gin.Context, id uuid.UUID, payload *domain.UserEntity) {
+	if userUsecase.userRepo.IsEmailExistExceptUserId(ctx, payload.Email, id) {
 		panic(*exception.BussinessException("Email already exist"))
 	}
 
-	err := userUsecase.userRepo.Update(context, id, payload)
+	err := userUsecase.userRepo.Update(ctx, id, payload)
 	if err != nil {
 		panic(*exception.ServerErrorException("Failed to update user"))
 	}
