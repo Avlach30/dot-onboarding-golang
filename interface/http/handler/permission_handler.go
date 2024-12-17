@@ -8,7 +8,6 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
 	"github.com/gin-gonic/gin"
@@ -32,58 +31,58 @@ func NewPermissionHandler(router *gin.Engine, permissionUsecase domain.Permissio
 }
 
 func (permissionHandler *PermissionHandler) Create() gin.HandlerFunc {
-	return func(httpContext *gin.Context) {
-		permissionRequest := httpContext.MustGet(constant.RequestBodyJSONKey).(*dto.PermissionCreateRequest)
+	return func(ctx *gin.Context) {
+		permissionRequest := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.PermissionCreateRequest)
 		newPermission := domain.PermissionEntity{
 			Key:  permissionRequest.Key,
 			Name: permissionRequest.Name,
 		}
-		permissionHandler.permissionUsecase.Create(singleton.GetContextFromGinContext(httpContext), &newPermission)
+		permissionHandler.permissionUsecase.Create(ctx, &newPermission)
 
-		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
+		ctx.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }
 
 func (permissionHandler *PermissionHandler) FindById() gin.HandlerFunc {
-	return func(httpContext *gin.Context) {
-		paramId := httpContext.Param("id")
+	return func(ctx *gin.Context) {
+		paramId := ctx.Param("id")
 		id := utils.UUIDChecker(paramId)
-		permissionData, _ := permissionHandler.permissionUsecase.FindById(singleton.GetContextFromGinContext(httpContext), id)
+		permissionData, _ := permissionHandler.permissionUsecase.FindById(ctx, id)
 
-		httpContext.JSON(http.StatusOK, utils.SucessResponse(permissionData))
+		ctx.JSON(http.StatusOK, utils.SucessResponse(permissionData))
 	}
 }
 
 func (permissionHandler *PermissionHandler) FindByKey() gin.HandlerFunc {
-	return func(httpContext *gin.Context) {
-		paramKey := httpContext.Param("key")
-		permissionData, _ := permissionHandler.permissionUsecase.FindByKey(singleton.GetContextFromGinContext(httpContext), paramKey)
+	return func(ctx *gin.Context) {
+		paramKey := ctx.Param("key")
+		permissionData, _ := permissionHandler.permissionUsecase.FindByKey(ctx, paramKey)
 
-		httpContext.JSON(http.StatusOK, utils.SucessResponse(permissionData))
+		ctx.JSON(http.StatusOK, utils.SucessResponse(permissionData))
 	}
 }
 
 func (permissionHandler *PermissionHandler) Update() gin.HandlerFunc {
-	return func(httpContext *gin.Context) {
-		permissionRequest := httpContext.MustGet(constant.RequestBodyJSONKey).(*dto.PermissionUpdateRequest)
-		paramId := httpContext.Param("id")
+	return func(ctx *gin.Context) {
+		permissionRequest := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.PermissionUpdateRequest)
+		paramId := ctx.Param("id")
 		id := utils.UUIDChecker(paramId)
 		updatePermission := domain.PermissionEntity{
 			Key:  permissionRequest.Key,
 			Name: permissionRequest.Name,
 		}
-		permissionHandler.permissionUsecase.Update(singleton.GetContextFromGinContext(httpContext), id, &updatePermission)
+		permissionHandler.permissionUsecase.Update(ctx, id, &updatePermission)
 
-		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
+		ctx.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }
 
 func (permissionHandler *PermissionHandler) Delete() gin.HandlerFunc {
-	return func(httpContext *gin.Context) {
-		paramId := httpContext.Param("id")
+	return func(ctx *gin.Context) {
+		paramId := ctx.Param("id")
 		id := utils.UUIDChecker(paramId)
-		permissionHandler.permissionUsecase.Delete(singleton.GetContextFromGinContext(httpContext), id)
+		permissionHandler.permissionUsecase.Delete(ctx, id)
 
-		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
+		ctx.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }
