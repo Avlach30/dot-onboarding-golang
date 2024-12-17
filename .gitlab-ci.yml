@@ -1,0 +1,7 @@
+include:
+  # sonarqube scanner
+  - component: gitlab.dot.co.id/cicd-components/sonarqube/cli@main
+    inputs:
+      run-on: /^develop$|^staging$|^main$/i
+      sonar-project-key: playground_boilerplates_go-service_2d6c3458-d317-4335-b557-f7d4fba8fd48
+      sonar-project-name: dot-boilerplate-go-service
