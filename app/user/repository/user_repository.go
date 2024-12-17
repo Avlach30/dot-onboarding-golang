@@ -8,6 +8,7 @@ import (
 	rolePermissionDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role_permission/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	userDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 	"gorm.io/gorm"
 )
@@ -34,9 +35,53 @@ func (user *UserRepository) Pagination(ctx *gin.Context) ([]domain.UserEntity, i
 	var users []domain.UserEntity
 	var total int64
 
-	user.userModel.Scopes(utils.Paginate(ctx)).Find(&users).Count(&total)
+	// Query filter
+	user.queryFilter(ctx)
+	// Query sort
+	user.querySort(ctx)
+
+	user.userModel.Session(&gorm.Session{}).
+		Scopes(utils.Paginate(ctx)).
+		Find(&users).
+		Count(&total)
 
 	return users, int(total)
+}
+
+// func filter for pagination
+func (user *UserRepository) queryFilter(ctx *gin.Context) *gorm.DB {
+	if search := ctx.Query("search"); search != "" {
+		user.userModel = user.userModel.
+			Where("name LIKE ?", "%"+search+"%")
+	}
+
+	return user.userModel
+}
+
+// func query sort for pagination
+func (user *UserRepository) querySort(ctx *gin.Context) *gorm.DB {
+	sortableColumns := []string{"name", "email", "created_at", "updated_at"}
+
+	if sort := ctx.Query("sort_by"); sort != "" {
+		if !utils.Contains(sortableColumns, sort) {
+			panic(*exception.BussinessException("Invalid sort column"))
+		}
+
+		user.userModel = user.userModel.
+			Order(sort + " " + ctx.Query("order"))
+
+		// Handle order by asc or desc
+		if order := ctx.Query("order"); order != "" {
+			if order != "asc" && order != "desc" {
+				panic(*exception.BussinessException("Invalid order value"))
+			}
+
+			user.userModel = user.userModel.
+				Order(sort + " " + order)
+		}
+	}
+
+	return user.userModel
 }
 
 func (user *UserRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*domain.UserEntity, error) {
