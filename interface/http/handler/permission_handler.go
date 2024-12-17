@@ -40,7 +40,7 @@ func (permissionHandler *PermissionHandler) Create() gin.HandlerFunc {
 		}
 		permissionHandler.permissionUsecase.Create(singleton.GetContextFromGinContext(httpContext), &newPermission)
 
-		httpContext.JSON(http.StatusOK, nil)
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }
 
@@ -50,7 +50,7 @@ func (permissionHandler *PermissionHandler) FindById() gin.HandlerFunc {
 		id := utils.UUIDChecker(paramId)
 		permissionData, _ := permissionHandler.permissionUsecase.FindById(singleton.GetContextFromGinContext(httpContext), id)
 
-		httpContext.JSON(http.StatusOK, permissionData)
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(permissionData))
 	}
 }
 
@@ -59,7 +59,7 @@ func (permissionHandler *PermissionHandler) FindByKey() gin.HandlerFunc {
 		paramKey := httpContext.Param("key")
 		permissionData, _ := permissionHandler.permissionUsecase.FindByKey(singleton.GetContextFromGinContext(httpContext), paramKey)
 
-		httpContext.JSON(http.StatusOK, permissionData)
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(permissionData))
 	}
 }
 
@@ -74,7 +74,7 @@ func (permissionHandler *PermissionHandler) Update() gin.HandlerFunc {
 		}
 		permissionHandler.permissionUsecase.Update(singleton.GetContextFromGinContext(httpContext), id, &updatePermission)
 
-		httpContext.JSON(http.StatusOK, nil)
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }
 
@@ -84,6 +84,6 @@ func (permissionHandler *PermissionHandler) Delete() gin.HandlerFunc {
 		id := utils.UUIDChecker(paramId)
 		permissionHandler.permissionUsecase.Delete(singleton.GetContextFromGinContext(httpContext), id)
 
-		httpContext.JSON(http.StatusOK, nil)
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }

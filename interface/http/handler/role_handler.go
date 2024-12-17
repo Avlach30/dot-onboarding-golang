@@ -41,7 +41,7 @@ func (roleHandler *RoleHandler) Create() gin.HandlerFunc {
 
 		roleHandler.roleUsecase.Create(singleton.GetContextFromGinContext(httpContext), &newRole)
 
-		httpContext.JSON(http.StatusOK, nil)
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }
 
@@ -51,7 +51,7 @@ func (roleHandler *RoleHandler) FindById() gin.HandlerFunc {
 		id := utils.UUIDChecker(paramId)
 		roleData, _ := roleHandler.roleUsecase.FindById(singleton.GetContextFromGinContext(httpContext), id)
 
-		httpContext.JSON(http.StatusOK, roleData)
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(roleData))
 	}
 }
 
@@ -60,7 +60,7 @@ func (roleHandler *RoleHandler) FindByKey() gin.HandlerFunc {
 		paramKey := httpContext.Param("key")
 		roleData, _ := roleHandler.roleUsecase.FindByKey(singleton.GetContextFromGinContext(httpContext), paramKey)
 
-		httpContext.JSON(http.StatusOK, roleData)
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(roleData))
 	}
 }
 
@@ -75,7 +75,7 @@ func (roleHandler *RoleHandler) Update() gin.HandlerFunc {
 		}
 		roleHandler.roleUsecase.Update(singleton.GetContextFromGinContext(httpContext), id, &updateRole)
 
-		httpContext.JSON(http.StatusOK, nil)
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }
 
@@ -85,6 +85,6 @@ func (roleHandler *RoleHandler) Delete() gin.HandlerFunc {
 		id := utils.UUIDChecker(paramId)
 		roleHandler.roleUsecase.Delete(singleton.GetContextFromGinContext(httpContext), id)
 
-		httpContext.JSON(http.StatusOK, nil)
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }
