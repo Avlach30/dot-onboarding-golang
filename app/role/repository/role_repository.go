@@ -1,8 +1,7 @@
 package repository
 
 import (
-	"context"
-
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
 	"gorm.io/gorm"
@@ -19,8 +18,8 @@ func NewRoleRepository(db *gorm.DB) domain.RoleRepository {
 }
 
 // FindByKey implements domain.RoleRepository.
-func (role *RoleRepository) FindByKey(context *context.Context, key string, trashed bool) (*domain.RoleEntity, error) {
-	role.model = role.model.WithContext(*context)
+func (role *RoleRepository) FindByKey(ctx *gin.Context, key string, trashed bool) (*domain.RoleEntity, error) {
+	role.model = role.model.WithContext(ctx)
 	roleEntity := &domain.RoleEntity{}
 
 	if trashed {
@@ -32,8 +31,8 @@ func (role *RoleRepository) FindByKey(context *context.Context, key string, tras
 	return roleEntity, err
 }
 
-func (role *RoleRepository) FindById(context *context.Context, id uuid.UUID, trashed bool) (*domain.RoleEntity, error) {
-	role.model = role.model.WithContext(*context)
+func (role *RoleRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*domain.RoleEntity, error) {
+	role.model = role.model.WithContext(ctx)
 	roleEntity := &domain.RoleEntity{}
 	if trashed {
 		role.model = role.model.Unscoped()
@@ -44,39 +43,39 @@ func (role *RoleRepository) FindById(context *context.Context, id uuid.UUID, tra
 	return roleEntity, err
 }
 
-func (role *RoleRepository) FindByNameAndKey(context *context.Context, name string, key string) (*domain.RoleEntity, error) {
-	role.model = role.model.WithContext(*context)
+func (role *RoleRepository) FindByNameAndKey(ctx *gin.Context, name string, key string) (*domain.RoleEntity, error) {
+	role.model = role.model.WithContext(ctx)
 	roleEntity := &domain.RoleEntity{}
 	role.model.First(&roleEntity, "name = ? and key = ?", name, key)
 
 	return roleEntity, nil
 }
 
-func (role *RoleRepository) Delete(context *context.Context, id uuid.UUID) {
-	role.model = role.model.WithContext(*context)
+func (role *RoleRepository) Delete(ctx *gin.Context, id uuid.UUID) {
+	role.model = role.model.WithContext(ctx)
 	role.model.Delete(&domain.RoleEntity{}, id)
 }
 
-func (role *RoleRepository) ForceDelete(context *context.Context, id uuid.UUID) {
-	role.model = role.model.WithContext(*context)
+func (role *RoleRepository) ForceDelete(ctx *gin.Context, id uuid.UUID) {
+	role.model = role.model.WithContext(ctx)
 	roleEntity := &domain.RoleEntity{}
 	role.model.Unscoped().Delete(&roleEntity, id)
 }
 
-func (role *RoleRepository) Update(context *context.Context, id uuid.UUID, payload *domain.RoleEntity) error {
-	role.model = role.model.WithContext(*context)
+func (role *RoleRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.RoleEntity) error {
+	role.model = role.model.WithContext(ctx)
 	err := role.model.Where("id = ?", id).Updates(&payload).Error
 	return err
 }
 
-func (role *RoleRepository) Create(context *context.Context, payload *domain.RoleEntity) error {
-	role.model = role.model.WithContext(*context)
+func (role *RoleRepository) Create(ctx *gin.Context, payload *domain.RoleEntity) error {
+	role.model = role.model.WithContext(ctx)
 	err := role.model.Create(&payload).Error
 	return err
 }
 
-func (role *RoleRepository) IsKeyExist(context *context.Context, key string) bool {
-	role.model = role.model.WithContext(*context)
+func (role *RoleRepository) IsKeyExist(ctx *gin.Context, key string) bool {
+	role.model = role.model.WithContext(ctx)
 	var count int64
 	role.model.
 		Where("key = ?", key).
@@ -84,8 +83,8 @@ func (role *RoleRepository) IsKeyExist(context *context.Context, key string) boo
 	return count > 0
 }
 
-func (role *RoleRepository) IsKeyExistExceptRoleId(context *context.Context, key string, id uuid.UUID) bool {
-	role.model = role.model.WithContext(*context)
+func (role *RoleRepository) IsKeyExistExceptRoleId(ctx *gin.Context, key string, id uuid.UUID) bool {
+	role.model = role.model.WithContext(ctx)
 	var count int64
 	role.model.
 		Where("key = ? AND id != ?", key, id).
