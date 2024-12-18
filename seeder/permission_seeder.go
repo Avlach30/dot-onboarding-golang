@@ -37,10 +37,10 @@ func (permissionSeeder *PermissionSeeder) Handle(db *gorm.DB) error {
 	}
 
 	// Insert each permission into the database
-	db.Exec(`DELETE FROM permission_entities`)
+	db.Exec(`DELETE FROM permissions`)
 	for _, permission := range permissions {
 		log.Println(permission)
-		db.Exec(`INSERT INTO permission_entities (name, key) VALUES (?, ?)`, permission.Name, permission.Key)
+		db.Exec(`INSERT INTO permissions (name, key) VALUES (?, ?)`, permission.Name, permission.Key)
 	}
 
 	return nil

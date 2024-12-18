@@ -39,12 +39,12 @@ func (userSeeder *UserSeeder) Handle(db *gorm.DB) error {
 	}
 
 	// Insert each user into the database
-	db.Exec(`DELETE FROM user_entities`)
+	db.Exec(`DELETE FROM users`)
 	for _, user := range users {
 		log.Println(user)
 		passwordByte, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.MinCost)
 		password := string(passwordByte)
-		db.Exec(`INSERT INTO user_entities (name, email, password) VALUES (?, ?, ?)`, user.Name, user.Email, password)
+		db.Exec(`INSERT INTO users (name, email, password) VALUES (?, ?, ?)`, user.Name, user.Email, password)
 	}
 
 	return nil
