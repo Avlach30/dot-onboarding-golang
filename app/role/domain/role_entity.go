@@ -8,10 +8,10 @@ import (
 )
 
 type RoleEntity struct {
-	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"` // UUID primary key
-	Name      string         `gorm:"size:255;not null"`
-	Key       string         `gorm:"size:255;not null"`
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	UpdatedAt time.Time      `gorm:"autoUpdateTime:true index"`
-	CreatedAt time.Time      `gorm:"autoCreateTime:true index"`
+	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"` // UUID primary key
+	Name      string         `gorm:"size:255;not null" json:"name"`
+	Key       string         `gorm:"size:255;not null" json:"key"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
+	UpdatedAt time.Time      `gorm:"autoUpdateTime:true index" json:"updated_at"`
+	CreatedAt time.Time      `gorm:"autoCreateTime:true index" json:"created_at"`
 }
