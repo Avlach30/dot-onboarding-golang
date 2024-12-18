@@ -33,11 +33,11 @@ func NewUserHandler(router *gin.Engine, userUsecase domain.UserUsecase) {
 
 func (userHandler *UserHandler) Pagination() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		userData, total := userHandler.userUsecase.Pagination(ctx)
+		data, total := userHandler.userUsecase.Pagination(ctx)
 
 		meta := utils.PaginationMetaBuilder(ctx, total)
 
-		ctx.JSON(http.StatusOK, utils.PaginationBuilder(userData, *meta))
+		ctx.JSON(http.StatusOK, utils.PaginationBuilder(data, *meta))
 	}
 }
 

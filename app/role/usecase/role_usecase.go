@@ -12,6 +12,10 @@ type RoleUsecase struct {
 	roleRepo domain.RoleRepository
 }
 
+func (roleUsecase *RoleUsecase) Pagination(ctx *gin.Context) ([]domain.RoleEntity, int) {
+	return roleUsecase.roleRepo.Pagination(ctx)
+}
+
 // Create implements domain.RoleUsecase.
 func (roleUsecase *RoleUsecase) Create(ctx *gin.Context, payload *domain.RoleEntity) error {
 	isKeyExist := roleUsecase.roleRepo.IsKeyExist(ctx, payload.Key)

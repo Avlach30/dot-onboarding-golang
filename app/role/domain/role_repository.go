@@ -6,6 +6,7 @@ import (
 )
 
 type RoleRepository interface {
+	Pagination(ctx *gin.Context) ([]RoleEntity, int)
 	Create(ctx *gin.Context, payload *RoleEntity) error
 	FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*RoleEntity, error)
 	FindByKey(ctx *gin.Context, key string, trashed bool) (*RoleEntity, error)
