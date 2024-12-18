@@ -6,6 +6,7 @@ import (
 )
 
 type PermissionRepository interface {
+	Pagination(ctx *gin.Context) ([]PermissionEntity, int)
 	Create(ctx *gin.Context, payload *PermissionEntity) error
 	FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*PermissionEntity, error)
 	FindByKey(ctx *gin.Context, key string, trashed bool) (*PermissionEntity, error)

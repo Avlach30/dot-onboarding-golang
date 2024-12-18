@@ -13,6 +13,10 @@ type PermissionUsecase struct {
 	permissionRepo domain.PermissionRepository
 }
 
+func (permissionUsecase *PermissionUsecase) Pagination(ctx *gin.Context) ([]domain.PermissionEntity, int) {
+	return permissionUsecase.permissionRepo.Pagination(ctx)
+}
+
 // Create implements domain.PermissionUsecase.
 func (permissionUsecase *PermissionUsecase) Create(ctx *gin.Context, payload *domain.PermissionEntity) error {
 	isKeyExist := permissionUsecase.permissionRepo.IsKeyExist(ctx, payload.Key)

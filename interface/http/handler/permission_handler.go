@@ -24,10 +24,21 @@ func NewPermissionHandler(router *gin.Engine, permissionUsecase domain.Permissio
 		permissionUsecase: permissionUsecase,
 	}
 
+	permissionHandlerRoute.GET("/", permissionHandler.Pagination())
 	permissionHandlerRoute.DELETE("/:id", permissionHandler.Delete())
 	permissionHandlerRoute.PATCH("/:id", middleware.ValidateRequestJSON(&dto.PermissionUpdateRequest{}), permissionHandler.Update())
 	permissionHandlerRoute.GET("/:id", permissionHandler.FindById())
 	permissionHandlerRoute.POST("/", middleware.ValidateRequestJSON(&dto.PermissionCreateRequest{}), permissionHandler.Create())
+}
+
+func (permissionHandler *PermissionHandler) Pagination() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		data, total := permissionHandler.permissionUsecase.Pagination(ctx)
+
+		meta := utils.PaginationMetaBuilder(ctx, total)
+
+		ctx.JSON(http.StatusOK, utils.PaginationBuilder(data, *meta))
+	}
 }
 
 func (permissionHandler *PermissionHandler) Create() gin.HandlerFunc {
