@@ -96,8 +96,7 @@ func (role *RoleRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed boo
 
 	err := role.model.
 		Preload("Permissions").
-		Where("id = ?", id).
-		First(&roleEntity).
+		First(&roleEntity, id).
 		Error
 
 	return roleEntity, err
