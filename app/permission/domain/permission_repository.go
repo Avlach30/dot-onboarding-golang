@@ -1,19 +1,18 @@
 package domain
 
 import (
-	"context"
-
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type PermissionRepository interface {
-	Create(context *context.Context, payload *PermissionEntity) error
-	FindById(context *context.Context, id uuid.UUID, trashed bool) (*PermissionEntity, error)
-	FindByKey(context *context.Context, key string, trashed bool) (*PermissionEntity, error)
-	FindByNameAndKey(context *context.Context, name string, key string) (*PermissionEntity, error)
-	Update(context *context.Context, id uuid.UUID, payload *PermissionEntity) error
-	Delete(context *context.Context, id uuid.UUID)
-	ForceDelete(context *context.Context, id uuid.UUID)
-	IsKeyExist(context *context.Context, key string) bool
-	IsKeyExistExceptPermissionId(context *context.Context, key string, id uuid.UUID) bool
+	Create(ctx *gin.Context, payload *PermissionEntity) error
+	FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*PermissionEntity, error)
+	FindByKey(ctx *gin.Context, key string, trashed bool) (*PermissionEntity, error)
+	FindByNameAndKey(ctx *gin.Context, name string, key string) (*PermissionEntity, error)
+	Update(ctx *gin.Context, id uuid.UUID, payload *PermissionEntity) error
+	Delete(ctx *gin.Context, id uuid.UUID)
+	ForceDelete(ctx *gin.Context, id uuid.UUID)
+	IsKeyExist(ctx *gin.Context, key string) bool
+	IsKeyExistExceptPermissionId(ctx *gin.Context, key string, id uuid.UUID) bool
 }

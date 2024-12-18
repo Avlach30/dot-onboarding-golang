@@ -1,8 +1,7 @@
 package usecase
 
 import (
-	"context"
-
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
@@ -14,24 +13,24 @@ type RoleUsecase struct {
 }
 
 // Create implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) Create(context *context.Context, payload *domain.RoleEntity) error {
-	isKeyExist := roleUsecase.roleRepo.IsKeyExist(context, payload.Key)
+func (roleUsecase *RoleUsecase) Create(ctx *gin.Context, payload *domain.RoleEntity) error {
+	isKeyExist := roleUsecase.roleRepo.IsKeyExist(ctx, payload.Key)
 
 	if isKeyExist {
 		panic(*exception.BussinessException("Key already exist"))
 	}
 
-	return roleUsecase.roleRepo.Create(context, payload)
+	return roleUsecase.roleRepo.Create(ctx, payload)
 }
 
 // Delete implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) Delete(context *context.Context, id uuid.UUID) {
-	roleUsecase.roleRepo.Delete(context, id)
+func (roleUsecase *RoleUsecase) Delete(ctx *gin.Context, id uuid.UUID) {
+	roleUsecase.roleRepo.Delete(ctx, id)
 }
 
 // FindById implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) FindById(context *context.Context, id uuid.UUID) (*domain.RoleEntity, error) {
-	role, err := roleUsecase.roleRepo.FindById(context, id, false)
+func (roleUsecase *RoleUsecase) FindById(ctx *gin.Context, id uuid.UUID) (*domain.RoleEntity, error) {
+	role, err := roleUsecase.roleRepo.FindById(ctx, id, false)
 
 	if err == gorm.ErrRecordNotFound {
 		panic(*exception.NotFoundException("Role not found"))
@@ -41,17 +40,17 @@ func (roleUsecase *RoleUsecase) FindById(context *context.Context, id uuid.UUID)
 }
 
 // FindByKey implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) FindByKey(context *context.Context, key string) (*domain.RoleEntity, error) {
-	return roleUsecase.roleRepo.FindByKey(context, key, false)
+func (roleUsecase *RoleUsecase) FindByKey(ctx *gin.Context, key string) (*domain.RoleEntity, error) {
+	return roleUsecase.roleRepo.FindByKey(ctx, key, false)
 }
 
 // Update implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) Update(context *context.Context, id uuid.UUID, payload *domain.RoleEntity) {
-	if roleUsecase.roleRepo.IsKeyExistExceptRoleId(context, payload.Key, id) {
+func (roleUsecase *RoleUsecase) Update(ctx *gin.Context, id uuid.UUID, payload *domain.RoleEntity) {
+	if roleUsecase.roleRepo.IsKeyExistExceptRoleId(ctx, payload.Key, id) {
 		panic(*exception.BussinessException("Key already exist"))
 	}
 
-	err := roleUsecase.roleRepo.Update(context, id, payload)
+	err := roleUsecase.roleRepo.Update(ctx, id, payload)
 	if err != nil {
 		panic(*exception.ServerErrorException("Failed to update role"))
 	}
