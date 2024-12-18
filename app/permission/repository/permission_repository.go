@@ -15,13 +15,13 @@ type PermissionRepository struct {
 
 func NewPermissionRepository(db *gorm.DB) domain.PermissionRepository {
 	return &PermissionRepository{
-		model: db.Model(&domain.PermissionEntity{}),
+		model: db.Model(&domain.Permission{}),
 	}
 }
 
-func (permission *PermissionRepository) Pagination(ctx *gin.Context) ([]domain.PermissionEntity, int) {
+func (permission *PermissionRepository) Pagination(ctx *gin.Context) ([]domain.Permission, int) {
 	permission.model = permission.model.WithContext(ctx)
-	var permissions []domain.PermissionEntity
+	var permissions []domain.Permission
 	var total int64
 
 	// Query filter
@@ -74,58 +74,58 @@ func (permission *PermissionRepository) querySort(ctx *gin.Context) *gorm.DB {
 }
 
 // FindByKey implements domain.PermissionRepository.
-func (permission *PermissionRepository) FindByKey(ctx *gin.Context, key string, trashed bool) (*domain.PermissionEntity, error) {
+func (permission *PermissionRepository) FindByKey(ctx *gin.Context, key string, trashed bool) (*domain.Permission, error) {
 	permission.model = permission.model.WithContext(ctx)
-	permissionEntity := &domain.PermissionEntity{}
+	Permission := &domain.Permission{}
 	if trashed {
 		permission.model = permission.model.Unscoped()
 	}
 
-	permission.model.Where("key = ?", key).First(&permissionEntity)
+	permission.model.Where("key = ?", key).First(&Permission)
 
-	return permissionEntity, nil
+	return Permission, nil
 }
 
-func (permission *PermissionRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*domain.PermissionEntity, error) {
+func (permission *PermissionRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*domain.Permission, error) {
 	permission.model = permission.model.WithContext(ctx)
-	permissionEntity := &domain.PermissionEntity{}
+	Permission := &domain.Permission{}
 	if trashed {
 		permission.model = permission.model.Unscoped()
 	}
 
-	err := permission.model.Where("id = ?", id).First(&permissionEntity).Error
+	err := permission.model.Where("id = ?", id).First(&Permission).Error
 
-	return permissionEntity, err
+	return Permission, err
 }
 
-func (permission *PermissionRepository) FindByNameAndKey(ctx *gin.Context, name string, key string) (*domain.PermissionEntity, error) {
+func (permission *PermissionRepository) FindByNameAndKey(ctx *gin.Context, name string, key string) (*domain.Permission, error) {
 	permission.model = permission.model.WithContext(ctx)
 
-	permissionEntity := &domain.PermissionEntity{}
-	permission.model.First(&permissionEntity, "name = ? and key = ?", name, key)
+	Permission := &domain.Permission{}
+	permission.model.First(&Permission, "name = ? and key = ?", name, key)
 
-	return permissionEntity, nil
+	return Permission, nil
 }
 
 func (permission *PermissionRepository) Delete(ctx *gin.Context, id uuid.UUID) {
 	permission.model = permission.model.WithContext(ctx)
-	permission.model.Delete(&domain.PermissionEntity{}, id)
+	permission.model.Delete(&domain.Permission{}, id)
 }
 
 func (permission *PermissionRepository) ForceDelete(ctx *gin.Context, id uuid.UUID) {
 	permission.model = permission.model.WithContext(ctx)
-	permissionEntity := &domain.PermissionEntity{}
-	permission.model.Unscoped().Where("id = ?", id).Find(&permissionEntity)
-	permission.model.Unscoped().Delete(&permissionEntity)
+	Permission := &domain.Permission{}
+	permission.model.Unscoped().Where("id = ?", id).Find(&Permission)
+	permission.model.Unscoped().Delete(&Permission)
 }
 
-func (permission *PermissionRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.PermissionEntity) error {
+func (permission *PermissionRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.Permission) error {
 	permission.model = permission.model.WithContext(ctx)
 	err := permission.model.Where("id = ?", id).Updates(&payload).Error
 	return err
 }
 
-func (permission *PermissionRepository) Create(ctx *gin.Context, payload *domain.PermissionEntity) error {
+func (permission *PermissionRepository) Create(ctx *gin.Context, payload *domain.Permission) error {
 	permission.model = permission.model.WithContext(ctx)
 	err := permission.model.Create(&payload).Error
 	return err

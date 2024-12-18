@@ -13,7 +13,7 @@ type AuthEntity struct {
 	ExpirationTime time.Time
 }
 
-type AuthPermissionEntity struct {
+type AuthPermission struct {
 	ID   uuid.UUID
 	Name string
 	Key  string

@@ -44,7 +44,7 @@ func (permissionHandler *PermissionHandler) Pagination() gin.HandlerFunc {
 func (permissionHandler *PermissionHandler) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		permissionRequest := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.PermissionCreateRequest)
-		newPermission := domain.PermissionEntity{
+		newPermission := domain.Permission{
 			Key:  permissionRequest.Key,
 			Name: permissionRequest.Name,
 		}
@@ -78,7 +78,7 @@ func (permissionHandler *PermissionHandler) Update() gin.HandlerFunc {
 		permissionRequest := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.PermissionUpdateRequest)
 		paramId := ctx.Param("id")
 		id := utils.UUIDChecker(paramId)
-		updatePermission := domain.PermissionEntity{
+		updatePermission := domain.Permission{
 			Key:  permissionRequest.Key,
 			Name: permissionRequest.Name,
 		}

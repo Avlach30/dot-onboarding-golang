@@ -46,7 +46,7 @@ func Delegate(taskName string, payload interface{}) {
 		}
 	}()
 
-	jobEntity := &domain.JobEntity{
+	jobEntity := &domain.Job{
 		Booked:   false,
 		Payload:  convertedPayload,
 		TaskName: taskName,
@@ -74,7 +74,7 @@ func DelegateStandalone(taskName string, payload interface{}, jobTask task.JobTa
 		}
 	}()
 
-	jobEntity := &domain.JobEntity{
+	jobEntity := &domain.Job{
 		Booked:   false,
 		Payload:  convertedPayload,
 		TaskName: taskName,
@@ -88,7 +88,7 @@ func ExecuteJobTask() {
 	for {
 		time.Sleep(5 * time.Second)
 
-		jobEntities := &[]domain.JobEntity{}
+		jobEntities := &[]domain.Job{}
 		dbUtil.Clauses(clause.Locking{Strength: "UPDATE"}).Where("booked = false").Order("created_at ASC").Limit(5).Find(&jobEntities)
 
 		countJobEntities := len(*jobEntities)
@@ -144,7 +144,7 @@ func ExecuteJobTask() {
 
 		}
 
-		dbUtil.Model(&domain.JobEntity{}).Where("id in ?", jobEntityIds).Update("booked", true)
+		dbUtil.Model(&domain.Job{}).Where("id in ?", jobEntityIds).Update("booked", true)
 	}
 }
 

@@ -6,10 +6,10 @@ import (
 )
 
 type UserUsecase interface {
-	Pagination(ctx *gin.Context) ([]UserEntity, int)
-	Create(ctx *gin.Context, payload *UserEntity) error
-	FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*UserEntity, error)
-	Update(ctx *gin.Context, id uuid.UUID, payload *UserEntity)
+	Pagination(ctx *gin.Context) ([]User, int)
+	Create(ctx *gin.Context, payload *User) error
+	FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*User, error)
+	Update(ctx *gin.Context, id uuid.UUID, payload *User)
 	Delete(ctx *gin.Context, id uuid.UUID)
 	ForceDelete(ctx *gin.Context, id uuid.UUID)
 }

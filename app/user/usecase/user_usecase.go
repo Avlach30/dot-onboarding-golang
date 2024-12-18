@@ -15,12 +15,12 @@ type UserUsecase struct {
 }
 
 // Pagination implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Pagination(ctx *gin.Context) ([]domain.UserEntity, int) {
+func (userUsecase *UserUsecase) Pagination(ctx *gin.Context) ([]domain.User, int) {
 	return userUsecase.userRepo.Pagination(ctx)
 }
 
 // Create implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Create(ctx *gin.Context, payload *domain.UserEntity) error {
+func (userUsecase *UserUsecase) Create(ctx *gin.Context, payload *domain.User) error {
 	isUserExist := userUsecase.userRepo.IsEmailExist(ctx, payload.Email)
 
 	if isUserExist {
@@ -45,7 +45,7 @@ func (userUsecase *UserUsecase) Delete(ctx *gin.Context, id uuid.UUID) {
 }
 
 // FindById implements domain.UserUsecase.
-func (userUsecase *UserUsecase) FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*domain.UserEntity, error) {
+func (userUsecase *UserUsecase) FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*domain.User, error) {
 	user, err := userUsecase.userRepo.FindById(ctx, id, trashed)
 
 	if err == gorm.ErrRecordNotFound {
@@ -61,7 +61,7 @@ func (userUsecase *UserUsecase) ForceDelete(ctx *gin.Context, id uuid.UUID) {
 }
 
 // Update implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Update(ctx *gin.Context, id uuid.UUID, payload *domain.UserEntity) {
+func (userUsecase *UserUsecase) Update(ctx *gin.Context, id uuid.UUID, payload *domain.User) {
 	if userUsecase.userRepo.IsEmailExistExceptUserId(ctx, payload.Email, id) {
 		panic(*exception.BussinessException("Email already exist"))
 	}

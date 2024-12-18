@@ -28,14 +28,14 @@ func PermissionGuard(permissionsToCheck ...string) gin.HandlerFunc {
 
 		// get global state
 		globalState := state.GetGlobalState()
-		permissions := state.Get[[]domain.AuthPermissionEntity](usecase.GenerateHttpContextPermissionKey(userID), globalState)
+		permissions := state.Get[[]domain.AuthPermission](usecase.GenerateHttpContextPermissionKey(userID), globalState)
 
 		if permissions == nil {
 			panic(*exception.ForbiddenException("Not Allowed Access"))
 		}
 
-		permissionInState := permissions.([]domain.AuthPermissionEntity)
-		permissionKeys := authPermissionEntityMapToKeys(&permissionInState)
+		permissionInState := permissions.([]domain.AuthPermission)
+		permissionKeys := authPermissionMapToKeys(&permissionInState)
 
 		// check user permission is allowed access or not
 		isPermissionsIntersect := utils.IsAnyIntersect(permissionsToCheck, permissionKeys)
@@ -50,7 +50,7 @@ func PermissionGuard(permissionsToCheck ...string) gin.HandlerFunc {
 	}
 }
 
-func authPermissionEntityMapToKeys(authPermissionEntities *[]domain.AuthPermissionEntity) []string {
+func authPermissionMapToKeys(authPermissionEntities *[]domain.AuthPermission) []string {
 	entities := *authPermissionEntities
 	keys := make([]string, len(entities))
 	for i, entity := range entities {

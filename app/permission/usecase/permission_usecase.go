@@ -13,12 +13,12 @@ type PermissionUsecase struct {
 	permissionRepo domain.PermissionRepository
 }
 
-func (permissionUsecase *PermissionUsecase) Pagination(ctx *gin.Context) ([]domain.PermissionEntity, int) {
+func (permissionUsecase *PermissionUsecase) Pagination(ctx *gin.Context) ([]domain.Permission, int) {
 	return permissionUsecase.permissionRepo.Pagination(ctx)
 }
 
 // Create implements domain.PermissionUsecase.
-func (permissionUsecase *PermissionUsecase) Create(ctx *gin.Context, payload *domain.PermissionEntity) error {
+func (permissionUsecase *PermissionUsecase) Create(ctx *gin.Context, payload *domain.Permission) error {
 	isKeyExist := permissionUsecase.permissionRepo.IsKeyExist(ctx, payload.Key)
 
 	if isKeyExist {
@@ -34,7 +34,7 @@ func (permissionUsecase *PermissionUsecase) Delete(ctx *gin.Context, id uuid.UUI
 }
 
 // FindById implements domain.PermissionUsecase.
-func (permissionUsecase *PermissionUsecase) FindById(ctx *gin.Context, id uuid.UUID) (*domain.PermissionEntity, error) {
+func (permissionUsecase *PermissionUsecase) FindById(ctx *gin.Context, id uuid.UUID) (*domain.Permission, error) {
 	permission, err := permissionUsecase.permissionRepo.FindById(ctx, id, false)
 
 	if err == gorm.ErrRecordNotFound {
@@ -45,12 +45,12 @@ func (permissionUsecase *PermissionUsecase) FindById(ctx *gin.Context, id uuid.U
 }
 
 // FindByKey implements domain.PermissionUsecase.
-func (permissionUsecase *PermissionUsecase) FindByKey(ctx *gin.Context, key string) (*domain.PermissionEntity, error) {
+func (permissionUsecase *PermissionUsecase) FindByKey(ctx *gin.Context, key string) (*domain.Permission, error) {
 	return permissionUsecase.permissionRepo.FindByKey(ctx, key, false)
 }
 
 // Update implements domain.PermissionUsecase.
-func (permissionUsecase *PermissionUsecase) Update(ctx *gin.Context, id uuid.UUID, payload *domain.PermissionEntity) {
+func (permissionUsecase *PermissionUsecase) Update(ctx *gin.Context, id uuid.UUID, payload *domain.Permission) {
 	if permissionUsecase.permissionRepo.IsKeyExistExceptPermissionId(ctx, payload.Key, id) {
 		panic(*exception.BussinessException("Key already exist"))
 	}

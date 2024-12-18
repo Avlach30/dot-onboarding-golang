@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserEntity struct {
+type User struct {
 	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Name      string         `gorm:"size:255;not null" json:"name"`
 	Email     string         `gorm:"size:255;not null" json:"email"`
