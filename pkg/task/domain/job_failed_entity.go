@@ -15,3 +15,7 @@ type JobFailedEntity struct {
 	UpdatedAt    time.Time      `gorm:"autoUpdateTime:true index"`
 	CreatedAt    time.Time      `gorm:"autoCreateTime:true index"`
 }
+
+func (JobFailedEntity) TableName() string {
+	return "job_faileds"
+}

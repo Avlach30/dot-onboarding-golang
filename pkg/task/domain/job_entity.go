@@ -16,3 +16,7 @@ type JobEntity struct {
 	UpdatedAt time.Time      `gorm:"autoUpdateTime:true index"`
 	CreatedAt time.Time      `gorm:"autoCreateTime:true index"`
 }
+
+func (JobEntity) TableName() string {
+	return "jobs"
+}

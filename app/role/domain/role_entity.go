@@ -17,5 +17,9 @@ type RoleEntity struct {
 	CreatedAt time.Time      `gorm:"autoCreateTime:true index" json:"created_at"`
 
 	// Relations
-	Permissions []domain.Permission `gorm:"many2many:role_permissions;" json:"permissions"`
+	Permissions []domain.PermissionEntity `gorm:"many2many:role_permissions;" json:"permissions"`
+}
+
+func (RoleEntity) TableName() string {
+	return "roles"
 }
