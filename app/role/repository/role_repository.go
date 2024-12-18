@@ -38,7 +38,11 @@ func (role *RoleRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed boo
 		role.model = role.model.Unscoped()
 	}
 
-	err := role.model.Where("id = ?", id).First(&roleEntity).Error
+	err := role.model.
+		Preload("Permissions").
+		Where("id = ?", id).
+		First(&roleEntity).
+		Error
 
 	return roleEntity, err
 }
