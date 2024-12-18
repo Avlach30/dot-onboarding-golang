@@ -93,7 +93,7 @@ func (permission *PermissionRepository) FindById(ctx *gin.Context, id uuid.UUID,
 		permission.model = permission.model.Unscoped()
 	}
 
-	err := permission.model.Where("id = ?", id).First(&permissionEntity).Error
+	err := permission.model.First(&permissionEntity, id).Error
 
 	return permissionEntity, err
 }

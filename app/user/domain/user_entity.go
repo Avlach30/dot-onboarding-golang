@@ -16,3 +16,7 @@ type UserEntity struct {
 	UpdatedAt time.Time      `gorm:"autoUpdateTime:true index" json:"updated_at"`
 	CreatedAt time.Time      `gorm:"autoCreateTime:true index" json:"created_at"`
 }
+
+func (UserEntity) TableName() string {
+	return "users"
+}

@@ -15,3 +15,7 @@ type PermissionEntity struct {
 	UpdatedAt time.Time      `gorm:"autoUpdateTime:true index" json:"updated_at"`
 	CreatedAt time.Time      `gorm:"autoCreateTime:true index" json:"created_at"`
 }
+
+func (PermissionEntity) TableName() string {
+	return "permissions"
+}
