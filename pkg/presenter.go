@@ -14,12 +14,14 @@ type ErrorValidation struct {
 	Message string `json:"message"`
 }
 
-type PaginationResponse struct {
-	Items *[]interface{} `json:"items"`
-	Meta  *MetaResponse  `json:"meta,omitempty"`
+type PaginationResponse[T any] struct {
+	Items *[]T          `json:"items"`
+	Meta  *MetaResponse `json:"meta"`
 }
 
 type MetaResponse struct {
-	Page    int `json:"page"`
-	PerPage int `json:"per_page"`
+	Page      int `json:"page"`
+	PerPage   int `json:"per_page"`
+	Total     int `json:"total"`
+	TotalPage int `json:"total_page"`
 }

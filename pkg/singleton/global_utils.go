@@ -24,8 +24,8 @@ func GetGlobalUtils() *UtilsSingleton {
 	return utilsSingleton
 }
 
-func GetContextFromGinContext(httpContext *gin.Context) *context.Context {
-	context := httpContext.Request.Context()
+func GetContextFromGinContext(ctx *gin.Context) *context.Context {
+	context := ctx.Request.Context()
 	return &context
 }
 

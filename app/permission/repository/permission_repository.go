@@ -4,11 +4,73 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 	"gorm.io/gorm"
 )
 
 type PermissionRepository struct {
 	model *gorm.DB
+}
+
+func NewPermissionRepository(db *gorm.DB) domain.PermissionRepository {
+	return &PermissionRepository{
+		model: db.Model(&domain.PermissionEntity{}),
+	}
+}
+
+func (permission *PermissionRepository) Pagination(ctx *gin.Context) ([]domain.PermissionEntity, int) {
+	permission.model = permission.model.WithContext(ctx)
+	var permissions []domain.PermissionEntity
+	var total int64
+
+	// Query filter
+	permission.queryFilter(ctx)
+	// Query sort
+	permission.querySort(ctx)
+
+	permission.model.Session(&gorm.Session{}).
+		Scopes(utils.Paginate(ctx)).
+		Find(&permissions).
+		Count(&total)
+
+	return permissions, int(total)
+}
+
+// func filter for pagination
+func (permission *PermissionRepository) queryFilter(ctx *gin.Context) *gorm.DB {
+	if search := ctx.Query("search"); search != "" {
+		permission.model = permission.model.
+			Where("name LIKE ?", "%"+search+"%")
+	}
+
+	return permission.model
+}
+
+// func query sort for pagination
+func (permission *PermissionRepository) querySort(ctx *gin.Context) *gorm.DB {
+	sortableColumns := []string{"name", "created_at", "updated_at"}
+
+	if sort := ctx.Query("sort_by"); sort != "" {
+		if !utils.Contains(sortableColumns, sort) {
+			panic(*exception.BussinessException("Invalid sort column"))
+		}
+
+		permission.model = permission.model.
+			Order(sort + " " + ctx.Query("order"))
+
+		// Handle order by asc or desc
+		if order := ctx.Query("order"); order != "" {
+			if order != "asc" && order != "desc" {
+				panic(*exception.BussinessException("Invalid order value"))
+			}
+
+			permission.model = permission.model.
+				Order(sort + " " + order)
+		}
+	}
+
+	return permission.model
 }
 
 // FindByKey implements domain.PermissionRepository.
@@ -22,12 +84,6 @@ func (permission *PermissionRepository) FindByKey(ctx *gin.Context, key string, 
 	permission.model.Where("key = ?", key).First(&permissionEntity)
 
 	return permissionEntity, nil
-}
-
-func NewPermissionRepository(db *gorm.DB) domain.PermissionRepository {
-	return &PermissionRepository{
-		model: db.Model(&domain.PermissionEntity{}),
-	}
 }
 
 func (permission *PermissionRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*domain.PermissionEntity, error) {
