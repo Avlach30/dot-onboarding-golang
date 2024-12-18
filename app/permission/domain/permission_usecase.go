@@ -6,10 +6,10 @@ import (
 )
 
 type PermissionUsecase interface {
-	Pagination(ctx *gin.Context) ([]Permission, int)
-	Create(ctx *gin.Context, schema *Permission) error
-	FindById(ctx *gin.Context, id uuid.UUID) (*Permission, error)
-	FindByKey(ctx *gin.Context, key string) (*Permission, error)
-	Update(ctx *gin.Context, id uuid.UUID, schema *Permission)
+	Pagination(ctx *gin.Context) ([]PermissionEntity, int)
+	Create(ctx *gin.Context, schema *PermissionEntity) error
+	FindById(ctx *gin.Context, id uuid.UUID) (*PermissionEntity, error)
+	FindByKey(ctx *gin.Context, key string) (*PermissionEntity, error)
+	Update(ctx *gin.Context, id uuid.UUID, schema *PermissionEntity)
 	Delete(ctx *gin.Context, id uuid.UUID)
 }

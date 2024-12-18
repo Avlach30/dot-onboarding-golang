@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Role struct {
+type RoleEntity struct {
 	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"` // UUID primary key
 	Name      string         `gorm:"size:255;not null" json:"name"`
 	Key       string         `gorm:"size:255;not null" json:"key"`

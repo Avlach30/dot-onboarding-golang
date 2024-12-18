@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Job struct {
+type JobEntity struct {
 	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"` // UUID primary key
 	TaskName  string         `gorm:"size:255;not null"`
 	Payload   string         `gorm:"type:text;not null"`

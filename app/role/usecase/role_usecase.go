@@ -12,12 +12,12 @@ type RoleUsecase struct {
 	roleRepo domain.RoleRepository
 }
 
-func (roleUsecase *RoleUsecase) Pagination(ctx *gin.Context) ([]domain.Role, int) {
+func (roleUsecase *RoleUsecase) Pagination(ctx *gin.Context) ([]domain.RoleEntity, int) {
 	return roleUsecase.roleRepo.Pagination(ctx)
 }
 
 // Create implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) Create(ctx *gin.Context, payload *domain.Role) error {
+func (roleUsecase *RoleUsecase) Create(ctx *gin.Context, payload *domain.RoleEntity) error {
 	isKeyExist := roleUsecase.roleRepo.IsKeyExist(ctx, payload.Key)
 
 	if isKeyExist {
@@ -33,7 +33,7 @@ func (roleUsecase *RoleUsecase) Delete(ctx *gin.Context, id uuid.UUID) {
 }
 
 // FindById implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) FindById(ctx *gin.Context, id uuid.UUID) (*domain.Role, error) {
+func (roleUsecase *RoleUsecase) FindById(ctx *gin.Context, id uuid.UUID) (*domain.RoleEntity, error) {
 	role, err := roleUsecase.roleRepo.FindById(ctx, id, false)
 
 	if err == gorm.ErrRecordNotFound {
@@ -44,12 +44,12 @@ func (roleUsecase *RoleUsecase) FindById(ctx *gin.Context, id uuid.UUID) (*domai
 }
 
 // FindByKey implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) FindByKey(ctx *gin.Context, key string) (*domain.Role, error) {
+func (roleUsecase *RoleUsecase) FindByKey(ctx *gin.Context, key string) (*domain.RoleEntity, error) {
 	return roleUsecase.roleRepo.FindByKey(ctx, key, false)
 }
 
 // Update implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) Update(ctx *gin.Context, id uuid.UUID, payload *domain.Role) {
+func (roleUsecase *RoleUsecase) Update(ctx *gin.Context, id uuid.UUID, payload *domain.RoleEntity) {
 	if roleUsecase.roleRepo.IsKeyExistExceptRoleId(ctx, payload.Key, id) {
 		panic(*exception.BussinessException("Key already exist"))
 	}

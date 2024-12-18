@@ -44,7 +44,7 @@ func (userHandler *UserHandler) Pagination() gin.HandlerFunc {
 func (userHandler *UserHandler) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		userRequest := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.UserCreateRequest)
-		newUser := domain.User{
+		newUser := domain.UserEntity{
 			Name:     userRequest.Name,
 			Email:    userRequest.Email,
 			Password: userRequest.Password,
@@ -70,7 +70,7 @@ func (userHandler *UserHandler) Update() gin.HandlerFunc {
 		userRequest := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.UserUpdateRequest)
 		paramId := ctx.Param("id")
 		id := utils.UUIDChecker(paramId)
-		updateUser := domain.User{
+		updateUser := domain.UserEntity{
 			Name:  userRequest.Name,
 			Email: userRequest.Email,
 		}

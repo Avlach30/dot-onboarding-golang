@@ -74,9 +74,9 @@ func (authUseCase *AuthUsecase) SignInLDAP(context *context.Context, username st
 }
 
 // SignIn implements domain.AuthUsecase.
-func (authUseCase *AuthUsecase) CreateJWTToken(user *userDomain.User) (token string, expirationTime time.Time) {
+func (authUseCase *AuthUsecase) CreateJWTToken(user *userDomain.UserEntity) (token string, expirationTime time.Time) {
 	// FIX ME: dummy permission
-	dummyPermissions := []domain.AuthPermission{
+	dummyPermissions := []domain.AuthPermissionEntity{
 		{
 			ID:   uuid.New(),
 			Name: immutable.PermissionApprove,

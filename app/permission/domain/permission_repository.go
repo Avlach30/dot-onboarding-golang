@@ -6,12 +6,12 @@ import (
 )
 
 type PermissionRepository interface {
-	Pagination(ctx *gin.Context) ([]Permission, int)
-	Create(ctx *gin.Context, payload *Permission) error
-	FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*Permission, error)
-	FindByKey(ctx *gin.Context, key string, trashed bool) (*Permission, error)
-	FindByNameAndKey(ctx *gin.Context, name string, key string) (*Permission, error)
-	Update(ctx *gin.Context, id uuid.UUID, payload *Permission) error
+	Pagination(ctx *gin.Context) ([]PermissionEntity, int)
+	Create(ctx *gin.Context, payload *PermissionEntity) error
+	FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*PermissionEntity, error)
+	FindByKey(ctx *gin.Context, key string, trashed bool) (*PermissionEntity, error)
+	FindByNameAndKey(ctx *gin.Context, name string, key string) (*PermissionEntity, error)
+	Update(ctx *gin.Context, id uuid.UUID, payload *PermissionEntity) error
 	Delete(ctx *gin.Context, id uuid.UUID)
 	ForceDelete(ctx *gin.Context, id uuid.UUID)
 	IsKeyExist(ctx *gin.Context, key string) bool
