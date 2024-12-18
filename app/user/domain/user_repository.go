@@ -1,17 +1,17 @@
 package domain
 
 import (
-	"context"
-
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type UserRepository interface {
-	Create(context *context.Context, payload *UserEntity) error
-	FindById(context *context.Context, id uuid.UUID, trashed bool) (*UserEntity, error)
-	Update(context *context.Context, id uuid.UUID, payload *UserEntity) error
-	Delete(context *context.Context, id uuid.UUID)
-	ForceDelete(context *context.Context, id uuid.UUID)
-	IsEmailExist(context *context.Context, email string) bool
-	IsEmailExistExceptUserId(context *context.Context, email string, id uuid.UUID) bool
+	Pagination(ctx *gin.Context) ([]UserEntity, int)
+	Create(ctx *gin.Context, payload *UserEntity) error
+	FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*UserEntity, error)
+	Update(ctx *gin.Context, id uuid.UUID, payload *UserEntity) error
+	Delete(ctx *gin.Context, id uuid.UUID)
+	ForceDelete(ctx *gin.Context, id uuid.UUID)
+	IsEmailExist(ctx *gin.Context, email string) bool
+	IsEmailExistExceptUserId(ctx *gin.Context, email string, id uuid.UUID) bool
 }

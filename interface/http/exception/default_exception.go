@@ -46,3 +46,11 @@ func NotFoundException(errorMessage string) *Exception {
 
 	return panic
 }
+
+func BadRequestException(errorMessage string) *Exception {
+	panic := &Exception{}
+	panic.ErrorMessage = errorMessage
+	panic.StatusCode = http.StatusBadRequest
+
+	return panic
+}

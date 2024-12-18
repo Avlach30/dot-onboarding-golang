@@ -1,15 +1,15 @@
 package domain
 
 import (
-	"context"
-
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type UserUsecase interface {
-	Create(context *context.Context, payload *UserEntity) error
-	FindById(context *context.Context, id uuid.UUID, trashed bool) (*UserEntity, error)
-	Update(context *context.Context, id uuid.UUID, payload *UserEntity)
-	Delete(context *context.Context, id uuid.UUID)
-	ForceDelete(context *context.Context, id uuid.UUID)
+	Pagination(ctx *gin.Context) ([]UserEntity, int)
+	Create(ctx *gin.Context, payload *UserEntity) error
+	FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*UserEntity, error)
+	Update(ctx *gin.Context, id uuid.UUID, payload *UserEntity)
+	Delete(ctx *gin.Context, id uuid.UUID)
+	ForceDelete(ctx *gin.Context, id uuid.UUID)
 }

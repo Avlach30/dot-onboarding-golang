@@ -24,10 +24,21 @@ func NewRoleHandler(router *gin.Engine, roleUsecase domain.RoleUsecase) {
 		roleUsecase: roleUsecase,
 	}
 
+	roleHandlerRoute.GET("/", roleHandler.Pagination())
 	roleHandlerRoute.DELETE("/:id", roleHandler.Delete())
 	roleHandlerRoute.PATCH("/:id", middleware.ValidateRequestJSON(&dto.RoleUpdateRequest{}), roleHandler.Update())
 	roleHandlerRoute.GET("/:id", roleHandler.FindById())
 	roleHandlerRoute.POST("/", middleware.ValidateRequestJSON(&dto.RoleCreateRequest{}), roleHandler.Create())
+}
+
+func (roleHandler *RoleHandler) Pagination() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		data, total := roleHandler.roleUsecase.Pagination(ctx)
+
+		meta := utils.PaginationMetaBuilder(ctx, total)
+
+		ctx.JSON(http.StatusOK, utils.PaginationBuilder(data, *meta))
+	}
 }
 
 func (roleHandler *RoleHandler) Create() gin.HandlerFunc {
