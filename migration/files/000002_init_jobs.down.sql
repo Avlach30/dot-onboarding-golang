@@ -1,2 +1,2 @@
-DROP TABLE IF EXISTS public.job_entities;
-DROP TABLE IF EXISTS public.job_failed_entities;
+DROP TABLE IF EXISTS public.jobs;
+DROP TABLE IF EXISTS public.job_faileds;
