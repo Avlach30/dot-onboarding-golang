@@ -17,5 +17,5 @@ type Role struct {
 	CreatedAt time.Time      `gorm:"autoCreateTime:true index" json:"created_at"`
 
 	// Relations
-	Permissions []domain.Permission `gorm:"many2many:role_permissions;"`
+	Permissions []domain.Permission `gorm:"many2many:role_permissions;" json:"permissions"`
 }
