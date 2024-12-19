@@ -43,13 +43,8 @@ func (userHandler *UserHandler) Pagination() gin.HandlerFunc {
 
 func (userHandler *UserHandler) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		userRequest := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.UserCreateRequest)
-		newUser := domain.UserEntity{
-			Name:     userRequest.Name,
-			Email:    userRequest.Email,
-			Password: userRequest.Password,
-		}
-		userHandler.userUsecase.Create(ctx, &newUser)
+		request := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.UserCreateRequest)
+		userHandler.userUsecase.Create(ctx, request)
 
 		ctx.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
@@ -59,7 +54,7 @@ func (userHandler *UserHandler) FindById() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		paramId := ctx.Param("id")
 		id := utils.UUIDChecker(paramId)
-		userData, _ := userHandler.userUsecase.FindById(ctx, id, false)
+		userData := userHandler.userUsecase.FindById(ctx, id, false)
 
 		ctx.JSON(http.StatusOK, utils.SucessResponse(userData))
 	}
@@ -67,14 +62,11 @@ func (userHandler *UserHandler) FindById() gin.HandlerFunc {
 
 func (userHandler *UserHandler) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		userRequest := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.UserUpdateRequest)
+		request := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.UserUpdateRequest)
 		paramId := ctx.Param("id")
 		id := utils.UUIDChecker(paramId)
-		updateUser := domain.UserEntity{
-			Name:  userRequest.Name,
-			Email: userRequest.Email,
-		}
-		userHandler.userUsecase.Update(ctx, id, &updateUser)
+
+		userHandler.userUsecase.Update(ctx, id, request)
 
 		ctx.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}

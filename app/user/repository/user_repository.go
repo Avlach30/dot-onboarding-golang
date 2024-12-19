@@ -1,11 +1,11 @@
 package repository
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	permissionDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
 	roleDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
-	rolePermissionDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role_permission/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	userDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
@@ -14,18 +14,14 @@ import (
 )
 
 type UserRepository struct {
-	userModel           *gorm.DB
-	permissionModel     *gorm.DB
-	roleModel           *gorm.DB
-	rolePermissionModel *gorm.DB
+	userModel *gorm.DB
+	roleModel *gorm.DB
 }
 
 func NewUserRepository(db *gorm.DB) domain.UserRepository {
 	return &UserRepository{
-		userModel:           db.Model(&userDomain.UserEntity{}),
-		permissionModel:     db.Model(&permissionDomain.PermissionEntity{}),
-		roleModel:           db.Model(&roleDomain.RoleEntity{}),
-		rolePermissionModel: db.Model(&rolePermissionDomain.RolePermissionEntity{}),
+		userModel: db.Model(&userDomain.UserEntity{}),
+		roleModel: db.Model(&roleDomain.RoleEntity{}),
 	}
 }
 
@@ -91,7 +87,10 @@ func (user *UserRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed boo
 		user.userModel = user.userModel.Unscoped()
 	}
 
-	err := user.userModel.Where("id = ?", id).First(&userEntity).Error
+	err := user.userModel.
+		Preload("Roles").
+		First(&userEntity, id).
+		Error
 
 	return userEntity, err
 }
@@ -107,17 +106,32 @@ func (user *UserRepository) ForceDelete(ctx *gin.Context, id uuid.UUID) {
 	user.userModel.Unscoped().Delete(&userEntity, id)
 }
 
-func (user *UserRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.UserEntity) error {
+func (user *UserRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.UserEntity) {
 	user.userModel = user.userModel.WithContext(ctx)
-	err := user.userModel.Where("id = ?", id).Updates(&payload).Error
+	userEntity := &domain.UserEntity{}
+	if err := user.userModel.First(&userEntity, id).Error; err != nil {
+		panic(*exception.ServerErrorException("Failed to find user"))
+	}
 
-	return err
+	err := user.userModel.Model(&userEntity).Association("Roles").Replace(payload.Roles)
+	if err != nil {
+		fmt.Println(err)
+		panic(*exception.ServerErrorException("Failed to update user roles"))
+	}
+
+	err = user.userModel.Where("id = ?", id).Updates(&payload).Error
+	if err != nil {
+		panic(*exception.ServerErrorException("Failed to update user"))
+	}
 }
 
-func (user *UserRepository) Create(ctx *gin.Context, payload *domain.UserEntity) error {
+func (user *UserRepository) Create(ctx *gin.Context, payload *domain.UserEntity) {
 	user.userModel = user.userModel.WithContext(ctx)
 	err := user.userModel.Create(&payload).Error
-	return err
+
+	if err != nil {
+		panic(*exception.ServerErrorException("Failed to create user"))
+	}
 }
 
 func (user *UserRepository) IsEmailExist(ctx *gin.Context, email string) bool {
@@ -137,4 +151,26 @@ func (user *UserRepository) IsEmailExistExceptUserId(ctx *gin.Context, email str
 		Count(&count)
 
 	return count > 0
+}
+
+func (user *UserRepository) FindRoleByIds(ctx *gin.Context, ids []uuid.UUID) []roleDomain.RoleEntity {
+	user.roleModel = user.roleModel.WithContext(ctx)
+	var roleEntities []roleDomain.RoleEntity
+	err := user.roleModel.Where("id IN ?", ids).Find(&roleEntities).Error
+
+	if err != nil {
+		panic(*exception.BussinessException("Error finding roles"))
+	}
+
+	if len(roleEntities) == 0 {
+		panic(*exception.NotFoundException("Roles not found"))
+	}
+
+	return roleEntities
+}
+
+// Delete user's roles using association table without deleting the user
+func (user *UserRepository) DeleteUserRoles(ctx *gin.Context, id uuid.UUID) {
+	user.userModel = user.userModel.WithContext(ctx)
+	user.userModel.Association("Roles").Clear()
 }
