@@ -16,6 +16,33 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 )
 
+func NewHTTPClient(baseURL string) *Client {
+	return &Client{
+		BaseURL:    baseURL,
+		HTTPClient: &http.Client{},
+	}
+}
+
+func (client *Client) Get(endpoint string, headers *Headers, responseBody any) (any, error) {
+	return client.SendHTTPRequest(http.MethodGet, endpoint, headers, nil, responseBody)
+}
+
+func (client *Client) Post(endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
+	return client.SendHTTPRequest(http.MethodPost, endpoint, headers, requestBody, responseBody)
+}
+
+func (client *Client) Put(endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
+	return client.SendHTTPRequest(http.MethodPut, endpoint, headers, requestBody, responseBody)
+}
+
+func (client *Client) Patch(endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
+	return client.SendHTTPRequest(http.MethodPatch, endpoint, headers, requestBody, responseBody)
+}
+
+func (client *Client) Delete(endpoint string, headers *Headers, responseBody any) (any, error) {
+	return client.SendHTTPRequest(http.MethodDelete, endpoint, headers, nil, responseBody)
+}
+
 func (client *Client) SendHTTPRequest(method, endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
 	url := client.BaseURL + endpoint
 
