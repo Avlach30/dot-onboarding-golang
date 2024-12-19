@@ -15,13 +15,13 @@ type RoleRepository struct {
 
 func NewRoleRepository(db *gorm.DB) domain.RoleRepository {
 	return &RoleRepository{
-		model: db.Model(&domain.Role{}),
+		model: db.Model(&domain.RoleEntity{}),
 	}
 }
 
-func (role *RoleRepository) Pagination(ctx *gin.Context) ([]domain.Role, int) {
+func (role *RoleRepository) Pagination(ctx *gin.Context) ([]domain.RoleEntity, int) {
 	role.model = role.model.WithContext(ctx)
-	var roles []domain.Role
+	var roles []domain.RoleEntity
 	var total int64
 
 	// Query filter
@@ -74,61 +74,60 @@ func (role *RoleRepository) querySort(ctx *gin.Context) *gorm.DB {
 }
 
 // FindByKey implements domain.RoleRepository.
-func (role *RoleRepository) FindByKey(ctx *gin.Context, key string, trashed bool) (*domain.Role, error) {
+func (role *RoleRepository) FindByKey(ctx *gin.Context, key string, trashed bool) (*domain.RoleEntity, error) {
 	role.model = role.model.WithContext(ctx)
-	Role := &domain.Role{}
+	roleEntity := &domain.RoleEntity{}
 
 	if trashed {
 		role.model = role.model.Unscoped()
 	}
 
-	err := role.model.Where("key = ?", key).First(&Role).Error
+	err := role.model.Where("key = ?", key).First(&roleEntity).Error
 
-	return Role, err
+	return roleEntity, err
 }
 
-func (role *RoleRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*domain.Role, error) {
+func (role *RoleRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*domain.RoleEntity, error) {
 	role.model = role.model.WithContext(ctx)
-	Role := &domain.Role{}
+	roleEntity := &domain.RoleEntity{}
 	if trashed {
 		role.model = role.model.Unscoped()
 	}
 
 	err := role.model.
 		Preload("Permissions").
-		Where("id = ?", id).
-		First(&Role).
+		First(&roleEntity, id).
 		Error
 
-	return Role, err
+	return roleEntity, err
 }
 
-func (role *RoleRepository) FindByNameAndKey(ctx *gin.Context, name string, key string) (*domain.Role, error) {
+func (role *RoleRepository) FindByNameAndKey(ctx *gin.Context, name string, key string) (*domain.RoleEntity, error) {
 	role.model = role.model.WithContext(ctx)
-	Role := &domain.Role{}
-	role.model.First(&Role, "name = ? and key = ?", name, key)
+	roleEntity := &domain.RoleEntity{}
+	role.model.First(&roleEntity, "name = ? and key = ?", name, key)
 
-	return Role, nil
+	return roleEntity, nil
 }
 
 func (role *RoleRepository) Delete(ctx *gin.Context, id uuid.UUID) {
 	role.model = role.model.WithContext(ctx)
-	role.model.Delete(&domain.Role{}, id)
+	role.model.Delete(&domain.RoleEntity{}, id)
 }
 
 func (role *RoleRepository) ForceDelete(ctx *gin.Context, id uuid.UUID) {
 	role.model = role.model.WithContext(ctx)
-	Role := &domain.Role{}
-	role.model.Unscoped().Delete(&Role, id)
+	roleEntity := &domain.RoleEntity{}
+	role.model.Unscoped().Delete(&roleEntity, id)
 }
 
-func (role *RoleRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.Role) error {
+func (role *RoleRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.RoleEntity) error {
 	role.model = role.model.WithContext(ctx)
 	err := role.model.Where("id = ?", id).Updates(&payload).Error
 	return err
 }
 
-func (role *RoleRepository) Create(ctx *gin.Context, payload *domain.Role) error {
+func (role *RoleRepository) Create(ctx *gin.Context, payload *domain.RoleEntity) error {
 	role.model = role.model.WithContext(ctx)
 	err := role.model.Create(&payload).Error
 	return err

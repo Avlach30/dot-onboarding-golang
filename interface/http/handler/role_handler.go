@@ -44,7 +44,7 @@ func (roleHandler *RoleHandler) Pagination() gin.HandlerFunc {
 func (roleHandler *RoleHandler) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		roleRequest := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.RoleCreateRequest)
-		newRole := domain.Role{
+		newRole := domain.RoleEntity{
 			Key:  roleRequest.Key,
 			Name: roleRequest.Name,
 		}
@@ -79,7 +79,7 @@ func (roleHandler *RoleHandler) Update() gin.HandlerFunc {
 		roleRequest := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.RoleUpdateRequest)
 		paramId := ctx.Param("id")
 		id := utils.UUIDChecker(paramId)
-		updateRole := domain.Role{
+		updateRole := domain.RoleEntity{
 			Key:  roleRequest.Key,
 			Name: roleRequest.Name,
 		}

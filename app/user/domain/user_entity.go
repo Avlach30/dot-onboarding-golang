@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type User struct {
+type UserEntity struct {
 	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Name      string         `gorm:"size:255;not null" json:"name"`
 	Email     string         `gorm:"size:255;not null" json:"email"`
@@ -19,4 +19,8 @@ type User struct {
 
 	// Relations
 	Roles []domain.Role `gorm:"many2many:user_roles;" json:"roles"`
+}
+
+func (UserEntity) TableName() string {
+	return "users"
 }

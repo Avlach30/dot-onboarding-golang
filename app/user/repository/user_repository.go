@@ -22,17 +22,17 @@ type UserRepository struct {
 
 func NewUserRepository(db *gorm.DB) domain.UserRepository {
 	return &UserRepository{
-		userModel:           db.Model(&userDomain.User{}),
-		permissionModel:     db.Model(&permissionDomain.Permission{}),
-		roleModel:           db.Model(&roleDomain.Role{}),
-		rolePermissionModel: db.Model(&rolePermissionDomain.RolePermission{}),
+		userModel:           db.Model(&userDomain.UserEntity{}),
+		permissionModel:     db.Model(&permissionDomain.PermissionEntity{}),
+		roleModel:           db.Model(&roleDomain.RoleEntity{}),
+		rolePermissionModel: db.Model(&rolePermissionDomain.RolePermissionEntity{}),
 	}
 }
 
 // Pagination get user data with pagination
-func (user *UserRepository) Pagination(ctx *gin.Context) ([]domain.User, int) {
+func (user *UserRepository) Pagination(ctx *gin.Context) ([]domain.UserEntity, int) {
 	user.userModel = user.userModel.WithContext(ctx)
-	var users []domain.User
+	var users []domain.UserEntity
 	var total int64
 
 	// Query filter
@@ -84,37 +84,37 @@ func (user *UserRepository) querySort(ctx *gin.Context) *gorm.DB {
 	return user.userModel
 }
 
-func (user *UserRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*domain.User, error) {
+func (user *UserRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*domain.UserEntity, error) {
 	user.userModel = user.userModel.WithContext(ctx)
-	User := &domain.User{}
+	userEntity := &domain.UserEntity{}
 	if trashed {
 		user.userModel = user.userModel.Unscoped()
 	}
 
-	err := user.userModel.Where("id = ?", id).First(&User).Error
+	err := user.userModel.Where("id = ?", id).First(&userEntity).Error
 
-	return User, err
+	return userEntity, err
 }
 
 func (user *UserRepository) Delete(ctx *gin.Context, id uuid.UUID) {
 	user.userModel = user.userModel.WithContext(ctx)
-	user.userModel.Delete(&domain.User{}, id)
+	user.userModel.Delete(&domain.UserEntity{}, id)
 }
 
 func (user *UserRepository) ForceDelete(ctx *gin.Context, id uuid.UUID) {
 	user.userModel = user.userModel.WithContext(ctx)
-	User := &domain.User{}
-	user.userModel.Unscoped().Delete(&User, id)
+	userEntity := &domain.UserEntity{}
+	user.userModel.Unscoped().Delete(&userEntity, id)
 }
 
-func (user *UserRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.User) error {
+func (user *UserRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.UserEntity) error {
 	user.userModel = user.userModel.WithContext(ctx)
 	err := user.userModel.Where("id = ?", id).Updates(&payload).Error
 
 	return err
 }
 
-func (user *UserRepository) Create(ctx *gin.Context, payload *domain.User) error {
+func (user *UserRepository) Create(ctx *gin.Context, payload *domain.UserEntity) error {
 	user.userModel = user.userModel.WithContext(ctx)
 	err := user.userModel.Create(&payload).Error
 	return err

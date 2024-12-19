@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Role struct {
+type RoleEntity struct {
 	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"` // UUID primary key
 	Name      string         `gorm:"size:255;not null" json:"name"`
 	Key       string         `gorm:"size:255;not null" json:"key"`
@@ -17,5 +17,9 @@ type Role struct {
 	CreatedAt time.Time      `gorm:"autoCreateTime:true index" json:"created_at"`
 
 	// Relations
-	Permissions []domain.Permission `gorm:"many2many:role_permissions;" json:"permissions"`
+	Permissions []domain.PermissionEntity `gorm:"many2many:role_permissions;foreignKey:ID;joinForeignKey:role_id;References:ID;joinReferences:permission_id" json:"permissions"`
+}
+
+func (RoleEntity) TableName() string {
+	return "roles"
 }
