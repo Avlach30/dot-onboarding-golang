@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	roleDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
@@ -104,17 +106,32 @@ func (user *UserRepository) ForceDelete(ctx *gin.Context, id uuid.UUID) {
 	user.userModel.Unscoped().Delete(&userEntity, id)
 }
 
-func (user *UserRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.UserEntity) error {
+func (user *UserRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.UserEntity) {
 	user.userModel = user.userModel.WithContext(ctx)
-	err := user.userModel.Where("id = ?", id).Updates(&payload).Error
+	userEntity := &domain.UserEntity{}
+	if err := user.userModel.First(&userEntity, id).Error; err != nil {
+		panic(*exception.ServerErrorException("Failed to find user"))
+	}
 
-	return err
+	err := user.userModel.Model(&userEntity).Association("Roles").Replace(payload.Roles)
+	if err != nil {
+		fmt.Println(err)
+		panic(*exception.ServerErrorException("Failed to update user roles"))
+	}
+
+	err = user.userModel.Where("id = ?", id).Updates(&payload).Error
+	if err != nil {
+		panic(*exception.ServerErrorException("Failed to update user"))
+	}
 }
 
-func (user *UserRepository) Create(ctx *gin.Context, payload *domain.UserEntity) error {
+func (user *UserRepository) Create(ctx *gin.Context, payload *domain.UserEntity) {
 	user.userModel = user.userModel.WithContext(ctx)
 	err := user.userModel.Create(&payload).Error
-	return err
+
+	if err != nil {
+		panic(*exception.ServerErrorException("Failed to create user"))
+	}
 }
 
 func (user *UserRepository) IsEmailExist(ctx *gin.Context, email string) bool {
@@ -150,4 +167,10 @@ func (user *UserRepository) FindRoleByIds(ctx *gin.Context, ids []uuid.UUID) []r
 	}
 
 	return roleEntities
+}
+
+// Delete user's roles using association table without deleting the user
+func (user *UserRepository) DeleteUserRoles(ctx *gin.Context, id uuid.UUID) {
+	user.userModel = user.userModel.WithContext(ctx)
+	user.userModel.Association("Roles").Clear()
 }
