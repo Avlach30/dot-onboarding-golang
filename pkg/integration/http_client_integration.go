@@ -16,79 +16,21 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 )
 
-type Client struct {
-	BaseURL    string
-	HTTPClient *http.Client
-}
-
-type Headers struct {
-	Authorization string
-	ContentType   string
-}
-
-func NewClient(baseURL string) *Client {
-	return &Client{
-		BaseURL:    baseURL,
-		HTTPClient: &http.Client{},
-	}
-}
-
-func (client *Client) SendRequest(method, endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
+func (client *Client) SendHTTPRequest(method, endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
 	url := client.BaseURL + endpoint
-	var reqBody io.Reader
 
-	switch headers.ContentType {
-	case constant.ContentTypeJSON:
-		jsonBody, err := json.Marshal(requestBody)
-		if err != nil {
-			log.Printf("Error marshaling JSON: %v", err)
-			return nil, err
-		}
-		reqBody = bytes.NewBuffer(jsonBody)
-	case constant.ContentTypeXML:
-		xmlBody, err := xml.Marshal(requestBody)
-		if err != nil {
-			log.Printf("Error marshaling XML: %v", err)
-			return nil, err
-		}
-		reqBody = bytes.NewBuffer(xmlBody)
-	case constant.ContentTypeMultipartFormData:
-		formBody := &bytes.Buffer{}
-		writer := multipart.NewWriter(formBody)
-		for key, value := range requestBody.(map[string]string) {
-			err := writer.WriteField(key, value)
-			if err != nil {
-				log.Printf("Error writing form field: %v", err)
-				return nil, err
-			}
-		}
-		err := writer.Close()
-		if err != nil {
-			log.Printf("Error closing multipart writer: %v", err)
-			return nil, err
-		}
-		reqBody = formBody
-		headers.ContentType = writer.FormDataContentType()
-	case constant.ContentTypeForm:
-		formData := encodedUrl.Values{}
-		for key, value := range utils.StructToMap(requestBody, true) {
-			formData.Add(key, value)
-		}
-		reqBody = strings.NewReader(formData.Encode())
-	default:
-		log.Printf("Unsupported content type: %s", headers.ContentType)
-		return responseBody, fmt.Errorf("unsupported content type: %s", headers.ContentType)
+	reqBody, err := prepareRequestBody(headers.ContentType, requestBody)
+	if err != nil {
+		log.Printf("Error preparing request body: %v", err)
+		return nil, err
 	}
-
 	req, err := http.NewRequest(method, url, reqBody)
 	if err != nil {
 		log.Printf("Error creating request: %v", err)
 		return nil, err
 	}
 
-	req.Header.Set("Content-Type", headers.ContentType)
-	req.Header.Set("Authorization", headers.Authorization)
-
+	setHeaders(req, headers)
 	log.Println("=========================START HTTP REQUEST=========================")
 	logRequest(req)
 	resp, err := client.HTTPClient.Do(req)
@@ -100,61 +42,72 @@ func (client *Client) SendRequest(method, endpoint string, headers *Headers, req
 		return nil, err
 	}
 
-	resBodyReader := resp.Body
-	json.NewDecoder(resBodyReader).Decode(&responseBody)
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&responseBody)
+	if err != nil {
+		log.Printf("Error decoding response: %v", err)
+		return nil, err
+	}
 
 	return responseBody, nil
 }
 
-func (client *Client) Get(endpoint string, headers *Headers, responseBody any) (any, error) {
-	return client.SendRequest(http.MethodGet, endpoint, headers, nil, responseBody)
-}
-
-func (client *Client) Post(endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
-	return client.SendRequest(http.MethodPost, endpoint, headers, requestBody, responseBody)
-}
-
-func (client *Client) Put(endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
-	return client.SendRequest(http.MethodPut, endpoint, headers, requestBody, responseBody)
-}
-
-func (client *Client) Patch(endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
-	return client.SendRequest(http.MethodPatch, endpoint, headers, requestBody, responseBody)
-}
-
-func (client *Client) Delete(endpoint string, headers *Headers, responseBody any) (any, error) {
-	return client.SendRequest(http.MethodDelete, endpoint, headers, nil, responseBody)
-}
-
-func logResponse(response *http.Response) {
-	var responseBody []byte
-
-	log.Printf("Response Status : %s", response.Status)
-	log.Printf("Response Headers : %v", response.Header)
-
-	responseBody, err := io.ReadAll(response.Body)
-	if err != nil {
-		log.Printf("Error reading response body : %v", err)
-		return
+func prepareRequestBody(contentType string, requestBody interface{}) (io.Reader, error) {
+	switch contentType {
+	case constant.ContentTypeJSON:
+		return jsonBody(requestBody)
+	case constant.ContentTypeXML:
+		return xmlBody(requestBody)
+	case constant.ContentTypeMultipartFormData:
+		return multipartFormBody(requestBody)
+	case constant.ContentTypeForm:
+		return formBody(requestBody)
+	default:
+		return nil, fmt.Errorf("unsupported content type: %s", contentType)
 	}
-
-	defer response.Body.Close()
-
-	log.Printf("Response Body : %s", string(responseBody))
 }
 
-func logRequest(request *http.Request) {
-	var requestBody []byte
-
-	requestBody, err := io.ReadAll(request.Body)
+func jsonBody(requestBody interface{}) (io.Reader, error) {
+	jsonBody, err := json.Marshal(requestBody)
 	if err != nil {
-		log.Printf("Error reading request body: %v", err)
-		return
+		return nil, err
 	}
+	return bytes.NewBuffer(jsonBody), nil
+}
 
-	defer request.Body.Close()
+func xmlBody(requestBody interface{}) (io.Reader, error) {
+	xmlBody, err := xml.Marshal(requestBody)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewBuffer(xmlBody), nil
+}
 
-	log.Printf("Request %s URL : %s", request.Method, request.URL)
-	log.Printf("Request Headers : %s", request.Header)
-	log.Printf("Request Body : %s", utils.StructToMap(requestBody, true))
+func multipartFormBody(requestBody interface{}) (io.Reader, error) {
+	formBody := &bytes.Buffer{}
+	writer := multipart.NewWriter(formBody)
+	for key, value := range requestBody.(map[string]string) {
+		err := writer.WriteField(key, value)
+		if err != nil {
+			return nil, err
+		}
+	}
+	err := writer.Close()
+	if err != nil {
+		return nil, err
+	}
+	return formBody, nil
+}
+
+func formBody(requestBody interface{}) (io.Reader, error) {
+	formData := encodedUrl.Values{}
+	for key, value := range utils.StructToMap(requestBody, true) {
+		formData.Add(key, value)
+	}
+	return strings.NewReader(formData.Encode()), nil
+}
+
+func setHeaders(req *http.Request, headers *Headers) {
+	req.Header.Set("Content-Type", headers.ContentType)
+	req.Header.Set("Authorization", headers.Authorization)
 }

@@ -24,7 +24,7 @@ func GetAuthToken(code string) (string, error) {
 		Code:         code,
 	}
 
-	httpClientGetToken := integration.NewClient("")
+	httpClientGetToken := integration.NewHTTPClient("")
 
 	bearerTokenSSO := ""
 	{
@@ -56,7 +56,7 @@ func GetEmail(bearerTokenSSO string) (string, error) {
 			ContentType:   constant.ContentTypeJSON,
 		}
 
-		httpClientGetToken := integration.NewClient("")
+		httpClientGetToken := integration.NewHTTPClient("")
 		responseBody, err := httpClientGetToken.Get(userInfoUrl, &headersUserInfo, &dto.GetUserInfoResponse{})
 		userInfoResponse := responseBody.(*dto.GetUserInfoResponse)
 
