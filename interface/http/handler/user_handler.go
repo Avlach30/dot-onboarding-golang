@@ -43,13 +43,8 @@ func (userHandler *UserHandler) Pagination() gin.HandlerFunc {
 
 func (userHandler *UserHandler) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		userRequest := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.UserCreateRequest)
-		newUser := domain.UserEntity{
-			Name:     userRequest.Name,
-			Email:    userRequest.Email,
-			Password: userRequest.Password,
-		}
-		userHandler.userUsecase.Create(ctx, &newUser)
+		request := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.UserCreateRequest)
+		userHandler.userUsecase.Create(ctx, request)
 
 		ctx.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}

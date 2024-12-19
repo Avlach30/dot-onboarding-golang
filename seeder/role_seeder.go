@@ -3,7 +3,7 @@ package seeder
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 
@@ -25,7 +25,7 @@ func (roleSeeder *RoleSeeder) Handle(db *gorm.DB) error {
 	}
 	defer file.Close()
 
-	bytes, err := ioutil.ReadAll(file)
+	bytes, err := io.ReadAll(file)
 	if err != nil {
 		return fmt.Errorf("could not read JSON file: %v", err)
 	}

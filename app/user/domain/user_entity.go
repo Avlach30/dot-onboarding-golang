@@ -18,7 +18,7 @@ type UserEntity struct {
 	CreatedAt time.Time      `gorm:"autoCreateTime:true index" json:"created_at"`
 
 	// Relations
-	Roles []domain.Role `gorm:"many2many:user_roles;" json:"roles"`
+	Roles []domain.RoleEntity `gorm:"many2many:user_roles;foreignKey:ID;joinForeignKey:user_id;References:ID;joinReferences:role_id" json:"roles"`
 }
 
 func (UserEntity) TableName() string {

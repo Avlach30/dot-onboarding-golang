@@ -5,9 +5,9 @@ CREATE TABLE public.user_roles (
     user_id uuid NULL,
     role_id uuid NULL,
     deleted_at timestamptz NULL,
-	created_at timestamptz NULL
+    created_at timestamptz NULL,
 
-    CONSTRAINT role_permissions_pkey PRIMARY KEY (id),
+    CONSTRAINT user_roles_pkey PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (role_id) REFERENCES roles (id)
 );

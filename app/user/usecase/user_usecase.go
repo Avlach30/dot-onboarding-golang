@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -20,7 +21,7 @@ func (userUsecase *UserUsecase) Pagination(ctx *gin.Context) ([]domain.UserEntit
 }
 
 // Create implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Create(ctx *gin.Context, payload *domain.UserEntity) error {
+func (userUsecase *UserUsecase) Create(ctx *gin.Context, payload *dto.UserCreateRequest) error {
 	isUserExist := userUsecase.userRepo.IsEmailExist(ctx, payload.Email)
 
 	if isUserExist {
@@ -36,7 +37,23 @@ func (userUsecase *UserUsecase) Create(ctx *gin.Context, payload *domain.UserEnt
 
 	payload.Password = string(hashedPassword)
 
-	return userUsecase.userRepo.Create(ctx, payload)
+	// Get role by role id
+	roles := userUsecase.userRepo.FindRoleByIds(ctx, payload.RoleIds)
+
+	// Validate roles length is same with role ids
+	if len(roles) != len(payload.RoleIds) {
+		panic(*exception.BussinessException("Role not found"))
+	}
+
+	// Extract payload to entity
+	payloadEntity := domain.UserEntity{
+		Name:     payload.Name,
+		Email:    payload.Email,
+		Password: payload.Password,
+		Roles:    roles,
+	}
+
+	return userUsecase.userRepo.Create(ctx, &payloadEntity)
 }
 
 // Delete implements domain.UserUsecase.

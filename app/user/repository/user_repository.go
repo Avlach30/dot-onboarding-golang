@@ -3,9 +3,7 @@ package repository
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	permissionDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
 	roleDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
-	rolePermissionDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role_permission/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	userDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
@@ -14,18 +12,14 @@ import (
 )
 
 type UserRepository struct {
-	userModel           *gorm.DB
-	permissionModel     *gorm.DB
-	roleModel           *gorm.DB
-	rolePermissionModel *gorm.DB
+	userModel *gorm.DB
+	roleModel *gorm.DB
 }
 
 func NewUserRepository(db *gorm.DB) domain.UserRepository {
 	return &UserRepository{
-		userModel:           db.Model(&userDomain.UserEntity{}),
-		permissionModel:     db.Model(&permissionDomain.PermissionEntity{}),
-		roleModel:           db.Model(&roleDomain.RoleEntity{}),
-		rolePermissionModel: db.Model(&rolePermissionDomain.RolePermissionEntity{}),
+		userModel: db.Model(&userDomain.UserEntity{}),
+		roleModel: db.Model(&roleDomain.RoleEntity{}),
 	}
 }
 
@@ -91,7 +85,10 @@ func (user *UserRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed boo
 		user.userModel = user.userModel.Unscoped()
 	}
 
-	err := user.userModel.Where("id = ?", id).First(&userEntity).Error
+	err := user.userModel.
+		Preload("Roles").
+		First(&userEntity, id).
+		Error
 
 	return userEntity, err
 }
@@ -137,4 +134,20 @@ func (user *UserRepository) IsEmailExistExceptUserId(ctx *gin.Context, email str
 		Count(&count)
 
 	return count > 0
+}
+
+func (user *UserRepository) FindRoleByIds(ctx *gin.Context, ids []uuid.UUID) []roleDomain.RoleEntity {
+	user.roleModel = user.roleModel.WithContext(ctx)
+	var roleEntities []roleDomain.RoleEntity
+	err := user.roleModel.Where("id IN ?", ids).Find(&roleEntities).Error
+
+	if err != nil {
+		panic(*exception.BussinessException("Error finding roles"))
+	}
+
+	if len(roleEntities) == 0 {
+		panic(*exception.NotFoundException("Roles not found"))
+	}
+
+	return roleEntities
 }
