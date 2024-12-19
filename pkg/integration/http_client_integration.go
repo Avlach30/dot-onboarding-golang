@@ -16,13 +16,6 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 )
 
-func NewHTTPClient(baseURL string) *Client {
-	return &Client{
-		BaseURL:    baseURL,
-		HTTPClient: &http.Client{},
-	}
-}
-
 func (client *Client) Get(endpoint string, headers *Headers, responseBody any) (any, error) {
 	return client.SendHTTPRequest(http.MethodGet, endpoint, headers, nil, responseBody)
 }
