@@ -37,9 +37,9 @@ func Get[T any](key string, keyPairSingleton *KeyPairSingleton) any {
 
 		return result
 	default:
-		for _, person := range keyPairSingleton.KeyPairs {
-			if person.Key == constant.RuntimeGlobalStateKey+key {
-				return person.Value // Return the pointer to the found person
+		for _, keyPair := range keyPairSingleton.KeyPairs {
+			if keyPair.Key == constant.RuntimeGlobalStateKey+key {
+				return keyPair.Value // Return the pointer to the found keyPair
 			}
 		}
 	}
@@ -52,8 +52,8 @@ func (keyPairSingleton *KeyPairSingleton) Delete(key string) {
 	case "redis":
 		redisClient.Del(context.Background(), constant.RedisGlobalStatePrefixKey+key).Result()
 	default:
-		for i, person := range keyPairSingleton.KeyPairs {
-			if person.Key == constant.RuntimeGlobalStateKey+key {
+		for i, keyPair := range keyPairSingleton.KeyPairs {
+			if keyPair.Key == constant.RuntimeGlobalStateKey+key {
 				keyPairSingleton.KeyPairs = append(keyPairSingleton.KeyPairs[:i], keyPairSingleton.KeyPairs[i+1:]...)
 				break
 			}
