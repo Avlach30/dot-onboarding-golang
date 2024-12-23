@@ -21,6 +21,7 @@ type UserEntity struct {
 	Roles []domain.RoleEntity `gorm:"many2many:user_roles;foreignKey:ID;joinForeignKey:user_id;References:ID;joinReferences:role_id" json:"roles"`
 }
 
+// Specify the table name for the User struct
 func (UserEntity) TableName() string {
 	return "users"
 }

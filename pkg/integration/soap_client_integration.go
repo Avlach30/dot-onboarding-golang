@@ -24,6 +24,9 @@ func (client *Client) SendSOAPRequest(action string, headers *Headers, requestBo
 	if err != nil {
 		return nil, err
 	}
+
+	createLogIntegration(req, resp)
+
 	defer resp.Body.Close()
 
 	return processResponse(resp, responseBody)

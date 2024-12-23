@@ -35,6 +35,15 @@ func Run(db *gorm.DB, exec string) {
 		log.Fatalf("could not create migrate instance : %v", err)
 	}
 
+	// Check if migration is dirty and force it if needed
+	version, dirty, _ := m.Version()
+	if dirty {
+		fmt.Printf("Migration is dirty. Forcing version %d\n", version)
+		if err := m.Force(int(version)); err != nil {
+			log.Fatalf("failed to force migration version : %v", err)
+		}
+	}
+
 	// Execute migration based on user input
 	switch exec {
 	case "down":

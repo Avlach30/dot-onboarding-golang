@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/task"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/task/domain"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -22,6 +23,11 @@ type UtilsSingleton struct {
 // GetKeyPairs returns the singleton instance with a slice of key pairs
 func GetGlobalUtils() *UtilsSingleton {
 	return utilsSingleton
+}
+
+// GetKeyPairs returns the singleton instance with a slice of key pairs
+func GetDBUtil() *gorm.DB {
+	return dbUtil
 }
 
 func GetContextFromGinContext(ctx *gin.Context) *context.Context {
