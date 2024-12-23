@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	roleDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
-	userDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 	"gorm.io/gorm"
@@ -20,7 +19,7 @@ type UserRepository struct {
 
 func NewUserRepository(db *gorm.DB) domain.UserRepository {
 	return &UserRepository{
-		userModel: db.Model(&userDomain.UserEntity{}),
+		userModel: db.Model(&domain.UserEntity{}),
 		roleModel: db.Model(&roleDomain.RoleEntity{}),
 	}
 }
@@ -89,6 +88,7 @@ func (user *UserRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed boo
 
 	err := user.userModel.
 		Preload("Roles").
+		Preload("Roles.Permissions").
 		First(&userEntity, id).
 		Error
 

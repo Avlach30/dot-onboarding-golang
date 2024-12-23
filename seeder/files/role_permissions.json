@@ -1,0 +1,50 @@
+[
+    {
+        "role_key": "super-admin",
+        "permission_key": "create-user"
+    },
+    {
+        "role_key": "super-admin",
+        "permission_key": "read-user"
+    },
+    {
+        "role_key": "super-admin",
+        "permission_key": "update-user"
+    },
+    {
+        "role_key": "super-admin",
+        "permission_key": "delete-user"
+    },
+    {
+        "role_key": "super-admin",
+        "permission_key": "create-role"
+    },
+    {
+        "role_key": "super-admin",
+        "permission_key": "read-role"
+    },
+    {
+        "role_key": "super-admin",
+        "permission_key": "update-role"
+    },
+    {
+        "role_key": "super-admin",
+        "permission_key": "delete-role"
+    },
+    {
+        "role_key": "super-admin",
+        "permission_key": "create-permission"
+    },
+    {
+        "role_key": "super-admin",
+        "permission_key": "read-permission"
+    },
+    {
+        "role_key": "super-admin",
+        "permission_key": "update-permission"
+    },
+    {
+        "role_key": "super-admin",
+        "permission_key": "delete-permission"
+    }
+]
