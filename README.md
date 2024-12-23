@@ -11,7 +11,7 @@
     ```
 2. create migration by:
     ```cli
-    migrate create -ext sql -dir migration/files -seq [migration name]
+    go run main.go --migration true --exec create --fileName [fileName]
     ```
 3. copy .env.example to .env.[folder name] and change based yours
     ```cli
