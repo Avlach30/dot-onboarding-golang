@@ -30,6 +30,9 @@ import (
 	authUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/usecase"
 	fileUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/storage/usecase"
 
+	notificationRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/repository"
+	notificationUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/usecase"
+
 	"github.com/getsentry/sentry-go"
 	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
@@ -168,6 +171,7 @@ func initializeModule(db *gorm.DB, router *gin.Engine) {
 	roleRepo := roleRepo.NewRoleRepository(db)
 	permissionRepo := permissionRepo.NewPermissionRepository(db)
 	authRepo := authRepo.NewAuthRepository(db)
+	notificationRepo := notificationRepo.NewNotificationRepository(db)
 
 	// Initialize usecases
 	userUsecase := userUC.NewUserUsecase(userRepo)
@@ -175,6 +179,7 @@ func initializeModule(db *gorm.DB, router *gin.Engine) {
 	roleUsecase := roleUC.NewRoleUsecase(roleRepo)
 	authUsecase := authUC.NewAuthUsecase(authRepo)
 	fileUsecase := fileUC.NewFileUsecase()
+	notificationUsecase := notificationUC.NewNotificationUseCase(notificationRepo)
 
 	// Setup handlers
 	handler.NewUserHandler(router, userUsecase)
@@ -182,6 +187,7 @@ func initializeModule(db *gorm.DB, router *gin.Engine) {
 	handler.NewRoleHandler(router, roleUsecase)
 	handler.NewAuthHandler(router, authUsecase)
 	handler.NewCommonHandler(router, fileUsecase)
+	handler.NewNotificationHandler(router, notificationUsecase)
 }
 
 func healthCheck(router *gin.Engine) {
