@@ -52,9 +52,8 @@ func (client *Client) SendHTTPRequest(method, endpoint string, headers *Headers,
 
 	setHeaders(req, headers)
 	log.Println("=========================START HTTP REQUEST=========================")
-	logRequest(req)
 	resp, err := client.HTTPClient.Do(req)
-	logResponse(resp)
+	createLogIntegration(req, resp)
 	log.Println("==========================END HTTP REQUEST==========================")
 
 	if err != nil {

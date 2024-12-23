@@ -16,7 +16,7 @@ type RolePermissionEntity struct {
 	Role         roleDomain.RoleEntity             `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE" json:"role"`
 	Permisison   permissionDomain.PermissionEntity `gorm:"foreignKey:PermissionID;constraint:OnDelete:CASCADE" json:"permission"`
 	DeletedAt    gorm.DeletedAt                    `gorm:"index" json:"deleted_at,omitempty"`
-	UpdatedAt    time.Time                         `gorm:"column:some_data;autoUpdateTime:true;index" json:"updated_at"`
+	UpdatedAt    time.Time                         `gorm:"autoUpdateTime:true;index" json:"updated_at"`
 	CreatedAt    time.Time                         `gorm:"autoCreateTime:true;index" json:"created_at"`
 }
 

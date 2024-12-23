@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"time"
 
@@ -32,8 +31,6 @@ func (authUseCase *AuthUsecase) SignInByOIDCCode(context *context.Context, code 
 	if err != nil || emailSSO == "" {
 		panic(*exception.UnauthorizedException("Not Valid Code"))
 	}
-
-	log.Println(emailSSO)
 
 	user, err := authUseCase.authRepo.FindUserByEmail(context, emailSSO)
 	if err != nil || user.ID == uuid.Nil {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/storage"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/task"
 	"gorm.io/gorm"
 )
@@ -13,19 +14,25 @@ import (
 var (
 	once              sync.Once
 	utilsSingleton    *UtilsSingleton
+	storageSingleton  *StorageSingleton
 	dbUtil            *gorm.DB
 	singletonInstance *KeyPairSingleton
 	redisClient       *redis.Client
 )
 
 // GetKeyPairs returns the singleton instance with a slice of key pairs
-func InitGlobal(workers *task.Workers, db *gorm.DB) {
+func InitGlobal(workers *task.Workers, db *gorm.DB, storageManager *storage.StorageManager) {
 	once.Do(func() {
 
 		// global worker
 		utilsSingleton = &UtilsSingleton{
 			Workers:           workers,
 			ListRegisteredJob: &task.ListRegisteredJob{},
+		}
+
+		// global storage
+		storageSingleton = &StorageSingleton{
+			StorageManager: storageManager,
 		}
 
 		// ini db for global util

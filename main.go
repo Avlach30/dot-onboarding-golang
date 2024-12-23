@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"net/http"
+	"os"
 	"strings"
 
 	"fmt"
@@ -12,6 +13,7 @@ import (
 
 	handler "gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/handler"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/seeder"
+	"gorm.io/gorm"
 
 	userRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/repository"
 	userUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/usecase"
@@ -26,6 +28,7 @@ import (
 	authJob "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/job"
 	authRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/repository"
 	authUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/usecase"
+	fileUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/storage/usecase"
 
 	"github.com/getsentry/sentry-go"
 	sentrygin "github.com/getsentry/sentry-go/gin"
@@ -35,36 +38,51 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/dbconn"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/storage"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/task"
 )
 
 func main() {
-	db, err := dbconn.InitDb(
-		&dbconn.DatabaseCredentials{
-			Host:     config.DBHost,
-			Username: config.DBUsername,
-			Password: config.DBPassword,
-			Port:     config.DBPort,
-			Name:     config.DBName,
-			TimeZome: config.DBTimeZone,
-		},
-	)
+	db := initializeDatabase()
+	handleMigrationAndSeeding(db)
+
+	storageManager := initializeStorageManager()
+	initializeWorkers(db, storageManager)
+
+	router := setupRouter()
+	initializeSentry()
+
+	initializeModule(db, router)
+	if err := router.Run(":" + config.AppPort); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
+}
+
+func initializeDatabase() *gorm.DB {
+	db, err := dbconn.InitDb(&dbconn.DatabaseCredentials{
+		Host:     config.DBHost,
+		Username: config.DBUsername,
+		Password: config.DBPassword,
+		Port:     config.DBPort,
+		Name:     config.DBName,
+		TimeZome: config.DBTimeZone,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
+	return db
+}
 
-	// migration run
-	runMigration := flag.String("migration", "none", "")
-	runSeeder := flag.String("dbseed", "none", "")
-
+func handleMigrationAndSeeding(db *gorm.DB) {
+	runMigration := flag.String("migration", "false", "Args (e.g., --migration [true/false]")
+	runSeeder := flag.String("dbseed", "false", "")
 	argsSeedClass := flag.String("class", "", "Add multiple values (e.g., --class UserSeed,RoleSeeder)")
 	execMigration := flag.String("exec", "up", "")
-
 	flag.Parse()
 
 	if *runMigration == "true" {
 		migration.Run(db, *execMigration)
-		return
+		os.Exit(0)
 	}
 
 	if *runSeeder == "true" {
@@ -72,74 +90,93 @@ func main() {
 		if *argsSeedClass == "" {
 			classes = nil
 		}
-
 		if err := seeder.Run(db, classes); err != nil {
 			log.Fatal(err)
 		}
-		return
+		os.Exit(0)
+	}
+}
+
+func initializeStorageManager() storage.StorageManager {
+	var storageManager storage.StorageManager
+	var err error
+
+	switch config.Storage {
+	case "gcs":
+		storageManager, err = storage.NewGCSManager()
+	case "s3":
+		storageManager, err = storage.NewS3Manager()
+	case "minio":
+		storageManager, err = storage.NewMinIOManager()
+	default:
+		log.Fatalf("Unsupported storage type: %s", config.Storage)
 	}
 
-	// init worker
+	if err != nil {
+		log.Fatalf("Failed to initialize storage manager: %v", err)
+	}
+
+	return storageManager
+}
+
+func initializeWorkers(db *gorm.DB, storageManager storage.StorageManager) {
 	workers := task.InitQueueWorkerTask()
-	singleton.InitGlobal(workers, db)
+	singleton.InitGlobal(workers, db, &storageManager)
 
-	// init all jobs as you want
-	singleton.AddJobDictionary(authJob.InitJob())
+	withJobExecutor := flag.String("withJobExecutor", "true", "")
+	if *withJobExecutor == "true" {
+		singleton.AddJobDictionary(authJob.InitJob())
+		go singleton.ExecuteJobTask()
 
-	go singleton.ExecuteJobTask()
+		schedulerExecutor := task.InitAllSchedulerTask()
+		go schedulerExecutor.RunScheduler()
+	}
 
-	// exec in diff goroutine
-	schedulerExecutor := task.InitAllSchedulerTask()
-	go schedulerExecutor.RunScheduler()
-
-	// exec in diff goroutine
 	go task.RunAllActiveWorker(workers)
+}
 
+func setupRouter() *gin.Engine {
 	router := gin.New()
 	gin.SetMode(config.GinMode)
+	router.Use(sentrygin.New(sentrygin.Options{}))
+	router.Use(handler.RecoverPanic())
+	healthCheck(router)
+	return router
+}
 
+func initializeSentry() {
 	tracesSampleRate, _ := strconv.ParseFloat(config.SentrySampleTrace, 64)
-
-	// To initialize Sentry's handler, you need to initialize Sentry itself beforehand
 	if err := sentry.Init(sentry.ClientOptions{
 		Dsn:              config.SentryDSN,
 		EnableTracing:    true,
 		TracesSampleRate: tracesSampleRate,
 	}); err != nil {
-		fmt.Printf("Sentry initialization failed : %v\n", err)
+		fmt.Printf("Sentry initialization failed: %v\n", err)
 	} else {
 		fmt.Println("Sentry initialized")
 	}
+}
 
-	// Create an instance of sentryhttp
-	sentryHandlerGin := sentrygin.New(sentrygin.Options{})
+func initializeModule(db *gorm.DB, router *gin.Engine) {
+	// Initialize repositories
+	userRepo := userRepo.NewUserRepository(db)
+	roleRepo := roleRepo.NewRoleRepository(db)
+	permissionRepo := permissionRepo.NewPermissionRepository(db)
+	authRepo := authRepo.NewAuthRepository(db)
 
-	// repository
-	userRepository := userRepo.NewUserRepository(db)
-	roleRepository := roleRepo.NewRoleRepository(db)
-	permissionRepository := permissionRepo.NewPermissionRepository(db)
-	authRepository := authRepo.NewAuthRepository(db)
+	// Initialize usecases
+	userUsecase := userUC.NewUserUsecase(userRepo)
+	permissionUsecase := permissionUC.NewPermissionUsecase(permissionRepo)
+	roleUsecase := roleUC.NewRoleUsecase(roleRepo)
+	authUsecase := authUC.NewAuthUsecase(authRepo)
+	fileUsecase := fileUC.NewFileUsecase()
 
-	// usecase
-	userUsecase := userUC.NewUserUsecase(userRepository)
-	permissionUsecase := permissionUC.NewPermissionUsecase(permissionRepository)
-	roleUsecase := roleUC.NewRoleUsecase(roleRepository)
-	authUsecase := authUC.NewAuthUsecase(authRepository)
-
-	// middware at main.go
-	router.Use(sentryHandlerGin)
-	router.Use(handler.RecoverPanic())
-
-	healthCheck(router)
-
+	// Setup handlers
 	handler.NewUserHandler(router, userUsecase)
 	handler.NewPermissionHandler(router, permissionUsecase)
 	handler.NewRoleHandler(router, roleUsecase)
 	handler.NewAuthHandler(router, authUsecase)
-
-	if err := router.Run(":" + config.AppPort); err != nil {
-		log.Fatalf("Failed to start server : %v", err)
-	}
+	handler.NewCommonHandler(router, fileUsecase)
 }
 
 func healthCheck(router *gin.Engine) {
