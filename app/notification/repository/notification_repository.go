@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
@@ -19,7 +20,7 @@ func NewNotificationRepository(db *gorm.DB) domain.NotificationRepository {
 }
 
 // Pagination get notification data with pagination
-func (notification *NotificationRepository) Pagination(ctx *gin.Context) ([]domain.NotificationEntity, int) {
+func (notification *NotificationRepository) Pagination(ctx *gin.Context, userId uuid.UUID) ([]domain.NotificationEntity, int) {
 	notification.notificationModel = notification.notificationModel.WithContext(ctx)
 	var notifications []domain.NotificationEntity
 	var total int64
@@ -31,6 +32,7 @@ func (notification *NotificationRepository) Pagination(ctx *gin.Context) ([]doma
 
 	notification.notificationModel.Session(&gorm.Session{}).
 		Scopes(utils.Paginate(ctx)).
+		Where("user_id = ?", userId).
 		Find(&notifications).
 		Count(&total)
 
@@ -61,12 +63,13 @@ func (notification *NotificationRepository) querySort(ctx *gin.Context) *gorm.DB
 }
 
 // HasUnread check if user has unread notification
-func (notification *NotificationRepository) HasUnread(ctx *gin.Context) bool {
+func (notification *NotificationRepository) HasUnread(ctx *gin.Context, userId uuid.UUID) bool {
 	notification.notificationModel = notification.notificationModel.WithContext(ctx)
 	var total int64
 
 	err := notification.notificationModel.
 		Where("is_read = ?", false).
+		Where("user_id = ?", userId).
 		Count(&total).Error
 
 	if err != nil {
@@ -77,11 +80,12 @@ func (notification *NotificationRepository) HasUnread(ctx *gin.Context) bool {
 }
 
 // MarkAsRead mark notification as read
-func (notification *NotificationRepository) MarkAsRead(ctx *gin.Context, id string) {
+func (notification *NotificationRepository) MarkAsRead(ctx *gin.Context, id string, userId uuid.UUID) {
 	notification.notificationModel = notification.notificationModel.WithContext(ctx)
 
 	err := notification.notificationModel.
 		Where("id = ?", id).
+		Where("user_id = ?", userId).
 		Update("is_read", true).Error
 
 	if err != nil {
