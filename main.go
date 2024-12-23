@@ -78,10 +78,15 @@ func handleMigrationAndSeeding(db *gorm.DB) {
 	runSeeder := flag.String("dbseed", "false", "")
 	argsSeedClass := flag.String("class", "", "Add multiple values (e.g., --class UserSeed,RoleSeeder)")
 	execMigration := flag.String("exec", "up", "")
+	fileName := flag.String("fileName", "", "Migration file name")
 	flag.Parse()
 
 	if *runMigration == "true" {
-		migration.Run(db, *execMigration)
+		if *execMigration == "create" {
+			migration.Create(db, *fileName)
+		} else {
+			migration.Run(db, *execMigration)
+		}
 		os.Exit(0)
 	}
 

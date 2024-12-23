@@ -3,6 +3,8 @@ package migration
 import (
 	"fmt"
 	"log"
+	"os"
+	"time"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -10,6 +12,24 @@ import (
 	_ "github.com/lib/pq"
 	"gorm.io/gorm"
 )
+
+func Create(db *gorm.DB, fileName string) {
+	if fileName != "" {
+		now := time.Now().Format("20060102150405")
+		upFileName := fmt.Sprintf("migration/files/%s_%s.up.sql", now, fileName)
+		downFileName := fmt.Sprintf("migration/files/%s_%s.down.sql", now, fileName)
+
+		if err := os.WriteFile(upFileName, []byte("-- Write your UP migration SQL here"), 0644); err != nil {
+			log.Fatalf("failed to create up migration file : %v", err)
+		}
+
+		if err := os.WriteFile(downFileName, []byte("-- Write your DOWN migration SQL here"), 0644); err != nil {
+			log.Fatalf("failed to create down migration file : %v", err)
+		}
+
+		fmt.Printf("Created migration files:\n%s\n%s\n", upFileName, downFileName)
+	}
+}
 
 func Run(db *gorm.DB, exec string) {
 	db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"") // Create UUID extension
