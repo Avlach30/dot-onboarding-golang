@@ -116,8 +116,10 @@ func initializeStorageManager() storage.StorageManager {
 		storageManager, err = storage.NewS3Manager()
 	case "minio":
 		storageManager, err = storage.NewMinIOManager()
+	case "local":
+		log.Println("You are using local storage")
 	default:
-		log.Fatalf("Unsupported storage type: %s", config.Storage)
+		log.Fatalf("Invalid storage type: %s", config.Storage)
 	}
 
 	if err != nil {
