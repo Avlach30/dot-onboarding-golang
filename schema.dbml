@@ -1,0 +1,132 @@
+// Table definitions
+
+Table job_faileds {
+  id uuid [pk, default: uuid_generate_v4()]
+  job_id varchar(255)
+  error_message varchar(255)
+  deleted_at timestamptz
+  updated_at timestamptz
+  created_at timestamptz
+}
+
+Index idx_job_faileds_deleted_at {
+  table: job_faileds
+  columns: deleted_at
+}
+
+Table jobs {
+  id uuid [pk, default: uuid_generate_v4()]
+  task_name varchar(255)
+  payload text
+  booked boolean [default: false]
+  deleted_at timestamptz
+  updated_at timestamptz
+  created_at timestamptz
+}
+
+Index idx_jobs_deleted_at {
+  table: jobs
+  columns: deleted_at
+}
+
+Table permissions {
+  id uuid [pk, default: uuid_generate_v4()]
+  "name" varchar(255)
+  "key" varchar(255) [unique]
+  deleted_at timestamptz
+  updated_at timestamptz
+  created_at timestamptz
+}
+
+Index idx_permissions_deleted_at {
+  table: permissions
+  columns: deleted_at
+}
+
+Table roles {
+  id uuid [pk, default: uuid_generate_v4()]
+  "name" varchar(255)
+  "key" varchar(255) [unique]
+  deleted_at timestamptz
+  updated_at timestamptz
+  created_at timestamptz
+}
+
+Index idx_roles_deleted_at {
+  table: roles
+  columns: deleted_at
+}
+
+Table schema_migrations {
+  version int8 [pk]
+  dirty boolean
+}
+
+Table users {
+  id uuid [pk, default: uuid_generate_v4()]
+  "name" varchar(255)
+  email varchar(255)
+  "password" varchar(255)
+  deleted_at timestamptz
+  updated_at timestamptz
+  created_at timestamptz
+}
+
+Index idx_users_deleted_at {
+  table: users
+  columns: deleted_at
+}
+
+Table notifications {
+  id uuid [pk, default: uuid_generate_v4()]
+  title varchar(255)
+  "content" varchar(255)
+  is_read boolean [default: false]
+  href varchar(255)
+  deleted_at timestamp
+  updated_at timestamp [default: CURRENT_TIMESTAMP]
+  created_at timestamp [default: CURRENT_TIMESTAMP]
+  user_id uuid [ref: > users.id]
+}
+
+Index idx_notifications_user_id_and_is_read {
+  table: notifications
+  columns: user_id, is_read
+}
+
+Table role_permissions {
+  id uuid [pk, default: uuid_generate_v4()]
+  role_id uuid [ref: > roles.id, null]
+  permission_id uuid [ref: > permissions.id, null]
+  deleted_at timestamptz
+  some_data timestamptz
+  created_at timestamptz
+}
+
+Index idx_composite_role_permission {
+  table: role_permissions
+  columns: role_id, permission_id
+}
+
+Index idx_role_permissions_created_at {
+  table: role_permissions
+  columns: created_at
+}
+
+Index idx_role_permissions_deleted_at {
+  table: role_permissions
+  columns: deleted_at
+}
+
+Index idx_role_permissions_updated_at {
+  table: role_permissions
+  columns: some_data
+}
+
+Table user_roles {
+  id uuid [pk, default: uuid_generate_v4()]
+  user_id uuid [ref: > users.id]
+  role_id uuid [ref: > roles.id]
+  deleted_at timestamptz
+  created_at timestamptz
+}
