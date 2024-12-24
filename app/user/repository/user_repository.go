@@ -115,7 +115,7 @@ func (user *UserRepository) Update(httpContext *gin.Context, id uuid.UUID, paylo
 		}
 
 		// Update roles within transaction
-		if err := tx.Model(&userEntity).Association("Roless").Replace(payload.Roles); err != nil {
+		if err := tx.Model(&userEntity).Association("Roles").Replace(payload.Roles); err != nil {
 			return err
 		}
 
