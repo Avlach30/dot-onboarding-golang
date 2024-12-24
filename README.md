@@ -61,3 +61,12 @@ The **Queue** running in diff goroutine, set your task global using this example
     singleton.DelegateStandalone("AuthSomeStandaonle", "string", &authTask.StandaloneJobTask{})
     ```
 Note: Remember the payload type, example can be found at `app/auth/job`
+
+The **Logger** log the message whatever u want
+1. define log driver inside your .env with LOG_DRIVER, if LOG_DRIVER is file. config the LOG_FOLDER_PATH as u want
+4. now you can use your log anywhere with speciic [category], otherwise default
+    ```
+    log.Println("[activity] some activity")
+    log.Println("[integration] some integration")
+    log.Println("[etc] some etc")
+    ```

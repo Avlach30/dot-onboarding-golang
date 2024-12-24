@@ -58,5 +58,6 @@ var (
 	GCSCredentialsFilePath = Get("GCS_CREDENTIAL_FILE_PATH", "")
 	GCSBucketName          = Get("GCS_BUCKET_NAME", "")
 
-	LogDriver = Get("LOG_DRIVER", "file")
+	LogDriver     = Get("LOG_DRIVER", "file")
+	LogFolderPath = Get("LOG_FOLDER_PATH", "log")
 )
