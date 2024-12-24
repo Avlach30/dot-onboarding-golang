@@ -13,17 +13,21 @@ import (
 	"gorm.io/gorm"
 )
 
+type SchemaMigration struct {
+	Version int64
+}
+
 func Create(db *gorm.DB, fileName string) {
 	if fileName != "" {
 		now := time.Now().Format("20060102150405")
 		upFileName := fmt.Sprintf("migration/files/%s_%s.up.sql", now, fileName)
 		downFileName := fmt.Sprintf("migration/files/%s_%s.down.sql", now, fileName)
 
-		if err := os.WriteFile(upFileName, []byte("-- Write your UP migration SQL here"), 0644); err != nil {
+		if err := os.WriteFile(upFileName, []byte(""), 0644); err != nil {
 			log.Fatalf("failed to create up migration file : %v", err)
 		}
 
-		if err := os.WriteFile(downFileName, []byte("-- Write your DOWN migration SQL here"), 0644); err != nil {
+		if err := os.WriteFile(downFileName, []byte(""), 0644); err != nil {
 			log.Fatalf("failed to create down migration file : %v", err)
 		}
 
@@ -67,9 +71,19 @@ func Run(db *gorm.DB, exec string) {
 	// Execute migration based on user input
 	switch exec {
 	case "down":
-		err = m.Down()
+		err = m.Steps(-1)
 		if err != nil && err != migrate.ErrNoChange {
 			log.Fatalf("failed to run down migration : %v", err)
+		}
+	case "fresh":
+		err = m.Down()
+		if err != nil && err != migrate.ErrNoChange {
+			log.Fatalf("failed to run down all migration : %v", err)
+		}
+
+		err = m.Up()
+		if err != nil && err != migrate.ErrNoChange {
+			log.Fatalf("failed to run up migration : %v", err)
 		}
 	default:
 		err = m.Up()

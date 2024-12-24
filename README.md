@@ -19,7 +19,7 @@
     ```
 4. do migrate up or down:
     ```cli
-    go run main.go --migration true --exec [up,down]
+    go run main.go --migration true --exec [up,down,fresh]
     ```
 5. do seed your data:
     ```cli
