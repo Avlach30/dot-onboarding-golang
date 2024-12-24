@@ -32,7 +32,7 @@ func IsAnyIntersect(slice1, slice2 []string) bool {
 }
 
 // Function to map struct to map[string]string
-func StructToMap(input interface{}, setKeyToSnakeCase bool) map[string]string {
+func StructToMap(input interface{}, setKeyStringToSnakeCase bool) map[string]string {
 	result := make(map[string]string)
 
 	// Use reflection to iterate over struct fields
@@ -70,8 +70,8 @@ func StructToMap(input interface{}, setKeyToSnakeCase bool) map[string]string {
 		}
 
 		key := fieldType.Name
-		if setKeyToSnakeCase {
-			key = ToSnakeCase(fieldType.Name)
+		if setKeyStringToSnakeCase {
+			key = StringToSnakeCase(fieldType.Name)
 		}
 
 		// Add the field value to the map using the field name as the key

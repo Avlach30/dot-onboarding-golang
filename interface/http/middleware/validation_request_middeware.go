@@ -21,7 +21,7 @@ func ValidateRequestJSON[T any](obj *T) gin.HandlerFunc {
 
 				for _, validationErr := range validationErrors {
 					errors = append(errors, pkg.ErrorValidation{
-						Key:     utils.ToSnakeCase(validationErr.Field()), // Fully qualified field name
+						Key:     utils.StringToSnakeCase(validationErr.Field()), // Fully qualified field name
 						Message: fmt.Sprintf("Error %s", validationErr.Tag()),
 					})
 				}
@@ -48,7 +48,7 @@ func ValidateRequestFormData[T any](obj *T) gin.HandlerFunc {
 
 				for i, validationErr := range validationErrors {
 					errors[i] = pkg.ErrorValidation{
-						Key:     utils.ToSnakeCase(validationErr.Field()),
+						Key:     utils.StringToSnakeCase(validationErr.Field()),
 						Message: fmt.Sprintf("Error %s", validationErr.Tag()),
 					}
 				}

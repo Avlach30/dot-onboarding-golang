@@ -49,7 +49,7 @@ func GetPresignURLUpload(targetPath string) (string, error) {
 		presignedURL, err := storageManager.GeneratePresignURL("put", targetPath, uploadDuration)
 		return presignedURL, err
 	default:
-		return "", fmt.Errorf("Not Support For PresignURL")
+		return "", fmt.Errorf("not support for presignURL")
 	}
 }
 
@@ -84,7 +84,7 @@ func GetPresignURLDownload(targetPath string) (string, error) {
 		presignedURL, err := storageManager.GeneratePresignURL("get", targetPath, uploadDuration)
 		return presignedURL, err
 	default:
-		return "", fmt.Errorf("Not Support For PresignURL")
+		return "", fmt.Errorf("not support for presignURL")
 	}
 }
 
