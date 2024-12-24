@@ -43,22 +43,54 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/storage"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/task"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
+)
+
+var (
+	execMigration     *string
+	runMigration      *string
+	migrationFileName *string
+
+	runSeeder   *string
+	seederClass *string
 )
 
 func main() {
+	initializeLog()
+
+	extractArgs()
+
 	db := initializeDatabase()
+
 	handleMigrationAndSeeding(db)
 
 	storageManager := initializeStorageManager()
+
 	initializeWorkers(db, storageManager)
 
 	router := setupRouter()
+
 	initializeSentry()
 
 	initializeModule(db, router)
+
+	log.Printf("Starting server on port %s...", config.AppPort)
 	if err := router.Run(":" + config.AppPort); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+func extractArgs() {
+	// migration args requirement
+	execMigration = flag.String("exec", "up", "Args (e.g., --migration [up/down/fresh]")
+	runMigration = flag.String("migration", "false", "Args (e.g., --migration [true/false]")
+	migrationFileName = flag.String("fileName", "", "Migration file name")
+
+	// seeder args requirement
+	runSeeder = flag.String("dbseed", "false", "")
+	seederClass = flag.String("class", "", "Add multiple values (e.g., --class UserSeed,RoleSeeder,...)")
+
+	flag.Parse()
 }
 
 func initializeDatabase() *gorm.DB {
@@ -76,17 +108,15 @@ func initializeDatabase() *gorm.DB {
 	return db
 }
 
-func handleMigrationAndSeeding(db *gorm.DB) {
-	runMigration := flag.String("migration", "false", "Args (e.g., --migration [true/false]")
-	runSeeder := flag.String("dbseed", "false", "")
-	argsSeedClass := flag.String("class", "", "Add multiple values (e.g., --class UserSeed,RoleSeeder)")
-	execMigration := flag.String("exec", "up", "")
-	fileName := flag.String("fileName", "", "Migration file name")
-	flag.Parse()
+func initializeLog() {
+	logWriter := utils.NewLogWriter()
+	log.SetOutput(logWriter)
+}
 
+func handleMigrationAndSeeding(db *gorm.DB) {
 	if *runMigration == "true" {
 		if *execMigration == "create" {
-			migration.Create(db, *fileName)
+			migration.Create(db, *migrationFileName)
 		} else {
 			migration.Run(db, *execMigration)
 		}
@@ -94,10 +124,11 @@ func handleMigrationAndSeeding(db *gorm.DB) {
 	}
 
 	if *runSeeder == "true" {
-		classes := strings.Split(*argsSeedClass, ",")
-		if *argsSeedClass == "" {
-			classes = nil
+		var classes []string = nil
+		if *seederClass != "" {
+			classes = strings.Split(*seederClass, ",")
 		}
+
 		if err := seeder.Run(db, classes); err != nil {
 			log.Fatal(err)
 		}
@@ -117,7 +148,6 @@ func initializeStorageManager() storage.StorageManager {
 	case "minio":
 		storageManager, err = storage.NewMinIOManager()
 	case "local":
-		log.Println("You are using local storage")
 	default:
 		log.Fatalf("Invalid storage type: %s", config.Storage)
 	}

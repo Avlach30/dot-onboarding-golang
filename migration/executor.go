@@ -1,6 +1,7 @@
 package migration
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -36,39 +37,58 @@ func Create(db *gorm.DB, fileName string) {
 }
 
 func Run(db *gorm.DB, exec string) {
-	db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"") // Create UUID extension
+	// Create UUID extension
+	db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
 
 	// Extract raw SQL DB from GORM
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Fatalf("failed to get raw DB from GORM : %v", err)
+		log.Fatalf("Failed to get raw DB from GORM: %v", err)
 	}
 
-	// Initialize migrate with the PostgreSQL driver
+	// Initialize migrator
+	migrator, err := initializeMigrator(sqlDB)
+	if err != nil {
+		log.Fatalf("Failed to initialize migrator: %v", err)
+	}
+
+	// Handle dirty migrations
+	handleDirtyMigration(migrator)
+	// Execute migration based on user input
+	err = executeMigration(migrator, exec)
+	if err != nil {
+		log.Fatalf("Migration failed: %v", err)
+	}
+	fmt.Println("Migration applied successfully!")
+}
+
+func initializeMigrator(sqlDB *sql.DB) (*migrate.Migrate, error) {
 	driver, err := postgres.WithInstance(sqlDB, &postgres.Config{})
 	if err != nil {
-		log.Fatalf("could not create postgres driver : %v", err)
+		return nil, fmt.Errorf("could not create postgres driver: %v", err)
 	}
 
-	m, err := migrate.NewWithDatabaseInstance(
-		"file://migration/files", // Path to migration files
-		"postgres",               // Database name
-		driver,
-	)
+	m, err := migrate.NewWithDatabaseInstance("file://migration/files", "postgres", driver)
 	if err != nil {
-		log.Fatalf("could not create migrate instance : %v", err)
+		return nil, fmt.Errorf("could not create migrate instance: %v", err)
 	}
 
-	// Check if migration is dirty and force it if needed
+	return m, nil
+}
+
+func handleDirtyMigration(m *migrate.Migrate) {
 	version, dirty, _ := m.Version()
 	if dirty {
 		fmt.Printf("Migration is dirty. Forcing version %d\n", version)
 		if err := m.Force(int(version)); err != nil {
-			log.Fatalf("failed to force migration version : %v", err)
+			log.Fatalf("Failed to force migration version: %v", err)
 		}
 	}
+}
 
-	// Execute migration based on user input
+func executeMigration(m *migrate.Migrate, exec string) error {
+	var err error
+
 	switch exec {
 	case "down":
 		err = m.Steps(-1)
@@ -87,10 +107,11 @@ func Run(db *gorm.DB, exec string) {
 		}
 	default:
 		err = m.Up()
-		if err != nil && err != migrate.ErrNoChange {
-			log.Fatalf("failed to run up migration : %v", err)
-		}
 	}
 
-	fmt.Println("Migration applied successfully!")
+	if err == migrate.ErrNoChange {
+		err = nil
+	}
+
+	return err
 }
