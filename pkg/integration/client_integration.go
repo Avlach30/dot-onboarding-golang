@@ -6,11 +6,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/integration/domain"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/integration/repository"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 )
 
 type Client struct {
@@ -32,22 +27,12 @@ func NewClient(baseURL string) *Client {
 }
 
 func createLogIntegration(request *http.Request, response *http.Response) error {
+	logRequest(request)
+	logResponse(response)
 
-	req := logRequest(request)
-	res := logResponse(response)
+	// do whatever u want to do with log, insert DB, or etc
 
-	if config.LogDriver != "database" {
-		return nil
-	}
-
-	logIntegrationRepo := repository.NewLogIntegrationRepository(singleton.GetDBUtil())
-	return logIntegrationRepo.CreateLogIntegration(&domain.LogIntegrationEntity{
-		URL:      request.Method + " " + request.URL.String(),
-		Request:  req,
-		Response: res,
-		Status:   response.Status,
-		Scheme:   "HTTP",
-	})
+	return nil
 }
 
 func logResponse(response *http.Response) string {
