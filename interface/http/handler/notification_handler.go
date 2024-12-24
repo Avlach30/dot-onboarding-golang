@@ -28,34 +28,34 @@ func NewNotificationHandler(router *gin.Engine, notificationUseCase domain.Notif
 }
 
 func (notificationHandler *NotificationHandler) Pagination() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		claimToken := ctx.MustGet(constant.AuthUserInfoKey)
+	return func(httpContext *gin.Context) {
+		claimToken := httpContext.MustGet(constant.AuthUserInfoKey)
 		userId := claimToken.(*jwt.CustomClaims).ID
-		data, total := notificationHandler.notificationUseCase.Pagination(ctx, userId)
+		data, total := notificationHandler.notificationUseCase.Pagination(httpContext, userId)
 
-		meta := utils.PaginationMetaBuilder(ctx, total)
+		meta := utils.PaginationMetaBuilder(httpContext, total)
 
-		ctx.JSON(http.StatusOK, utils.PaginationBuilder(data, *meta))
+		httpContext.JSON(http.StatusOK, utils.PaginationBuilder(data, *meta))
 	}
 }
 
 func (notificationHandler *NotificationHandler) HasUnread() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		claimToken := ctx.MustGet(constant.AuthUserInfoKey)
+	return func(httpContext *gin.Context) {
+		claimToken := httpContext.MustGet(constant.AuthUserInfoKey)
 		userId := claimToken.(*jwt.CustomClaims).ID
-		hasUnread := notificationHandler.notificationUseCase.HasUnread(ctx, userId)
+		hasUnread := notificationHandler.notificationUseCase.HasUnread(httpContext, userId)
 
-		ctx.JSON(http.StatusOK, utils.SucessResponse(hasUnread))
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(hasUnread))
 	}
 }
 
 func (notificationHandler *NotificationHandler) MarkAsRead() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		claimToken := ctx.MustGet(constant.AuthUserInfoKey)
+	return func(httpContext *gin.Context) {
+		claimToken := httpContext.MustGet(constant.AuthUserInfoKey)
 		userId := claimToken.(*jwt.CustomClaims).ID
-		id := ctx.Param("id")
-		notificationHandler.notificationUseCase.MarkAsRead(ctx, id, userId)
+		id := httpContext.Param("id")
+		notificationHandler.notificationUseCase.MarkAsRead(httpContext, id, userId)
 
-		ctx.JSON(http.StatusOK, utils.SucessResponse(nil))
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }

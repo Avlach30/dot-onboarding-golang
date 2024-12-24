@@ -6,14 +6,14 @@ import (
 )
 
 type PermissionRepository interface {
-	Pagination(ctx *gin.Context) ([]PermissionEntity, int)
-	Create(ctx *gin.Context, payload *PermissionEntity) error
-	FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*PermissionEntity, error)
-	FindByKey(ctx *gin.Context, key string, trashed bool) (*PermissionEntity, error)
-	FindByNameAndKey(ctx *gin.Context, name string, key string) (*PermissionEntity, error)
-	Update(ctx *gin.Context, id uuid.UUID, payload *PermissionEntity) error
-	Delete(ctx *gin.Context, id uuid.UUID)
-	ForceDelete(ctx *gin.Context, id uuid.UUID)
-	IsKeyExist(ctx *gin.Context, key string) bool
-	IsKeyExistExceptPermissionId(ctx *gin.Context, key string, id uuid.UUID) bool
+	Pagination(httpContext *gin.Context) ([]PermissionEntity, int)
+	Create(httpContext *gin.Context, payload *PermissionEntity) error
+	FindById(httpContext *gin.Context, id uuid.UUID, trashed bool) (*PermissionEntity, error)
+	FindByKey(httpContext *gin.Context, key string, trashed bool) (*PermissionEntity, error)
+	FindByNameAndKey(httpContext *gin.Context, name string, key string) (*PermissionEntity, error)
+	Update(httpContext *gin.Context, id uuid.UUID, payload *PermissionEntity) error
+	Delete(httpContext *gin.Context, id uuid.UUID)
+	ForceDelete(httpContext *gin.Context, id uuid.UUID)
+	IsKeyExist(httpContext *gin.Context, key string) bool
+	IsKeyExistExceptPermissionId(httpContext *gin.Context, key string, id uuid.UUID) bool
 }

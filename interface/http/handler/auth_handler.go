@@ -5,7 +5,6 @@ import (
 
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/dto"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
@@ -31,8 +30,8 @@ func NewAuthHandler(router *gin.Engine, authUsecase domain.AuthUsecase) {
 
 func (authHandler *AuthHandler) SignIn() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
-		authRequest := httpContext.MustGet(constant.RequestBodyJSONKey).(*dto.AuthSignInRequest)
-		token, expirationTime := authHandler.authUsecase.SignInBasic(singleton.GetContextFromGinContext(httpContext), authRequest.Email, authRequest.Password)
+		authRequest := singleton.GetHTTPRequest[dto.AuthSignInRequest](httpContext)
+		token, expirationTime := authHandler.authUsecase.SignInBasic(httpContext, authRequest.Email, authRequest.Password)
 
 		data := &dto.AuthSignInResponse{
 			Token:     token,
@@ -48,8 +47,8 @@ func (authHandler *AuthHandler) SignIn() gin.HandlerFunc {
 
 func (authHandler *AuthHandler) SignLDAP() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
-		authRequest := httpContext.MustGet(constant.RequestBodyJSONKey).(*dto.AuthSignLDAPRequest)
-		token, expirationTime := authHandler.authUsecase.SignInLDAP(singleton.GetContextFromGinContext(httpContext), authRequest.Username, authRequest.Password)
+		authRequest := singleton.GetHTTPRequest[dto.AuthSignLDAPRequest](httpContext)
+		token, expirationTime := authHandler.authUsecase.SignInLDAP(httpContext, authRequest.Username, authRequest.Password)
 
 		data := &dto.AuthSignInResponse{
 			Token:     token,
@@ -65,8 +64,8 @@ func (authHandler *AuthHandler) SignLDAP() gin.HandlerFunc {
 
 func (authHandler *AuthHandler) SignOIDC() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
-		authRequest := httpContext.MustGet(constant.RequestBodyJSONKey).(*dto.AuthSignOIDCRequest)
-		token, expirationTime := authHandler.authUsecase.SignInByOIDCCode(singleton.GetContextFromGinContext(httpContext), authRequest.Code)
+		authRequest := singleton.GetHTTPRequest[dto.AuthSignOIDCRequest](httpContext)
+		token, expirationTime := authHandler.authUsecase.SignInByOIDCCode(httpContext, authRequest.Code)
 
 		data := &dto.AuthSignInResponse{
 			Token:     token,

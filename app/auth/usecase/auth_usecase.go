@@ -1,10 +1,10 @@
 package usecase
 
 import (
-	"context"
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/immutable"
@@ -24,7 +24,7 @@ type AuthUsecase struct {
 }
 
 // SignInURLOpenIDClient implements domain.AuthUsecase.
-func (authUseCase *AuthUsecase) SignInByOIDCCode(context *context.Context, code string) (token string, expiredAt time.Time) {
+func (authUseCase *AuthUsecase) SignInByOIDCCode(httpContext *gin.Context, code string) (token string, expiredAt time.Time) {
 
 	// get email from token
 	emailSSO, err := oidc.GetEmailByCode(code)
@@ -32,7 +32,7 @@ func (authUseCase *AuthUsecase) SignInByOIDCCode(context *context.Context, code 
 		panic(*exception.UnauthorizedException("Not Valid Code"))
 	}
 
-	user, err := authUseCase.authRepo.FindUserByEmail(context, emailSSO)
+	user, err := authUseCase.authRepo.FindUserByEmail(httpContext, emailSSO)
 	if err != nil || user.ID == uuid.Nil {
 		panic(*exception.BussinessException("Email Not Found"))
 	}
@@ -42,8 +42,8 @@ func (authUseCase *AuthUsecase) SignInByOIDCCode(context *context.Context, code 
 }
 
 // SignIn implements domain.AuthUsecase.
-func (authUseCase *AuthUsecase) SignInBasic(context *context.Context, email string, password string) (token string, expirationTime time.Time) {
-	user, err := authUseCase.authRepo.FindUserByEmail(context, email)
+func (authUseCase *AuthUsecase) SignInBasic(httpContext *gin.Context, email string, password string) (token string, expirationTime time.Time) {
+	user, err := authUseCase.authRepo.FindUserByEmail(httpContext, email)
 	if err != nil {
 		panic(*exception.BussinessException("Email and Password did not match"))
 	}
@@ -56,13 +56,13 @@ func (authUseCase *AuthUsecase) SignInBasic(context *context.Context, email stri
 }
 
 // SignIn implements domain.AuthUsecase.
-func (authUseCase *AuthUsecase) SignInLDAP(context *context.Context, username string, password string) (token string, expirationTime time.Time) {
+func (authUseCase *AuthUsecase) SignInLDAP(httpContext *gin.Context, username string, password string) (token string, expirationTime time.Time) {
 	userLDAP, err := ldap.AuthUsingLDAP(username, password)
 	if err != nil {
 		panic(*exception.UnauthorizedException("Email Not Found"))
 	}
 
-	user, err := authUseCase.authRepo.FindUserByEmail(context, userLDAP.Email)
+	user, err := authUseCase.authRepo.FindUserByEmail(httpContext, userLDAP.Email)
 	if err != nil {
 		panic(*exception.UnauthorizedException("Email Not Found"))
 	}

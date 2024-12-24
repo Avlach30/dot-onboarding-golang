@@ -1,11 +1,10 @@
 package domain
 
 import (
-	"context"
-
+	"github.com/gin-gonic/gin"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 )
 
 type AuthRepository interface {
-	FindUserByEmail(context *context.Context, email string) (*domain.UserEntity, error)
+	FindUserByEmail(httpContext *gin.Context, email string) (*domain.UserEntity, error)
 }

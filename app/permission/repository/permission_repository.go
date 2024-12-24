@@ -19,18 +19,18 @@ func NewPermissionRepository(db *gorm.DB) domain.PermissionRepository {
 	}
 }
 
-func (permission *PermissionRepository) Pagination(ctx *gin.Context) ([]domain.PermissionEntity, int) {
-	permission.model = permission.model.WithContext(ctx)
+func (permission *PermissionRepository) Pagination(httpContext *gin.Context) ([]domain.PermissionEntity, int) {
+	permission.model = permission.model.WithContext(httpContext)
 	var permissions []domain.PermissionEntity
 	var total int64
 
 	// Query filter
-	permission.queryFilter(ctx)
+	permission.queryFilter(httpContext)
 	// Query sort
-	permission.querySort(ctx)
+	permission.querySort(httpContext)
 
 	permission.model.Session(&gorm.Session{}).
-		Scopes(utils.Paginate(ctx)).
+		Scopes(utils.Paginate(httpContext)).
 		Find(&permissions).
 		Count(&total)
 
@@ -38,8 +38,8 @@ func (permission *PermissionRepository) Pagination(ctx *gin.Context) ([]domain.P
 }
 
 // func filter for pagination
-func (permission *PermissionRepository) queryFilter(ctx *gin.Context) *gorm.DB {
-	if search := ctx.Query("search"); search != "" {
+func (permission *PermissionRepository) queryFilter(httpContext *gin.Context) *gorm.DB {
+	if search := httpContext.Query("search"); search != "" {
 		permission.model = permission.model.
 			Where("name LIKE ?", "%"+search+"%")
 	}
@@ -48,19 +48,19 @@ func (permission *PermissionRepository) queryFilter(ctx *gin.Context) *gorm.DB {
 }
 
 // func query sort for pagination
-func (permission *PermissionRepository) querySort(ctx *gin.Context) *gorm.DB {
+func (permission *PermissionRepository) querySort(httpContext *gin.Context) *gorm.DB {
 	sortableColumns := []string{"name", "created_at", "updated_at"}
 
-	if sort := ctx.Query("sort_by"); sort != "" {
+	if sort := httpContext.Query("sort_by"); sort != "" {
 		if !utils.Contains(sortableColumns, sort) {
 			panic(*exception.BussinessException("Invalid sort column"))
 		}
 
 		permission.model = permission.model.
-			Order(sort + " " + ctx.Query("order"))
+			Order(sort + " " + httpContext.Query("order"))
 
 		// Handle order by asc or desc
-		if order := ctx.Query("order"); order != "" {
+		if order := httpContext.Query("order"); order != "" {
 			if order != "asc" && order != "desc" {
 				panic(*exception.BussinessException("Invalid order value"))
 			}
@@ -74,8 +74,8 @@ func (permission *PermissionRepository) querySort(ctx *gin.Context) *gorm.DB {
 }
 
 // FindByKey implements domain.PermissionRepository.
-func (permission *PermissionRepository) FindByKey(ctx *gin.Context, key string, trashed bool) (*domain.PermissionEntity, error) {
-	permission.model = permission.model.WithContext(ctx)
+func (permission *PermissionRepository) FindByKey(httpContext *gin.Context, key string, trashed bool) (*domain.PermissionEntity, error) {
+	permission.model = permission.model.WithContext(httpContext)
 	permissionEntity := &domain.PermissionEntity{}
 	if trashed {
 		permission.model = permission.model.Unscoped()
@@ -86,8 +86,8 @@ func (permission *PermissionRepository) FindByKey(ctx *gin.Context, key string, 
 	return permissionEntity, nil
 }
 
-func (permission *PermissionRepository) FindById(ctx *gin.Context, id uuid.UUID, trashed bool) (*domain.PermissionEntity, error) {
-	permission.model = permission.model.WithContext(ctx)
+func (permission *PermissionRepository) FindById(httpContext *gin.Context, id uuid.UUID, trashed bool) (*domain.PermissionEntity, error) {
+	permission.model = permission.model.WithContext(httpContext)
 	permissionEntity := &domain.PermissionEntity{}
 	if trashed {
 		permission.model = permission.model.Unscoped()
@@ -98,8 +98,8 @@ func (permission *PermissionRepository) FindById(ctx *gin.Context, id uuid.UUID,
 	return permissionEntity, err
 }
 
-func (permission *PermissionRepository) FindByNameAndKey(ctx *gin.Context, name string, key string) (*domain.PermissionEntity, error) {
-	permission.model = permission.model.WithContext(ctx)
+func (permission *PermissionRepository) FindByNameAndKey(httpContext *gin.Context, name string, key string) (*domain.PermissionEntity, error) {
+	permission.model = permission.model.WithContext(httpContext)
 
 	permissionEntity := &domain.PermissionEntity{}
 	permission.model.First(&permissionEntity, "name = ? and key = ?", name, key)
@@ -107,32 +107,32 @@ func (permission *PermissionRepository) FindByNameAndKey(ctx *gin.Context, name 
 	return permissionEntity, nil
 }
 
-func (permission *PermissionRepository) Delete(ctx *gin.Context, id uuid.UUID) {
-	permission.model = permission.model.WithContext(ctx)
+func (permission *PermissionRepository) Delete(httpContext *gin.Context, id uuid.UUID) {
+	permission.model = permission.model.WithContext(httpContext)
 	permission.model.Delete(&domain.PermissionEntity{}, id)
 }
 
-func (permission *PermissionRepository) ForceDelete(ctx *gin.Context, id uuid.UUID) {
-	permission.model = permission.model.WithContext(ctx)
+func (permission *PermissionRepository) ForceDelete(httpContext *gin.Context, id uuid.UUID) {
+	permission.model = permission.model.WithContext(httpContext)
 	permissionEntity := &domain.PermissionEntity{}
 	permission.model.Unscoped().Where("id = ?", id).Find(&permissionEntity)
 	permission.model.Unscoped().Delete(&permissionEntity)
 }
 
-func (permission *PermissionRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.PermissionEntity) error {
-	permission.model = permission.model.WithContext(ctx)
+func (permission *PermissionRepository) Update(httpContext *gin.Context, id uuid.UUID, payload *domain.PermissionEntity) error {
+	permission.model = permission.model.WithContext(httpContext)
 	err := permission.model.Where("id = ?", id).Updates(&payload).Error
 	return err
 }
 
-func (permission *PermissionRepository) Create(ctx *gin.Context, payload *domain.PermissionEntity) error {
-	permission.model = permission.model.WithContext(ctx)
+func (permission *PermissionRepository) Create(httpContext *gin.Context, payload *domain.PermissionEntity) error {
+	permission.model = permission.model.WithContext(httpContext)
 	err := permission.model.Create(&payload).Error
 	return err
 }
 
-func (permission *PermissionRepository) IsKeyExist(ctx *gin.Context, key string) bool {
-	permission.model = permission.model.WithContext(ctx)
+func (permission *PermissionRepository) IsKeyExist(httpContext *gin.Context, key string) bool {
+	permission.model = permission.model.WithContext(httpContext)
 	var count int64
 	permission.model.
 		Where("key = ?", key).
@@ -140,8 +140,8 @@ func (permission *PermissionRepository) IsKeyExist(ctx *gin.Context, key string)
 	return count > 0
 }
 
-func (permission *PermissionRepository) IsKeyExistExceptPermissionId(ctx *gin.Context, key string, id uuid.UUID) bool {
-	permission.model = permission.model.WithContext(ctx)
+func (permission *PermissionRepository) IsKeyExistExceptPermissionId(httpContext *gin.Context, key string, id uuid.UUID) bool {
+	permission.model = permission.model.WithContext(httpContext)
 	var count int64
 	permission.model.
 		Where("key = ? AND id != ?", key, id).

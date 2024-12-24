@@ -24,13 +24,13 @@ func NewUserUsecase(userRepo domain.UserRepository) domain.UserUsecase {
 }
 
 // Pagination implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Pagination(ctx *gin.Context) ([]domain.UserEntity, int) {
-	return userUsecase.userRepo.Pagination(ctx)
+func (userUsecase *UserUsecase) Pagination(httpContext *gin.Context) ([]domain.UserEntity, int) {
+	return userUsecase.userRepo.Pagination(httpContext)
 }
 
 // Create implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Create(ctx *gin.Context, payload *dto.UserCreateRequest) {
-	isUserExist := userUsecase.userRepo.IsEmailExist(ctx, payload.Email)
+func (userUsecase *UserUsecase) Create(httpContext *gin.Context, payload *dto.UserCreateRequest) {
+	isUserExist := userUsecase.userRepo.IsEmailExist(httpContext, payload.Email)
 	if isUserExist {
 		panic(*exception.BussinessException("Email already exist"))
 	}
@@ -44,7 +44,7 @@ func (userUsecase *UserUsecase) Create(ctx *gin.Context, payload *dto.UserCreate
 	payload.Password = string(hashedPassword)
 
 	// Get role by role ids
-	roles := userUsecase.userRepo.FindRoleByIds(ctx, payload.RoleIds)
+	roles := userUsecase.userRepo.FindRoleByIds(httpContext, payload.RoleIds)
 	// Validate roles length is same with role ids
 	if len(roles) != len(payload.RoleIds) {
 		panic(*exception.BussinessException("Role not found"))
@@ -58,17 +58,17 @@ func (userUsecase *UserUsecase) Create(ctx *gin.Context, payload *dto.UserCreate
 		Roles:    roles,
 	}
 
-	userUsecase.userRepo.Create(ctx, &payloadEntity)
+	userUsecase.userRepo.Create(httpContext, &payloadEntity)
 }
 
 // Update implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Update(ctx *gin.Context, id uuid.UUID, payload *dto.UserUpdateRequest) {
-	if userUsecase.userRepo.IsEmailExistExceptUserId(ctx, payload.Email, id) {
+func (userUsecase *UserUsecase) Update(httpContext *gin.Context, id uuid.UUID, payload *dto.UserUpdateRequest) {
+	if userUsecase.userRepo.IsEmailExistExceptUserId(httpContext, payload.Email, id) {
 		panic(*exception.BussinessException("Email already exist"))
 	}
 
 	// Get role by role ids
-	roles := userUsecase.userRepo.FindRoleByIds(ctx, payload.RoleIds)
+	roles := userUsecase.userRepo.FindRoleByIds(httpContext, payload.RoleIds)
 	// Validate roles length is same with role ids
 	if len(roles) != len(payload.RoleIds) {
 		panic(*exception.BussinessException("Role not found"))
@@ -81,18 +81,18 @@ func (userUsecase *UserUsecase) Update(ctx *gin.Context, id uuid.UUID, payload *
 		Roles: roles,
 	}
 
-	userUsecase.userRepo.Update(ctx, id, &payloadEntity)
+	userUsecase.userRepo.Update(httpContext, id, &payloadEntity)
 
 }
 
 // Delete implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Delete(ctx *gin.Context, id uuid.UUID) {
-	userUsecase.userRepo.Delete(ctx, id)
+func (userUsecase *UserUsecase) Delete(httpContext *gin.Context, id uuid.UUID) {
+	userUsecase.userRepo.Delete(httpContext, id)
 }
 
 // FindById implements domain.UserUsecase.
-func (userUsecase *UserUsecase) FindById(ctx *gin.Context, id uuid.UUID, trashed bool) *domain.UserEntity {
-	user, err := userUsecase.userRepo.FindById(ctx, id, trashed)
+func (userUsecase *UserUsecase) FindById(httpContext *gin.Context, id uuid.UUID, trashed bool) *domain.UserEntity {
+	user, err := userUsecase.userRepo.FindById(httpContext, id, trashed)
 
 	if err == gorm.ErrRecordNotFound {
 		panic(*exception.NotFoundException("User not found"))
@@ -105,6 +105,6 @@ func (userUsecase *UserUsecase) FindById(ctx *gin.Context, id uuid.UUID, trashed
 }
 
 // ForceDelete implements domain.UserUsecase.
-func (userUsecase *UserUsecase) ForceDelete(ctx *gin.Context, id uuid.UUID) {
-	userUsecase.userRepo.ForceDelete(ctx, id)
+func (userUsecase *UserUsecase) ForceDelete(httpContext *gin.Context, id uuid.UUID) {
+	userUsecase.userRepo.ForceDelete(httpContext, id)
 }

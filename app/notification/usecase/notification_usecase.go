@@ -16,14 +16,14 @@ func NewNotificationUseCase(notificationRepo domain.NotificationUseCase) domain.
 	}
 }
 
-func (notification *NotificationUseCase) Pagination(ctx *gin.Context, userId uuid.UUID) ([]domain.NotificationEntity, int) {
-	return notification.notificationRepo.Pagination(ctx, userId)
+func (notification *NotificationUseCase) Pagination(httpContext *gin.Context, userId uuid.UUID) ([]domain.NotificationEntity, int) {
+	return notification.notificationRepo.Pagination(httpContext, userId)
 }
 
-func (notification *NotificationUseCase) HasUnread(ctx *gin.Context, userId uuid.UUID) bool {
-	return notification.notificationRepo.HasUnread(ctx, userId)
+func (notification *NotificationUseCase) HasUnread(httpContext *gin.Context, userId uuid.UUID) bool {
+	return notification.notificationRepo.HasUnread(httpContext, userId)
 }
 
-func (notification *NotificationUseCase) MarkAsRead(ctx *gin.Context, id string, userId uuid.UUID) {
-	notification.notificationRepo.MarkAsRead(ctx, id, userId)
+func (notification *NotificationUseCase) MarkAsRead(httpContext *gin.Context, id string, userId uuid.UUID) {
+	notification.notificationRepo.MarkAsRead(httpContext, id, userId)
 }

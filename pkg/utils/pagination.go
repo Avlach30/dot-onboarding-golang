@@ -13,15 +13,15 @@ func GetPaginationOffset(page, limit int) int {
 	return offset
 }
 
-func Paginate(ctx *gin.Context) func(db *gorm.DB) *gorm.DB {
+func Paginate(httpContext *gin.Context) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		pageStr := ctx.DefaultQuery("page", "1")
+		pageStr := httpContext.DefaultQuery("page", "1")
 		page, _ := strconv.Atoi(pageStr)
 		if page <= 0 {
 			page = 1
 		}
 
-		perPageStr := ctx.DefaultQuery("per_page", "10")
+		perPageStr := httpContext.DefaultQuery("per_page", "10")
 		perPage, _ := strconv.Atoi(perPageStr)
 		switch {
 		case perPage > 100:

@@ -6,7 +6,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/usecase"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/jwt"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	state "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 )
@@ -19,12 +19,7 @@ func PermissionGuard(permissionsToCheck ...string) gin.HandlerFunc {
 			panic(*exception.UnauthorizedException("Not Authorized"))
 		}
 
-		authEntityInfo, isExists := httpContext.Get(constant.AuthUserInfoKey)
-		if !isExists || !isAuthorized.(bool) {
-			panic(*exception.UnauthorizedException("Not Authorized"))
-		}
-
-		userID := authEntityInfo.(*jwt.CustomClaims).ID
+		userID := singleton.GetAuthUserID(httpContext)
 
 		// get global state
 		globalState := state.GetGlobalState()

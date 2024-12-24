@@ -17,13 +17,13 @@ type GCSManager struct {
 }
 
 func NewGCSManager() (StorageManager, error) {
-	ctx := context.Background()
+	backgroundContext := context.Background()
 
 	bucket := localConfig.GCSBucketName
 	credentialsFile := localConfig.GCSCredentialsFilePath
 
 	creds := option.WithCredentialsFile(credentialsFile)
-	client, err := storage.NewClient(ctx, creds)
+	client, err := storage.NewClient(backgroundContext, creds)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create GCS client: %v", err)
 	}
@@ -34,11 +34,11 @@ func NewGCSManager() (StorageManager, error) {
 }
 
 func (gcsManager *GCSManager) StoreData(key string, data []byte) error {
-	ctx := context.Background()
+	backgroundContext := context.Background()
 	bucket := gcsManager.Client.Bucket(gcsManager.Bucket)
 	obj := bucket.Object(key)
 
-	writer := obj.NewWriter(ctx)
+	writer := obj.NewWriter(backgroundContext)
 	_, err := writer.Write(data)
 	if err != nil {
 		return fmt.Errorf("failed to write data: %v", err)
@@ -66,11 +66,11 @@ func (gcsManager *GCSManager) GeneratePresignURL(method string, key string, expi
 }
 
 func (gcsManager *GCSManager) GetData(key string) ([]byte, error) {
-	ctx := context.Background()
+	backgroundContext := context.Background()
 	bucket := gcsManager.Client.Bucket(gcsManager.Bucket)
 	obj := bucket.Object(key)
 
-	reader, err := obj.NewReader(ctx)
+	reader, err := obj.NewReader(backgroundContext)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create reader: %v", err)
 	}
@@ -85,11 +85,11 @@ func (gcsManager *GCSManager) GetData(key string) ([]byte, error) {
 }
 
 func (gcsManager *GCSManager) DeleteData(key string) error {
-	ctx := context.Background()
+	backgroundContext := context.Background()
 	bucket := gcsManager.Client.Bucket(gcsManager.Bucket)
 	obj := bucket.Object(key)
 
-	if err := obj.Delete(ctx); err != nil {
+	if err := obj.Delete(backgroundContext); err != nil {
 		return fmt.Errorf("failed to delete object: %v", err)
 	}
 

@@ -47,10 +47,10 @@ func PaginationBuilder[T any](items []T, meta pkg.MetaResponse) *PaginationRespo
 	})
 }
 
-func PaginationMetaBuilder(ctx *gin.Context, total int) *pkg.MetaResponse {
+func PaginationMetaBuilder(httpContext *gin.Context, total int) *pkg.MetaResponse {
 	// Get query params
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	perPage, _ := strconv.Atoi(ctx.DefaultQuery("per_page", "10"))
+	page, _ := strconv.Atoi(httpContext.DefaultQuery("page", "1"))
+	perPage, _ := strconv.Atoi(httpContext.DefaultQuery("per_page", "10"))
 
 	// Calculate total page
 	totalPage := int(math.Ceil(float64(total) / float64(perPage)))

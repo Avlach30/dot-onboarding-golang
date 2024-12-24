@@ -10,7 +10,6 @@ import (
 
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/storage/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/storage/dto"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
@@ -38,8 +37,8 @@ func NewCommonHandler(router *gin.Engine, fileUsecase domain.FileUsecase) {
 
 func (common *CommonHandler) CreateFile() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
-		createFileRequest := httpContext.MustGet(constant.RequestBodyJSONKey).(*dto.UploadFilesRequest)
-		filePaths, _ := common.fileUsecase.UploadFiles(singleton.GetContextFromGinContext(httpContext), createFileRequest)
+		createFileRequest := singleton.GetHTTPRequest[dto.UploadFilesRequest](httpContext)
+		filePaths, _ := common.fileUsecase.UploadFiles(httpContext, createFileRequest)
 
 		response := &dto.UploadFilesResponse{
 			FilePaths: make([]dto.UploadedFilePath, len(filePaths)),
@@ -64,7 +63,7 @@ func (common *CommonHandler) DeleteFile() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		filePaths := strings.Split(httpContext.Query("file_paths"), ",")
 
-		common.fileUsecase.Delete(singleton.GetContextFromGinContext(httpContext), filePaths)
+		common.fileUsecase.Delete(httpContext, filePaths)
 		httpContext.JSON(http.StatusOK, utils.SucessResponse(
 			nil,
 		))
@@ -73,13 +72,13 @@ func (common *CommonHandler) DeleteFile() gin.HandlerFunc {
 
 func (common *CommonHandler) GeneratePresignURLUpload() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
-		GeneratePresignURL := httpContext.MustGet(constant.RequestBodyJSONKey).(*dto.CreatePresignURLUploadRequest)
+		GeneratePresignURL := singleton.GetHTTPRequest[dto.CreatePresignURLUploadRequest](httpContext)
 		var url string
 		switch GeneratePresignURL.ActionType {
 		case "download":
-			url, _ = common.fileUsecase.GetPresignUrlForDownload(singleton.GetContextFromGinContext(httpContext), GeneratePresignURL.FileName)
+			url, _ = common.fileUsecase.GetPresignUrlForDownload(httpContext, GeneratePresignURL.FileName)
 		case "upload":
-			url, _ = common.fileUsecase.GetPresignUrlForUpload(singleton.GetContextFromGinContext(httpContext), GeneratePresignURL.FileName)
+			url, _ = common.fileUsecase.GetPresignUrlForUpload(httpContext, GeneratePresignURL.FileName)
 		default:
 			panic(*exception.BussinessException("action_type did not recognize"))
 		}
@@ -100,17 +99,13 @@ func (common *CommonHandler) DownloadFile() gin.HandlerFunc {
 		}
 
 		// Get the file reader from the usecase
-		fileContents, err := common.fileUsecase.Get(singleton.GetContextFromGinContext(httpContext), filePath)
+		fileContents, err := common.fileUsecase.Get(httpContext, filePath)
 		if err != nil {
 			panic(*exception.BussinessException("Failed to get file contents"))
 		}
 
 		fileReader := bytes.NewReader(fileContents)
 		fileSize := int64(len(fileContents))
-
-		if err != nil {
-			panic(*exception.BussinessException("Failed to get file reader"))
-		}
 
 		// Set headers for file download
 		httpContext.Header("Content-Description", "File Transfer")

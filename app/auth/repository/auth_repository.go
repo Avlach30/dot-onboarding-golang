@@ -1,8 +1,7 @@
 package repository
 
 import (
-	"context"
-
+	"github.com/gin-gonic/gin"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
 	permissionDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
 	roleDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
@@ -19,8 +18,8 @@ type AuthRepository struct {
 }
 
 // FindUserByEmail implements domain.AuthRepository.
-func (authRepo *AuthRepository) FindUserByEmail(context *context.Context, email string) (*userDomain.UserEntity, error) {
-	authRepo.userModel = authRepo.userModel.WithContext(*context)
+func (authRepo *AuthRepository) FindUserByEmail(httpContext *gin.Context, email string) (*userDomain.UserEntity, error) {
+	authRepo.userModel = authRepo.userModel.WithContext(httpContext)
 	user := &userDomain.UserEntity{}
 	err := authRepo.userModel.Where("email = ?", email).Find(&user).Error
 	return user, err

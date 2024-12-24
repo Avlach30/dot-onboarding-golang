@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"log"
@@ -9,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/storage/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/storage/dto"
@@ -30,7 +30,7 @@ type FileUsecase struct {
 }
 
 // Create implements domain.FileUsecase.
-func (f *FileUsecase) UploadFiles(context *context.Context, files *dto.UploadFilesRequest) (map[string]string, error) {
+func (f *FileUsecase) UploadFiles(httpContext *gin.Context, files *dto.UploadFilesRequest) (map[string]string, error) {
 	allowUploadSizeGeneral, err := strconv.ParseInt(config.MaxSizeUploadFile, 10, 64)
 	if err != nil {
 		panic(*exception.BussinessException("Wrong Max Upload Size"))
@@ -98,7 +98,7 @@ func (f *FileUsecase) UploadFiles(context *context.Context, files *dto.UploadFil
 }
 
 // Delete implements domain.FileUsecase.
-func (f *FileUsecase) Delete(context *context.Context, filePaths []string) error {
+func (f *FileUsecase) Delete(httpContext *gin.Context, filePaths []string) error {
 	var wg sync.WaitGroup
 	errChan := make(chan error, len(filePaths))
 
@@ -135,12 +135,12 @@ func (f *FileUsecase) Delete(context *context.Context, filePaths []string) error
 }
 
 // Get implements domain.FileUsecase.
-func (f *FileUsecase) Get(context *context.Context, filePath string) ([]byte, error) {
+func (f *FileUsecase) Get(httpContext *gin.Context, filePath string) ([]byte, error) {
 	return singleton.ReadFile(filePath)
 }
 
 // GetPresignUrlForUpload implements domain.FileUsecase.
-func (f *FileUsecase) GetPresignUrlForUpload(context *context.Context, filePath string) (string, error) {
+func (f *FileUsecase) GetPresignUrlForUpload(httpContext *gin.Context, filePath string) (string, error) {
 	targetPath := buildPathFileUpload(filePath)
 	presignUrl, err := singleton.GetPresignURLUpload(targetPath)
 	if err != nil {
@@ -151,7 +151,7 @@ func (f *FileUsecase) GetPresignUrlForUpload(context *context.Context, filePath 
 }
 
 // GetPresignUrlForUpload implements domain.FileUsecase.
-func (f *FileUsecase) GetPresignUrlForDownload(context *context.Context, filePath string) (string, error) {
+func (f *FileUsecase) GetPresignUrlForDownload(httpContext *gin.Context, filePath string) (string, error) {
 	targetPath := buildPathFileUpload(filePath)
 	presignUrl, err := singleton.GetPresignURLDownload(targetPath)
 	if err != nil {

@@ -6,10 +6,10 @@ import (
 )
 
 type RoleUsecase interface {
-	Pagination(ctx *gin.Context) ([]RoleEntity, int)
-	Create(ctx *gin.Context, schema *RoleEntity) error
-	FindById(ctx *gin.Context, id uuid.UUID) (*RoleEntity, error)
-	FindByKey(ctx *gin.Context, key string) (*RoleEntity, error)
-	Update(ctx *gin.Context, id uuid.UUID, dto *RoleEntity)
-	Delete(ctx *gin.Context, id uuid.UUID)
+	Pagination(httpContext *gin.Context) ([]RoleEntity, int)
+	Create(httpContext *gin.Context, schema *RoleEntity) error
+	FindById(httpContext *gin.Context, id uuid.UUID) (*RoleEntity, error)
+	FindByKey(httpContext *gin.Context, key string) (*RoleEntity, error)
+	Update(httpContext *gin.Context, id uuid.UUID, dto *RoleEntity)
+	Delete(httpContext *gin.Context, id uuid.UUID)
 }

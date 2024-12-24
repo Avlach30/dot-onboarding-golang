@@ -1,15 +1,15 @@
 package domain
 
 import (
-	"context"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 )
 
 type AuthUsecase interface {
-	SignInBasic(context *context.Context, email string, password string) (token string, expirationTime time.Time)
-	SignInLDAP(context *context.Context, username string, password string) (token string, expirationTime time.Time)
-	SignInByOIDCCode(context *context.Context, code string) (token string, expirationTime time.Time)
+	SignInBasic(httpContext *gin.Context, email string, password string) (token string, expirationTime time.Time)
+	SignInLDAP(httpContext *gin.Context, username string, password string) (token string, expirationTime time.Time)
+	SignInByOIDCCode(httpContext *gin.Context, code string) (token string, expirationTime time.Time)
 	CreateJWTToken(user *domain.UserEntity) (token string, expirationTime time.Time)
 }

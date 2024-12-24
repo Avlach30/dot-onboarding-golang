@@ -13,29 +13,29 @@ type PermissionUsecase struct {
 	permissionRepo domain.PermissionRepository
 }
 
-func (permissionUsecase *PermissionUsecase) Pagination(ctx *gin.Context) ([]domain.PermissionEntity, int) {
-	return permissionUsecase.permissionRepo.Pagination(ctx)
+func (permissionUsecase *PermissionUsecase) Pagination(httpContext *gin.Context) ([]domain.PermissionEntity, int) {
+	return permissionUsecase.permissionRepo.Pagination(httpContext)
 }
 
 // Create implements domain.PermissionUsecase.
-func (permissionUsecase *PermissionUsecase) Create(ctx *gin.Context, payload *domain.PermissionEntity) error {
-	isKeyExist := permissionUsecase.permissionRepo.IsKeyExist(ctx, payload.Key)
+func (permissionUsecase *PermissionUsecase) Create(httpContext *gin.Context, payload *domain.PermissionEntity) error {
+	isKeyExist := permissionUsecase.permissionRepo.IsKeyExist(httpContext, payload.Key)
 
 	if isKeyExist {
 		panic(*exception.BussinessException("Key already exist"))
 	}
 
-	return permissionUsecase.permissionRepo.Create(ctx, payload)
+	return permissionUsecase.permissionRepo.Create(httpContext, payload)
 }
 
 // Delete implements domain.PermissionUsecase.
-func (permissionUsecase *PermissionUsecase) Delete(ctx *gin.Context, id uuid.UUID) {
-	permissionUsecase.permissionRepo.Delete(ctx, id)
+func (permissionUsecase *PermissionUsecase) Delete(httpContext *gin.Context, id uuid.UUID) {
+	permissionUsecase.permissionRepo.Delete(httpContext, id)
 }
 
 // FindById implements domain.PermissionUsecase.
-func (permissionUsecase *PermissionUsecase) FindById(ctx *gin.Context, id uuid.UUID) (*domain.PermissionEntity, error) {
-	permission, err := permissionUsecase.permissionRepo.FindById(ctx, id, false)
+func (permissionUsecase *PermissionUsecase) FindById(httpContext *gin.Context, id uuid.UUID) (*domain.PermissionEntity, error) {
+	permission, err := permissionUsecase.permissionRepo.FindById(httpContext, id, false)
 
 	if err == gorm.ErrRecordNotFound {
 		panic(*exception.NotFoundException("Permission not found"))
@@ -45,17 +45,17 @@ func (permissionUsecase *PermissionUsecase) FindById(ctx *gin.Context, id uuid.U
 }
 
 // FindByKey implements domain.PermissionUsecase.
-func (permissionUsecase *PermissionUsecase) FindByKey(ctx *gin.Context, key string) (*domain.PermissionEntity, error) {
-	return permissionUsecase.permissionRepo.FindByKey(ctx, key, false)
+func (permissionUsecase *PermissionUsecase) FindByKey(httpContext *gin.Context, key string) (*domain.PermissionEntity, error) {
+	return permissionUsecase.permissionRepo.FindByKey(httpContext, key, false)
 }
 
 // Update implements domain.PermissionUsecase.
-func (permissionUsecase *PermissionUsecase) Update(ctx *gin.Context, id uuid.UUID, payload *domain.PermissionEntity) {
-	if permissionUsecase.permissionRepo.IsKeyExistExceptPermissionId(ctx, payload.Key, id) {
+func (permissionUsecase *PermissionUsecase) Update(httpContext *gin.Context, id uuid.UUID, payload *domain.PermissionEntity) {
+	if permissionUsecase.permissionRepo.IsKeyExistExceptPermissionId(httpContext, payload.Key, id) {
 		panic(*exception.BussinessException("Key already exist"))
 	}
 
-	err := permissionUsecase.permissionRepo.Update(ctx, id, payload)
+	err := permissionUsecase.permissionRepo.Update(httpContext, id, payload)
 	if err != nil {
 		panic(*exception.ServerErrorException("Failed to update permission"))
 	}

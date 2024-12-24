@@ -5,9 +5,9 @@ import (
 
 	domain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/dto"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
 	"github.com/gin-gonic/gin"
@@ -32,69 +32,69 @@ func NewRoleHandler(router *gin.Engine, roleUsecase domain.RoleUsecase) {
 }
 
 func (roleHandler *RoleHandler) Pagination() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		data, total := roleHandler.roleUsecase.Pagination(ctx)
+	return func(httpContext *gin.Context) {
+		data, total := roleHandler.roleUsecase.Pagination(httpContext)
 
-		meta := utils.PaginationMetaBuilder(ctx, total)
+		meta := utils.PaginationMetaBuilder(httpContext, total)
 
-		ctx.JSON(http.StatusOK, utils.PaginationBuilder(data, *meta))
+		httpContext.JSON(http.StatusOK, utils.PaginationBuilder(data, *meta))
 	}
 }
 
 func (roleHandler *RoleHandler) Create() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		roleRequest := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.RoleCreateRequest)
+	return func(httpContext *gin.Context) {
+		roleRequest := singleton.GetHTTPRequest[dto.RoleCreateRequest](httpContext)
 		newRole := domain.RoleEntity{
 			Key:  roleRequest.Key,
 			Name: roleRequest.Name,
 		}
 
-		roleHandler.roleUsecase.Create(ctx, &newRole)
+		roleHandler.roleUsecase.Create(httpContext, &newRole)
 
-		ctx.JSON(http.StatusOK, utils.SucessResponse(nil))
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }
 
 func (roleHandler *RoleHandler) FindById() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		paramId := ctx.Param("id")
+	return func(httpContext *gin.Context) {
+		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
-		roleData, _ := roleHandler.roleUsecase.FindById(ctx, id)
+		roleData, _ := roleHandler.roleUsecase.FindById(httpContext, id)
 
-		ctx.JSON(http.StatusOK, utils.SucessResponse(roleData))
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(roleData))
 	}
 }
 
 func (roleHandler *RoleHandler) FindByKey() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		paramKey := ctx.Param("key")
-		roleData, _ := roleHandler.roleUsecase.FindByKey(ctx, paramKey)
+	return func(httpContext *gin.Context) {
+		paramKey := httpContext.Param("key")
+		roleData, _ := roleHandler.roleUsecase.FindByKey(httpContext, paramKey)
 
-		ctx.JSON(http.StatusOK, utils.SucessResponse(roleData))
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(roleData))
 	}
 }
 
 func (roleHandler *RoleHandler) Update() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		roleRequest := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.RoleUpdateRequest)
-		paramId := ctx.Param("id")
+	return func(httpContext *gin.Context) {
+		roleRequest := singleton.GetHTTPRequest[dto.RoleUpdateRequest](httpContext)
+		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
 		updateRole := domain.RoleEntity{
 			Key:  roleRequest.Key,
 			Name: roleRequest.Name,
 		}
-		roleHandler.roleUsecase.Update(ctx, id, &updateRole)
+		roleHandler.roleUsecase.Update(httpContext, id, &updateRole)
 
-		ctx.JSON(http.StatusOK, utils.SucessResponse(nil))
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }
 
 func (roleHandler *RoleHandler) Delete() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		paramId := ctx.Param("id")
+	return func(httpContext *gin.Context) {
+		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
-		roleHandler.roleUsecase.Delete(ctx, id)
+		roleHandler.roleUsecase.Delete(httpContext, id)
 
-		ctx.JSON(http.StatusOK, utils.SucessResponse(nil))
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }

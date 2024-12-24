@@ -5,9 +5,9 @@ import (
 
 	domain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/dto"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
 	"github.com/gin-gonic/gin"
@@ -32,52 +32,52 @@ func NewUserHandler(router *gin.Engine, userUsecase domain.UserUsecase) {
 }
 
 func (userHandler *UserHandler) Pagination() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		data, total := userHandler.userUsecase.Pagination(ctx)
+	return func(httpContext *gin.Context) {
+		data, total := userHandler.userUsecase.Pagination(httpContext)
 
-		meta := utils.PaginationMetaBuilder(ctx, total)
+		meta := utils.PaginationMetaBuilder(httpContext, total)
 
-		ctx.JSON(http.StatusOK, utils.PaginationBuilder(data, *meta))
+		httpContext.JSON(http.StatusOK, utils.PaginationBuilder(data, *meta))
 	}
 }
 
 func (userHandler *UserHandler) Create() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		request := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.UserCreateRequest)
-		userHandler.userUsecase.Create(ctx, request)
+	return func(httpContext *gin.Context) {
+		request := singleton.GetHTTPRequest[dto.UserCreateRequest](httpContext)
+		userHandler.userUsecase.Create(httpContext, request)
 
-		ctx.JSON(http.StatusOK, utils.SucessResponse(nil))
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }
 
 func (userHandler *UserHandler) FindById() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		paramId := ctx.Param("id")
+	return func(httpContext *gin.Context) {
+		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
-		userData := userHandler.userUsecase.FindById(ctx, id, false)
+		userData := userHandler.userUsecase.FindById(httpContext, id, false)
 
-		ctx.JSON(http.StatusOK, utils.SucessResponse(userData))
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(userData))
 	}
 }
 
 func (userHandler *UserHandler) Update() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		request := ctx.MustGet(constant.RequestBodyJSONKey).(*dto.UserUpdateRequest)
-		paramId := ctx.Param("id")
+	return func(httpContext *gin.Context) {
+		request := singleton.GetHTTPRequest[dto.UserUpdateRequest](httpContext)
+		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
 
-		userHandler.userUsecase.Update(ctx, id, request)
+		userHandler.userUsecase.Update(httpContext, id, request)
 
-		ctx.JSON(http.StatusOK, utils.SucessResponse(nil))
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }
 
 func (userHandler *UserHandler) Delete() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		paramId := ctx.Param("id")
+	return func(httpContext *gin.Context) {
+		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
-		userHandler.userUsecase.Delete(ctx, id)
+		userHandler.userUsecase.Delete(httpContext, id)
 
-		ctx.JSON(http.StatusOK, utils.SucessResponse(nil))
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
 }

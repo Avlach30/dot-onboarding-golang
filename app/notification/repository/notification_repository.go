@@ -20,18 +20,18 @@ func NewNotificationRepository(db *gorm.DB) domain.NotificationRepository {
 }
 
 // Pagination get notification data with pagination
-func (notification *NotificationRepository) Pagination(ctx *gin.Context, userId uuid.UUID) ([]domain.NotificationEntity, int) {
-	notification.notificationModel = notification.notificationModel.WithContext(ctx)
+func (notification *NotificationRepository) Pagination(httpContext *gin.Context, userId uuid.UUID) ([]domain.NotificationEntity, int) {
+	notification.notificationModel = notification.notificationModel.WithContext(httpContext)
 	var notifications []domain.NotificationEntity
 	var total int64
 
 	// Query filter
-	notification.queryFilter(ctx)
+	notification.queryFilter(httpContext)
 	// Query sort
-	notification.querySort(ctx)
+	notification.querySort(httpContext)
 
 	notification.notificationModel.Session(&gorm.Session{}).
-		Scopes(utils.Paginate(ctx)).
+		Scopes(utils.Paginate(httpContext)).
 		Where("user_id = ?", userId).
 		Find(&notifications).
 		Count(&total)
@@ -40,8 +40,8 @@ func (notification *NotificationRepository) Pagination(ctx *gin.Context, userId 
 }
 
 // func filter for pagination
-func (notification *NotificationRepository) queryFilter(ctx *gin.Context) *gorm.DB {
-	if search := ctx.Query("search"); search != "" {
+func (notification *NotificationRepository) queryFilter(httpContext *gin.Context) *gorm.DB {
+	if search := httpContext.Query("search"); search != "" {
 		notification.notificationModel = notification.notificationModel.
 			Where("title LIKE ?", search+"%")
 	}
@@ -50,12 +50,12 @@ func (notification *NotificationRepository) queryFilter(ctx *gin.Context) *gorm.
 }
 
 // func query sort for pagination
-func (notification *NotificationRepository) querySort(ctx *gin.Context) *gorm.DB {
+func (notification *NotificationRepository) querySort(httpContext *gin.Context) *gorm.DB {
 	sortableColumns := []string{"created_at"}
 
-	if sort := ctx.Query("sort_by"); sort != "" {
+	if sort := httpContext.Query("sort_by"); sort != "" {
 		if !utils.Contains(sortableColumns, sort) {
-			notification.notificationModel = notification.notificationModel.Order(sort + " " + ctx.Query("order"))
+			notification.notificationModel = notification.notificationModel.Order(sort + " " + httpContext.Query("order"))
 		}
 	}
 
@@ -63,8 +63,8 @@ func (notification *NotificationRepository) querySort(ctx *gin.Context) *gorm.DB
 }
 
 // HasUnread check if user has unread notification
-func (notification *NotificationRepository) HasUnread(ctx *gin.Context, userId uuid.UUID) bool {
-	notification.notificationModel = notification.notificationModel.WithContext(ctx)
+func (notification *NotificationRepository) HasUnread(httpContext *gin.Context, userId uuid.UUID) bool {
+	notification.notificationModel = notification.notificationModel.WithContext(httpContext)
 	var total int64
 
 	err := notification.notificationModel.
@@ -80,8 +80,8 @@ func (notification *NotificationRepository) HasUnread(ctx *gin.Context, userId u
 }
 
 // MarkAsRead mark notification as read
-func (notification *NotificationRepository) MarkAsRead(ctx *gin.Context, id string, userId uuid.UUID) {
-	notification.notificationModel = notification.notificationModel.WithContext(ctx)
+func (notification *NotificationRepository) MarkAsRead(httpContext *gin.Context, id string, userId uuid.UUID) {
+	notification.notificationModel = notification.notificationModel.WithContext(httpContext)
 
 	err := notification.notificationModel.
 		Where("id = ?", id).
