@@ -3,8 +3,8 @@ CREATE TABLE IF NOT EXISTS public.permissions (
 	"name" varchar(255) NOT NULL,
 	"key" varchar(255) NOT NULL,
 	deleted_at timestamptz NULL,
-	updated_at timestamptz NULL,
-	created_at timestamptz NULL,
+	updated_at timestamptz DEFAULT CURRENT_TIMESTAMP,
+	created_at timestamptz DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT permissions_pkey PRIMARY KEY (id)
 );
 CREATE INDEX IF NOT EXISTS idx_permissions_deleted_at ON public.permissions USING btree (deleted_at);
@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS public.roles (
 	"name" varchar(255) NOT NULL,
 	"key" varchar(255) NOT NULL,
 	deleted_at timestamptz NULL,
-	updated_at timestamptz NULL,
-	created_at timestamptz NULL,
+	updated_at timestamptz DEFAULT CURRENT_TIMESTAMP,
+	created_at timestamptz DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT roles_pkey PRIMARY KEY (id)
 );
 CREATE INDEX IF NOT EXISTS idx_roles_deleted_at ON public.roles USING btree (deleted_at);
@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS public.users (
 	email varchar(255) NOT NULL,
 	"password" varchar(255) NOT NULL,
 	deleted_at timestamptz NULL,
-	updated_at timestamptz NULL,
-	created_at timestamptz NULL,
+	updated_at timestamptz DEFAULT CURRENT_TIMESTAMP,
+	created_at timestamptz DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT users_pkey PRIMARY KEY (id)
 );
 CREATE INDEX IF NOT EXISTS idx_users_deleted_at ON public.users USING btree (deleted_at);
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS public.role_permissions (
 	permission_id uuid NULL,
 	deleted_at timestamptz NULL,
 	some_data timestamptz NULL,
-	created_at timestamptz NULL,
+	created_at timestamptz DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT role_permissions_pkey PRIMARY KEY (id),
 	CONSTRAINT fk_role_permissions_permisison FOREIGN KEY (permission_id) REFERENCES public.permissions(id) ON DELETE CASCADE,
 	CONSTRAINT fk_role_permissions_role FOREIGN KEY (role_id) REFERENCES public.roles(id) ON DELETE CASCADE
