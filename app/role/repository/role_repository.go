@@ -21,6 +21,7 @@ func NewRoleRepository(db *gorm.DB) domain.RoleRepository {
 	}
 }
 
+// Pagination get role data with pagination
 func (role *RoleRepository) Pagination(ctx *gin.Context) ([]domain.RoleEntity, int) {
 	query := role.model.WithContext(ctx)
 	var roles []domain.RoleEntity
@@ -37,7 +38,7 @@ func (role *RoleRepository) Pagination(ctx *gin.Context) ([]domain.RoleEntity, i
 		Count(&total).Error
 
 	if err != nil {
-		log.Println("Error role pagination: ", err)
+		log.Println("Error pagination role", err)
 		panic(*exception.ServerErrorException(err.Error()))
 	}
 
@@ -62,19 +63,18 @@ func (role *RoleRepository) querySort(query *gorm.DB, ctx *gin.Context) *gorm.DB
 			panic(*exception.BussinessException("Invalid sort column"))
 		}
 
-		// Handle order by asc or desc
+		// Handle order query
 		if order := ctx.Query("order"); order != "" {
 			if order != "asc" && order != "desc" {
 				panic(*exception.BussinessException("Invalid order value"))
 			}
-
 			query = query.Order(sort + " " + order)
 		} else {
-			query = query.Order(sort + " asc")
+			query = query.Order(sort)
 		}
 	}
 
-	return role.model
+	return query
 }
 
 func (role *RoleRepository) FindOneById(ctx *gin.Context, id uuid.UUID, trashed bool) *domain.RoleEntity {
