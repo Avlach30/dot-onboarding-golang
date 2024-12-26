@@ -27,7 +27,7 @@ func NewPermissionHandler(router *gin.Engine, permissionUsecase domain.Permissio
 	permissionHandlerRoute.GET("/", permissionHandler.Pagination())
 	permissionHandlerRoute.DELETE("/:id", permissionHandler.Delete())
 	permissionHandlerRoute.PATCH("/:id", middleware.ValidateRequestJSON(&dto.PermissionUpdateRequest{}), permissionHandler.Update())
-	permissionHandlerRoute.GET("/:id", permissionHandler.FindById())
+	permissionHandlerRoute.GET("/:id", permissionHandler.Detail())
 	permissionHandlerRoute.POST("/", middleware.ValidateRequestJSON(&dto.PermissionCreateRequest{}), permissionHandler.Create())
 }
 
@@ -54,20 +54,11 @@ func (permissionHandler *PermissionHandler) Create() gin.HandlerFunc {
 	}
 }
 
-func (permissionHandler *PermissionHandler) FindById() gin.HandlerFunc {
+func (permissionHandler *PermissionHandler) Detail() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
-		permissionData, _ := permissionHandler.permissionUsecase.FindById(httpContext, id)
-
-		httpContext.JSON(http.StatusOK, utils.SucessResponse(permissionData))
-	}
-}
-
-func (permissionHandler *PermissionHandler) FindByKey() gin.HandlerFunc {
-	return func(httpContext *gin.Context) {
-		paramKey := httpContext.Param("key")
-		permissionData, _ := permissionHandler.permissionUsecase.FindByKey(httpContext, paramKey)
+		permissionData := permissionHandler.permissionUsecase.FindOneById(httpContext, id)
 
 		httpContext.JSON(http.StatusOK, utils.SucessResponse(permissionData))
 	}

@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
@@ -19,133 +21,134 @@ func NewPermissionRepository(db *gorm.DB) domain.PermissionRepository {
 	}
 }
 
-func (permission *PermissionRepository) Pagination(httpContext *gin.Context) ([]domain.PermissionEntity, int) {
-	permission.model = permission.model.WithContext(httpContext)
+// Pagination get permission data with pagination
+func (permission *PermissionRepository) Pagination(ctx *gin.Context) ([]domain.PermissionEntity, int) {
+	query := permission.model.WithContext(ctx)
 	var permissions []domain.PermissionEntity
 	var total int64
 
 	// Query filter
-	permission.queryFilter(httpContext)
+	query = permission.queryFilter(query, ctx)
 	// Query sort
-	permission.querySort(httpContext)
+	query = permission.querySort(query, ctx)
 
-	permission.model.Session(&gorm.Session{}).
-		Scopes(utils.Paginate(httpContext)).
+	err := query.Session(&gorm.Session{}).
+		Scopes(utils.Paginate(ctx)).
 		Find(&permissions).
-		Count(&total)
+		Count(&total).Error
+
+	if err != nil {
+		log.Println("Error pagination permission", err)
+		panic(*exception.ServerErrorException(err.Error()))
+	}
 
 	return permissions, int(total)
 }
 
 // func filter for pagination
-func (permission *PermissionRepository) queryFilter(httpContext *gin.Context) *gorm.DB {
-	if search := httpContext.Query("search"); search != "" {
-		permission.model = permission.model.
-			Where("name LIKE ?", "%"+search+"%")
+func (permission *PermissionRepository) queryFilter(query *gorm.DB, ctx *gin.Context) *gorm.DB {
+	if search := ctx.Query("search"); search != "" {
+		query = query.Where("name LIKE ?", search+"%")
 	}
 
-	return permission.model
+	return query
 }
 
 // func query sort for pagination
-func (permission *PermissionRepository) querySort(httpContext *gin.Context) *gorm.DB {
+func (permission *PermissionRepository) querySort(query *gorm.DB, ctx *gin.Context) *gorm.DB {
 	sortableColumns := []string{"name", "created_at", "updated_at"}
 
-	if sort := httpContext.Query("sort_by"); sort != "" {
+	if sort := ctx.Query("sort_by"); sort != "" {
 		if !utils.Contains(sortableColumns, sort) {
 			panic(*exception.BussinessException("Invalid sort column"))
 		}
 
-		permission.model = permission.model.
-			Order(sort + " " + httpContext.Query("order"))
-
-		// Handle order by asc or desc
-		if order := httpContext.Query("order"); order != "" {
+		// Handle order query
+		if order := ctx.Query("order"); order != "" {
 			if order != "asc" && order != "desc" {
 				panic(*exception.BussinessException("Invalid order value"))
 			}
-
-			permission.model = permission.model.
-				Order(sort + " " + order)
+			query = query.Order(sort + " " + order)
+		} else {
+			query = query.Order(sort)
 		}
 	}
 
-	return permission.model
+	return query
 }
 
-// FindByKey implements domain.PermissionRepository.
-func (permission *PermissionRepository) FindByKey(httpContext *gin.Context, key string, trashed bool) (*domain.PermissionEntity, error) {
-	permission.model = permission.model.WithContext(httpContext)
-	permissionEntity := &domain.PermissionEntity{}
-	if trashed {
-		permission.model = permission.model.Unscoped()
-	}
-
-	permission.model.Where("key = ?", key).First(&permissionEntity)
-
-	return permissionEntity, nil
-}
-
-func (permission *PermissionRepository) FindById(httpContext *gin.Context, id uuid.UUID, trashed bool) (*domain.PermissionEntity, error) {
-	permission.model = permission.model.WithContext(httpContext)
+func (permission *PermissionRepository) FindOneById(ctx *gin.Context, id uuid.UUID, trashed bool) *domain.PermissionEntity {
+	permission.model = permission.model.WithContext(ctx)
 	permissionEntity := &domain.PermissionEntity{}
 	if trashed {
 		permission.model = permission.model.Unscoped()
 	}
 
 	err := permission.model.First(&permissionEntity, id).Error
+	if err == gorm.ErrRecordNotFound {
+		panic(*exception.NotFoundException("Permission not found"))
+	} else if err != nil {
+		log.Println("Error find permission by id", err)
+		panic(*exception.ServerErrorException(err.Error()))
+	}
 
-	return permissionEntity, err
+	return permissionEntity
 }
 
-func (permission *PermissionRepository) FindByNameAndKey(httpContext *gin.Context, name string, key string) (*domain.PermissionEntity, error) {
-	permission.model = permission.model.WithContext(httpContext)
+func (permission *PermissionRepository) Delete(ctx *gin.Context, id uuid.UUID) {
+	permission.model = permission.model.WithContext(ctx)
+	err := permission.model.Delete(&domain.PermissionEntity{}, id).Error
 
-	permissionEntity := &domain.PermissionEntity{}
-	permission.model.First(&permissionEntity, "name = ? and key = ?", name, key)
-
-	return permissionEntity, nil
+	if err != nil {
+		log.Println("Error delete permission", err)
+		panic(*exception.ServerErrorException(err.Error()))
+	}
 }
 
-func (permission *PermissionRepository) Delete(httpContext *gin.Context, id uuid.UUID) {
-	permission.model = permission.model.WithContext(httpContext)
-	permission.model.Delete(&domain.PermissionEntity{}, id)
-}
-
-func (permission *PermissionRepository) ForceDelete(httpContext *gin.Context, id uuid.UUID) {
-	permission.model = permission.model.WithContext(httpContext)
-	permissionEntity := &domain.PermissionEntity{}
-	permission.model.Unscoped().Where("id = ?", id).Find(&permissionEntity)
-	permission.model.Unscoped().Delete(&permissionEntity)
-}
-
-func (permission *PermissionRepository) Update(httpContext *gin.Context, id uuid.UUID, payload *domain.PermissionEntity) error {
-	permission.model = permission.model.WithContext(httpContext)
+func (permission *PermissionRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.PermissionEntity) {
+	permission.model = permission.model.WithContext(ctx)
 	err := permission.model.Where("id = ?", id).Updates(&payload).Error
-	return err
+	if err != nil {
+		log.Println("Error update permission", err)
+		panic(*exception.ServerErrorException(err.Error()))
+	}
 }
 
-func (permission *PermissionRepository) Create(httpContext *gin.Context, payload *domain.PermissionEntity) error {
-	permission.model = permission.model.WithContext(httpContext)
+func (permission *PermissionRepository) Create(ctx *gin.Context, payload *domain.PermissionEntity) {
+	permission.model = permission.model.WithContext(ctx)
 	err := permission.model.Create(&payload).Error
-	return err
+	if err != nil {
+		log.Println("Error create permission", err)
+		panic(*exception.ServerErrorException(err.Error()))
+	}
 }
 
-func (permission *PermissionRepository) IsKeyExist(httpContext *gin.Context, key string) bool {
-	permission.model = permission.model.WithContext(httpContext)
+func (permission *PermissionRepository) IsKeyExist(ctx *gin.Context, key string) bool {
+	permission.model = permission.model.WithContext(ctx)
 	var count int64
-	permission.model.
+	err := permission.model.
 		Where("key = ?", key).
-		Count(&count)
+		Count(&count).Error
+
+	if err != nil {
+		log.Println("Error check key exist", err)
+		panic(*exception.ServerErrorException(err.Error()))
+	}
+
 	return count > 0
 }
 
-func (permission *PermissionRepository) IsKeyExistExceptPermissionId(httpContext *gin.Context, key string, id uuid.UUID) bool {
-	permission.model = permission.model.WithContext(httpContext)
+func (permission *PermissionRepository) IsKeyExistExceptPermissionId(ctx *gin.Context, key string, id uuid.UUID) bool {
+	permission.model = permission.model.WithContext(ctx)
 	var count int64
-	permission.model.
+	err := permission.model.
 		Where("key = ? AND id != ?", key, id).
-		Count(&count)
+		Count(&count).Error
+
+	if err != nil {
+		log.Println("Error check key exist", err)
+		panic(*exception.ServerErrorException(err.Error()))
+	}
 
 	return count > 0
 }

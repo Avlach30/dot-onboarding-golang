@@ -7,9 +7,8 @@ import (
 
 type PermissionUsecase interface {
 	Pagination(httpContext *gin.Context) ([]PermissionEntity, int)
-	Create(httpContext *gin.Context, schema *PermissionEntity) error
-	FindById(httpContext *gin.Context, id uuid.UUID) (*PermissionEntity, error)
-	FindByKey(httpContext *gin.Context, key string) (*PermissionEntity, error)
+	Create(httpContext *gin.Context, schema *PermissionEntity)
+	FindOneById(httpContext *gin.Context, id uuid.UUID) *PermissionEntity
 	Update(httpContext *gin.Context, id uuid.UUID, schema *PermissionEntity)
 	Delete(httpContext *gin.Context, id uuid.UUID)
 }
