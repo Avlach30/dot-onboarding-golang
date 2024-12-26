@@ -100,7 +100,6 @@ func (notification *NotificationRepository) FindOneById(ctx *gin.Context, id uui
 	notification.notificationModel = notification.notificationModel.WithContext(ctx)
 	notificationEntity := domain.NotificationEntity{}
 
-	// Find notification with its user (join)
 	err := notification.notificationModel.
 		Joins("User").
 		Where("notifications.id = ?", id).
