@@ -9,5 +9,5 @@ type NotificationUseCase interface {
 	Pagination(ctx *gin.Context, userId uuid.UUID) ([]NotificationEntity, int)
 	HasUnread(ctx *gin.Context, userId uuid.UUID) bool
 	MarkAsRead(ctx *gin.Context, id uuid.UUID, userId uuid.UUID)
-	Detail(ctx *gin.Context, id uuid.UUID) NotificationEntity
+	Detail(ctx *gin.Context, id uuid.UUID, userId uuid.UUID) NotificationEntity
 }

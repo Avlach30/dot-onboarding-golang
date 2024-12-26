@@ -28,6 +28,6 @@ func (notification *NotificationUseCase) MarkAsRead(httpContext *gin.Context, id
 	notification.notificationRepo.MarkAsRead(httpContext, id, userId)
 }
 
-func (notification *NotificationUseCase) Detail(httpContext *gin.Context, id uuid.UUID) domain.NotificationEntity {
-	return notification.notificationRepo.FindOneById(httpContext, id)
+func (notification *NotificationUseCase) Detail(httpContext *gin.Context, id uuid.UUID, userId uuid.UUID) domain.NotificationEntity {
+	return notification.notificationRepo.FindOneById(httpContext, id, userId)
 }

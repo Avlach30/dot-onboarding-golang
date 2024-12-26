@@ -64,10 +64,12 @@ func (notificationHandler *NotificationHandler) MarkAsRead() gin.HandlerFunc {
 
 func (notificationHandler *NotificationHandler) Detail() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		claimToken := ctx.MustGet(constant.AuthUserInfoKey)
+		userId := claimToken.(*jwt.CustomClaims).ID
 		paramId := ctx.Param("id")
 		id := utils.UUIDChecker(paramId)
 
-		data := notificationHandler.notificationUseCase.Detail(ctx, id)
+		data := notificationHandler.notificationUseCase.Detail(ctx, id, userId)
 
 		ctx.JSON(http.StatusOK, utils.SucessResponse(data))
 	}

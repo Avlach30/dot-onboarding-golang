@@ -96,13 +96,14 @@ func (notification *NotificationRepository) MarkAsRead(ctx *gin.Context, id uuid
 }
 
 // FindOneById get notification detail by id
-func (notification *NotificationRepository) FindOneById(ctx *gin.Context, id uuid.UUID) domain.NotificationEntity {
+func (notification *NotificationRepository) FindOneById(ctx *gin.Context, id uuid.UUID, userId uuid.UUID) domain.NotificationEntity {
 	notification.notificationModel = notification.notificationModel.WithContext(ctx)
 	notificationEntity := domain.NotificationEntity{}
 
 	err := notification.notificationModel.
 		Joins("User").
 		Where("notifications.id = ?", id).
+		Where("notifications.user_id = ?", userId).
 		First(&notificationEntity).Error
 
 	if err == gorm.ErrRecordNotFound {
