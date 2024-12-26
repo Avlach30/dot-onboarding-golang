@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/immutable"
 	userDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
@@ -72,23 +71,23 @@ func (authUseCase *AuthUsecase) SignInLDAP(httpContext *gin.Context, username st
 
 // SignIn implements domain.AuthUsecase.
 func (authUseCase *AuthUsecase) CreateJWTToken(user *userDomain.UserEntity) (token string, expirationTime time.Time) {
-	// FIX ME: dummy permission
-	dummyPermissions := []domain.AuthPermissionEntity{
-		{
-			ID:   uuid.New(),
-			Name: immutable.PermissionApprove,
-			Key:  immutable.PermissionApprove,
-		},
-		{
-			ID:   uuid.New(),
-			Name: immutable.PermissionExport,
-			Key:  immutable.PermissionExport,
-		},
+
+	// set up permissions
+	roles := user.Roles
+	authPermissions := make([]domain.AuthPermissionEntity, 0)
+	for _, role := range roles {
+		for _, permission := range role.Permissions {
+			authPermissions = append(authPermissions, domain.AuthPermissionEntity{
+				ID:   permission.ID,
+				Name: permission.Name,
+				Key:  permission.Key,
+			})
+		}
 	}
 
-	// set permissions in global state
+	// set authPermissions in global state
 	globalState := state.GetGlobalState()
-	globalState.Set(GenerateHttpContextPermissionKey(user.ID), &dummyPermissions)
+	globalState.Set(GenerateHttpContextPermissionKey(user.ID), authPermissions)
 
 	// Generate JWT token
 	authInformation := &domain.AuthEntity{
