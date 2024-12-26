@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
@@ -19,76 +21,64 @@ func NewRoleRepository(db *gorm.DB) domain.RoleRepository {
 	}
 }
 
-func (role *RoleRepository) Pagination(httpContext *gin.Context) ([]domain.RoleEntity, int) {
-	role.model = role.model.WithContext(httpContext)
+// Pagination get role data with pagination
+func (role *RoleRepository) Pagination(ctx *gin.Context) ([]domain.RoleEntity, int) {
+	query := role.model.WithContext(ctx)
 	var roles []domain.RoleEntity
 	var total int64
 
 	// Query filter
-	role.queryFilter(httpContext)
+	query = role.queryFilter(query, ctx)
 	// Query sort
-	role.querySort(httpContext)
+	query = role.querySort(query, ctx)
 
-	role.model.Session(&gorm.Session{}).
-		Scopes(utils.Paginate(httpContext)).
+	err := query.Session(&gorm.Session{}).
+		Scopes(utils.Paginate(ctx)).
 		Find(&roles).
-		Count(&total)
+		Count(&total).Error
+
+	if err != nil {
+		log.Println("Error pagination role", err)
+		panic(*exception.ServerErrorException(err.Error()))
+	}
 
 	return roles, int(total)
 }
 
 // func filter for pagination
-func (role *RoleRepository) queryFilter(httpContext *gin.Context) *gorm.DB {
-	if search := httpContext.Query("search"); search != "" {
-		role.model = role.model.
-			Where("name LIKE ?", "%"+search+"%")
+func (role *RoleRepository) queryFilter(query *gorm.DB, ctx *gin.Context) *gorm.DB {
+	if search := ctx.Query("search"); search != "" {
+		query = query.Where("name LIKE ?", search+"%")
 	}
 
-	return role.model
+	return query
 }
 
 // func query sort for pagination
-func (role *RoleRepository) querySort(httpContext *gin.Context) *gorm.DB {
+func (role *RoleRepository) querySort(query *gorm.DB, ctx *gin.Context) *gorm.DB {
 	sortableColumns := []string{"name", "created_at", "updated_at"}
 
-	if sort := httpContext.Query("sort_by"); sort != "" {
+	if sort := ctx.Query("sort_by"); sort != "" {
 		if !utils.Contains(sortableColumns, sort) {
 			panic(*exception.BussinessException("Invalid sort column"))
 		}
 
-		role.model = role.model.
-			Order(sort + " " + httpContext.Query("order"))
-
-		// Handle order by asc or desc
-		if order := httpContext.Query("order"); order != "" {
+		// Handle order query
+		if order := ctx.Query("order"); order != "" {
 			if order != "asc" && order != "desc" {
 				panic(*exception.BussinessException("Invalid order value"))
 			}
-
-			role.model = role.model.
-				Order(sort + " " + order)
+			query = query.Order(sort + " " + order)
+		} else {
+			query = query.Order(sort)
 		}
 	}
 
-	return role.model
+	return query
 }
 
-// FindByKey implements domain.RoleRepository.
-func (role *RoleRepository) FindByKey(httpContext *gin.Context, key string, trashed bool) (*domain.RoleEntity, error) {
-	role.model = role.model.WithContext(httpContext)
-	roleEntity := &domain.RoleEntity{}
-
-	if trashed {
-		role.model = role.model.Unscoped()
-	}
-
-	err := role.model.Where("key = ?", key).First(&roleEntity).Error
-
-	return roleEntity, err
-}
-
-func (role *RoleRepository) FindById(httpContext *gin.Context, id uuid.UUID, trashed bool) (*domain.RoleEntity, error) {
-	role.model = role.model.WithContext(httpContext)
+func (role *RoleRepository) FindOneById(ctx *gin.Context, id uuid.UUID, trashed bool) *domain.RoleEntity {
+	role.model = role.model.WithContext(ctx)
 	roleEntity := &domain.RoleEntity{}
 	if trashed {
 		role.model = role.model.Unscoped()
@@ -99,55 +89,72 @@ func (role *RoleRepository) FindById(httpContext *gin.Context, id uuid.UUID, tra
 		First(&roleEntity, id).
 		Error
 
-	return roleEntity, err
+	if err == gorm.ErrRecordNotFound {
+		panic(*exception.NotFoundException("Role not found"))
+	} else if err != nil {
+		log.Println("Error role find by id: ", err)
+		panic(*exception.ServerErrorException(err.Error()))
+	}
+
+	return roleEntity
 }
 
-func (role *RoleRepository) FindByNameAndKey(httpContext *gin.Context, name string, key string) (*domain.RoleEntity, error) {
-	role.model = role.model.WithContext(httpContext)
-	roleEntity := &domain.RoleEntity{}
-	role.model.First(&roleEntity, "name = ? and key = ?", name, key)
+func (role *RoleRepository) Delete(ctx *gin.Context, id uuid.UUID) {
+	role.model = role.model.WithContext(ctx)
+	err := role.model.Delete(&domain.RoleEntity{}, id).Error
 
-	return roleEntity, nil
+	if err != nil {
+		log.Println("Error role delete: ", err)
+		panic(*exception.ServerErrorException(err.Error()))
+	}
 }
 
-func (role *RoleRepository) Delete(httpContext *gin.Context, id uuid.UUID) {
-	role.model = role.model.WithContext(httpContext)
-	role.model.Delete(&domain.RoleEntity{}, id)
-}
-
-func (role *RoleRepository) ForceDelete(httpContext *gin.Context, id uuid.UUID) {
-	role.model = role.model.WithContext(httpContext)
-	roleEntity := &domain.RoleEntity{}
-	role.model.Unscoped().Delete(&roleEntity, id)
-}
-
-func (role *RoleRepository) Update(httpContext *gin.Context, id uuid.UUID, payload *domain.RoleEntity) error {
-	role.model = role.model.WithContext(httpContext)
+func (role *RoleRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.RoleEntity) {
+	role.model = role.model.WithContext(ctx)
 	err := role.model.Where("id = ?", id).Updates(&payload).Error
-	return err
+
+	if err != nil {
+		log.Println("Error role update: ", err)
+		panic(*exception.ServerErrorException(err.Error()))
+	}
 }
 
-func (role *RoleRepository) Create(httpContext *gin.Context, payload *domain.RoleEntity) error {
-	role.model = role.model.WithContext(httpContext)
+func (role *RoleRepository) Create(ctx *gin.Context, payload *domain.RoleEntity) {
+	role.model = role.model.WithContext(ctx)
 	err := role.model.Create(&payload).Error
-	return err
+
+	if err != nil {
+		log.Println("Error role create: ", err)
+		panic(*exception.ServerErrorException(err.Error()))
+	}
 }
 
-func (role *RoleRepository) IsKeyExist(httpContext *gin.Context, key string) bool {
-	role.model = role.model.WithContext(httpContext)
+func (role *RoleRepository) IsKeyExist(ctx *gin.Context, key string) bool {
+	role.model = role.model.WithContext(ctx)
 	var count int64
-	role.model.
+	err := role.model.
 		Where("key = ?", key).
-		Count(&count)
+		Count(&count).Error
+
+	if err != nil {
+		log.Println("Error role is key exist: ", err)
+		panic(*exception.ServerErrorException(err.Error()))
+	}
+
 	return count > 0
 }
 
-func (role *RoleRepository) IsKeyExistExceptRoleId(httpContext *gin.Context, key string, id uuid.UUID) bool {
-	role.model = role.model.WithContext(httpContext)
+func (role *RoleRepository) IsKeyExistExceptRoleId(ctx *gin.Context, key string, id uuid.UUID) bool {
+	role.model = role.model.WithContext(ctx)
 	var count int64
-	role.model.
+	err := role.model.
 		Where("key = ? AND id != ?", key, id).
-		Count(&count)
+		Count(&count).Error
+
+	if err != nil {
+		log.Println("Error role is key exist except role id: ", err)
+		panic(*exception.ServerErrorException(err.Error()))
+	}
 
 	return count > 0
 }

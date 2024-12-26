@@ -5,11 +5,16 @@ import (
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
-	"gorm.io/gorm"
 )
 
 type RoleUsecase struct {
 	roleRepo domain.RoleRepository
+}
+
+func NewRoleUsecase(roleRepo domain.RoleRepository) domain.RoleUsecase {
+	return &RoleUsecase{
+		roleRepo: roleRepo,
+	}
 }
 
 func (roleUsecase *RoleUsecase) Pagination(httpContext *gin.Context) ([]domain.RoleEntity, int) {
@@ -17,14 +22,14 @@ func (roleUsecase *RoleUsecase) Pagination(httpContext *gin.Context) ([]domain.R
 }
 
 // Create implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) Create(httpContext *gin.Context, payload *domain.RoleEntity) error {
+func (roleUsecase *RoleUsecase) Create(httpContext *gin.Context, payload *domain.RoleEntity) {
 	isKeyExist := roleUsecase.roleRepo.IsKeyExist(httpContext, payload.Key)
 
 	if isKeyExist {
 		panic(*exception.BussinessException("Key already exist"))
 	}
 
-	return roleUsecase.roleRepo.Create(httpContext, payload)
+	roleUsecase.roleRepo.Create(httpContext, payload)
 }
 
 // Delete implements domain.RoleUsecase.
@@ -32,20 +37,9 @@ func (roleUsecase *RoleUsecase) Delete(httpContext *gin.Context, id uuid.UUID) {
 	roleUsecase.roleRepo.Delete(httpContext, id)
 }
 
-// FindById implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) FindById(httpContext *gin.Context, id uuid.UUID) (*domain.RoleEntity, error) {
-	role, err := roleUsecase.roleRepo.FindById(httpContext, id, false)
-
-	if err == gorm.ErrRecordNotFound {
-		panic(*exception.NotFoundException("Role not found"))
-	}
-
-	return role, err
-}
-
-// FindByKey implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) FindByKey(httpContext *gin.Context, key string) (*domain.RoleEntity, error) {
-	return roleUsecase.roleRepo.FindByKey(httpContext, key, false)
+// FindOneById implements domain.RoleUsecase.
+func (roleUsecase *RoleUsecase) FindOneById(httpContext *gin.Context, id uuid.UUID) *domain.RoleEntity {
+	return roleUsecase.roleRepo.FindOneById(httpContext, id, false)
 }
 
 // Update implements domain.RoleUsecase.
@@ -54,14 +48,5 @@ func (roleUsecase *RoleUsecase) Update(httpContext *gin.Context, id uuid.UUID, p
 		panic(*exception.BussinessException("Key already exist"))
 	}
 
-	err := roleUsecase.roleRepo.Update(httpContext, id, payload)
-	if err != nil {
-		panic(*exception.ServerErrorException("Failed to update role"))
-	}
-}
-
-func NewRoleUsecase(roleRepo domain.RoleRepository) domain.RoleUsecase {
-	return &RoleUsecase{
-		roleRepo: roleRepo,
-	}
+	roleUsecase.roleRepo.Update(httpContext, id, payload)
 }

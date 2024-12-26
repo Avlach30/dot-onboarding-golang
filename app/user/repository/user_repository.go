@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -52,7 +51,6 @@ func (user *UserRepository) Pagination(httpContext *gin.Context) ([]domain.UserE
 // func filter for pagination
 func (user *UserRepository) queryFilter(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
 	if search := httpContext.Query("search"); search != "" {
-		fmt.Println("search", search)
 		query = query.Where("name LIKE ?", search+"%")
 	}
 

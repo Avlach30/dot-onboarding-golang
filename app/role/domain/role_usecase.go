@@ -7,9 +7,8 @@ import (
 
 type RoleUsecase interface {
 	Pagination(httpContext *gin.Context) ([]RoleEntity, int)
-	Create(httpContext *gin.Context, schema *RoleEntity) error
-	FindById(httpContext *gin.Context, id uuid.UUID) (*RoleEntity, error)
-	FindByKey(httpContext *gin.Context, key string) (*RoleEntity, error)
+	Create(httpContext *gin.Context, schema *RoleEntity)
+	FindOneById(httpContext *gin.Context, id uuid.UUID) *RoleEntity
 	Update(httpContext *gin.Context, id uuid.UUID, dto *RoleEntity)
 	Delete(httpContext *gin.Context, id uuid.UUID)
 }

@@ -17,7 +17,7 @@ type RoleEntity struct {
 	CreatedAt time.Time      `gorm:"autoCreateTime:true index" json:"created_at"`
 
 	// Relations
-	Permissions []domain.PermissionEntity `gorm:"many2many:role_permissions;foreignKey:ID;joinForeignKey:role_id;References:ID;joinReferences:permission_id" json:"permissions"`
+	Permissions []domain.PermissionEntity `gorm:"many2many:role_permissions;foreignKey:id;joinForeignKey:role_id;References:id;joinReferences:permission_id" json:"permissions"`
 }
 
 func (RoleEntity) TableName() string {
