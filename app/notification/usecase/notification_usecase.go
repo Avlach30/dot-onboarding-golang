@@ -10,7 +10,7 @@ type NotificationUseCase struct {
 	notificationRepo domain.NotificationRepository
 }
 
-func NewNotificationUseCase(notificationRepo domain.NotificationUseCase) domain.NotificationUseCase {
+func NewNotificationUseCase(notificationRepo domain.NotificationRepository) domain.NotificationUseCase {
 	return &NotificationUseCase{
 		notificationRepo: notificationRepo,
 	}
@@ -24,6 +24,10 @@ func (notification *NotificationUseCase) HasUnread(httpContext *gin.Context, use
 	return notification.notificationRepo.HasUnread(httpContext, userId)
 }
 
-func (notification *NotificationUseCase) MarkAsRead(httpContext *gin.Context, id string, userId uuid.UUID) {
+func (notification *NotificationUseCase) MarkAsRead(httpContext *gin.Context, id uuid.UUID, userId uuid.UUID) {
 	notification.notificationRepo.MarkAsRead(httpContext, id, userId)
+}
+
+func (notification *NotificationUseCase) Detail(httpContext *gin.Context, id uuid.UUID) domain.NotificationEntity {
+	return notification.notificationRepo.FindOneById(httpContext, id)
 }

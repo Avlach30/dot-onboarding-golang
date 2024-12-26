@@ -25,37 +25,50 @@ func NewNotificationHandler(router *gin.Engine, notificationUseCase domain.Notif
 	notificationHandlerRoute.GET("/", notificationHandler.Pagination())
 	notificationHandlerRoute.GET("/has-unread", notificationHandler.HasUnread())
 	notificationHandlerRoute.PATCH("/mark-as-read/:id", notificationHandler.MarkAsRead())
+	notificationHandlerRoute.GET("/:id", notificationHandler.Detail())
 }
 
 func (notificationHandler *NotificationHandler) Pagination() gin.HandlerFunc {
-	return func(httpContext *gin.Context) {
-		claimToken := httpContext.MustGet(constant.AuthUserInfoKey)
+	return func(ctx *gin.Context) {
+		claimToken := ctx.MustGet(constant.AuthUserInfoKey)
 		userId := claimToken.(*jwt.CustomClaims).ID
-		data, total := notificationHandler.notificationUseCase.Pagination(httpContext, userId)
+		data, total := notificationHandler.notificationUseCase.Pagination(ctx, userId)
 
-		meta := utils.PaginationMetaBuilder(httpContext, total)
+		meta := utils.PaginationMetaBuilder(ctx, total)
 
-		httpContext.JSON(http.StatusOK, utils.PaginationBuilder(data, *meta))
+		ctx.JSON(http.StatusOK, utils.PaginationBuilder(data, *meta))
 	}
 }
 
 func (notificationHandler *NotificationHandler) HasUnread() gin.HandlerFunc {
-	return func(httpContext *gin.Context) {
-		claimToken := httpContext.MustGet(constant.AuthUserInfoKey)
+	return func(ctx *gin.Context) {
+		claimToken := ctx.MustGet(constant.AuthUserInfoKey)
 		userId := claimToken.(*jwt.CustomClaims).ID
-		hasUnread := notificationHandler.notificationUseCase.HasUnread(httpContext, userId)
+		hasUnread := notificationHandler.notificationUseCase.HasUnread(ctx, userId)
 
-		httpContext.JSON(http.StatusOK, utils.SucessResponse(hasUnread))
+		ctx.JSON(http.StatusOK, utils.SucessResponse(hasUnread))
 	}
 }
 
 func (notificationHandler *NotificationHandler) MarkAsRead() gin.HandlerFunc {
-	return func(httpContext *gin.Context) {
-		claimToken := httpContext.MustGet(constant.AuthUserInfoKey)
+	return func(ctx *gin.Context) {
+		claimToken := ctx.MustGet(constant.AuthUserInfoKey)
 		userId := claimToken.(*jwt.CustomClaims).ID
-		id := httpContext.Param("id")
-		notificationHandler.notificationUseCase.MarkAsRead(httpContext, id, userId)
+		paramId := ctx.Param("id")
+		id := utils.UUIDChecker(paramId)
+		notificationHandler.notificationUseCase.MarkAsRead(ctx, id, userId)
 
-		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
+		ctx.JSON(http.StatusOK, utils.SucessResponse(nil))
+	}
+}
+
+func (notificationHandler *NotificationHandler) Detail() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		paramId := ctx.Param("id")
+		id := utils.UUIDChecker(paramId)
+
+		data := notificationHandler.notificationUseCase.Detail(ctx, id)
+
+		ctx.JSON(http.StatusOK, utils.SucessResponse(data))
 	}
 }

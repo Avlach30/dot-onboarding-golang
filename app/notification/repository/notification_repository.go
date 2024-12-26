@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/domain"
@@ -20,18 +22,18 @@ func NewNotificationRepository(db *gorm.DB) domain.NotificationRepository {
 }
 
 // Pagination get notification data with pagination
-func (notification *NotificationRepository) Pagination(httpContext *gin.Context, userId uuid.UUID) ([]domain.NotificationEntity, int) {
-	notification.notificationModel = notification.notificationModel.WithContext(httpContext)
+func (notification *NotificationRepository) Pagination(ctx *gin.Context, userId uuid.UUID) ([]domain.NotificationEntity, int) {
+	notification.notificationModel = notification.notificationModel.WithContext(ctx)
 	var notifications []domain.NotificationEntity
 	var total int64
 
 	// Query filter
-	notification.queryFilter(httpContext)
+	notification.queryFilter(ctx)
 	// Query sort
-	notification.querySort(httpContext)
+	notification.querySort(ctx)
 
 	notification.notificationModel.Session(&gorm.Session{}).
-		Scopes(utils.Paginate(httpContext)).
+		Scopes(utils.Paginate(ctx)).
 		Where("user_id = ?", userId).
 		Find(&notifications).
 		Count(&total)
@@ -40,8 +42,8 @@ func (notification *NotificationRepository) Pagination(httpContext *gin.Context,
 }
 
 // func filter for pagination
-func (notification *NotificationRepository) queryFilter(httpContext *gin.Context) *gorm.DB {
-	if search := httpContext.Query("search"); search != "" {
+func (notification *NotificationRepository) queryFilter(ctx *gin.Context) *gorm.DB {
+	if search := ctx.Query("search"); search != "" {
 		notification.notificationModel = notification.notificationModel.
 			Where("title LIKE ?", search+"%")
 	}
@@ -50,12 +52,12 @@ func (notification *NotificationRepository) queryFilter(httpContext *gin.Context
 }
 
 // func query sort for pagination
-func (notification *NotificationRepository) querySort(httpContext *gin.Context) *gorm.DB {
+func (notification *NotificationRepository) querySort(ctx *gin.Context) *gorm.DB {
 	sortableColumns := []string{"created_at"}
 
-	if sort := httpContext.Query("sort_by"); sort != "" {
+	if sort := ctx.Query("sort_by"); sort != "" {
 		if !utils.Contains(sortableColumns, sort) {
-			notification.notificationModel = notification.notificationModel.Order(sort + " " + httpContext.Query("order"))
+			notification.notificationModel = notification.notificationModel.Order(sort + " " + ctx.Query("order"))
 		}
 	}
 
@@ -63,8 +65,8 @@ func (notification *NotificationRepository) querySort(httpContext *gin.Context) 
 }
 
 // HasUnread check if user has unread notification
-func (notification *NotificationRepository) HasUnread(httpContext *gin.Context, userId uuid.UUID) bool {
-	notification.notificationModel = notification.notificationModel.WithContext(httpContext)
+func (notification *NotificationRepository) HasUnread(ctx *gin.Context, userId uuid.UUID) bool {
+	notification.notificationModel = notification.notificationModel.WithContext(ctx)
 	var total int64
 
 	err := notification.notificationModel.
@@ -80,8 +82,8 @@ func (notification *NotificationRepository) HasUnread(httpContext *gin.Context, 
 }
 
 // MarkAsRead mark notification as read
-func (notification *NotificationRepository) MarkAsRead(httpContext *gin.Context, id string, userId uuid.UUID) {
-	notification.notificationModel = notification.notificationModel.WithContext(httpContext)
+func (notification *NotificationRepository) MarkAsRead(ctx *gin.Context, id uuid.UUID, userId uuid.UUID) {
+	notification.notificationModel = notification.notificationModel.WithContext(ctx)
 
 	err := notification.notificationModel.
 		Where("id = ?", id).
@@ -91,4 +93,25 @@ func (notification *NotificationRepository) MarkAsRead(httpContext *gin.Context,
 	if err != nil {
 		panic(*exception.ServerErrorException("Failed to mark notification as read"))
 	}
+}
+
+// FindOneById get notification detail by id
+func (notification *NotificationRepository) FindOneById(ctx *gin.Context, id uuid.UUID) domain.NotificationEntity {
+	notification.notificationModel = notification.notificationModel.WithContext(ctx)
+	notificationEntity := domain.NotificationEntity{}
+
+	// Find notification with its user (join)
+	err := notification.notificationModel.
+		Joins("User").
+		Where("notifications.id = ?", id).
+		First(&notificationEntity).Error
+
+	if err == gorm.ErrRecordNotFound {
+		panic(*exception.NotFoundException("Notification not found"))
+	} else if err != nil {
+		log.Println("err detail notification", err)
+		panic(*exception.ServerErrorException("Failed to get notification detail"))
+	}
+
+	return notificationEntity
 }
