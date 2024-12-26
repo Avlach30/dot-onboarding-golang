@@ -3,7 +3,7 @@ package pkg
 type BaseResponse struct {
 	StatusCode   int                `json:"status_code"`
 	ErrorMessage string             `json:"error_message,omitempty"`
-	StackTrace   string             `json:"stack_trace"`
+	StackTrace   string             `json:"stack_trace,omitempty"`
 	Data         *interface{}       `json:"data"`
 	Errors       *[]ErrorValidation `json:"errors"`
 	Version      string             `json:"version"`

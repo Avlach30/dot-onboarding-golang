@@ -27,7 +27,7 @@ func NewUserHandler(router *gin.Engine, userUsecase domain.UserUsecase) {
 	userHandlerRoute.GET("/", userHandler.Pagination())
 	userHandlerRoute.DELETE("/:id", userHandler.Delete())
 	userHandlerRoute.PATCH("/:id", middleware.ValidateRequestJSON(&dto.UserUpdateRequest{}), userHandler.Update())
-	userHandlerRoute.GET("/:id", userHandler.FindById())
+	userHandlerRoute.GET("/:id", userHandler.Detail())
 	userHandlerRoute.POST("/", middleware.ValidateRequestJSON(&dto.UserCreateRequest{}), userHandler.Create())
 }
 
@@ -50,11 +50,11 @@ func (userHandler *UserHandler) Create() gin.HandlerFunc {
 	}
 }
 
-func (userHandler *UserHandler) FindById() gin.HandlerFunc {
+func (userHandler *UserHandler) Detail() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
-		userData := userHandler.userUsecase.FindById(httpContext, id, false)
+		userData := userHandler.userUsecase.FindOneById(httpContext, id, false)
 
 		httpContext.JSON(http.StatusOK, utils.SucessResponse(userData))
 	}

@@ -9,8 +9,7 @@ import (
 type UserUsecase interface {
 	Pagination(httpContext *gin.Context) ([]UserEntity, int)
 	Create(httpContext *gin.Context, payload *dto.UserCreateRequest)
-	FindById(httpContext *gin.Context, id uuid.UUID, trashed bool) *UserEntity
+	FindOneById(httpContext *gin.Context, id uuid.UUID, trashed bool) *UserEntity
 	Update(httpContext *gin.Context, id uuid.UUID, payload *dto.UserUpdateRequest)
 	Delete(httpContext *gin.Context, id uuid.UUID)
-	ForceDelete(httpContext *gin.Context, id uuid.UUID)
 }
