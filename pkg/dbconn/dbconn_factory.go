@@ -10,6 +10,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type DatabaseCredentials struct {
@@ -34,7 +35,10 @@ func InitDb(databaseCredentials *DatabaseCredentials) (*gorm.DB, error) {
 		databaseCredentials.TimeZome,
 	)
 
-	db, errors := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, errors := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+
 	if errors != nil {
 		panic(errors.Error())
 	}

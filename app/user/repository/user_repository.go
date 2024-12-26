@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	roleDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
@@ -109,17 +107,26 @@ func (user *UserRepository) ForceDelete(httpContext *gin.Context, id uuid.UUID) 
 func (user *UserRepository) Update(httpContext *gin.Context, id uuid.UUID, payload *domain.UserEntity) {
 	user.userModel = user.userModel.WithContext(httpContext)
 	userEntity := &domain.UserEntity{}
-	if err := user.userModel.First(&userEntity, id).Error; err != nil {
-		panic(*exception.ServerErrorException("Failed to find user"))
-	}
 
-	err := user.userModel.Model(&userEntity).Association("Roles").Replace(payload.Roles)
-	if err != nil {
-		fmt.Println(err)
-		panic(*exception.ServerErrorException("Failed to update user roles"))
-	}
+	err := user.userModel.Transaction(func(tx *gorm.DB) error {
+		// Find user within transaction
+		if err := tx.First(&userEntity, id).Error; err != nil {
+			return err
+		}
 
-	err = user.userModel.Where("id = ?", id).Updates(&payload).Error
+		// Update roles within transaction
+		if err := tx.Model(&userEntity).Association("Roles").Replace(payload.Roles); err != nil {
+			return err
+		}
+
+		// Update user data within transaction
+		if err := tx.Where("id = ?", id).Updates(&payload).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		panic(*exception.ServerErrorException("Failed to update user"))
 	}
