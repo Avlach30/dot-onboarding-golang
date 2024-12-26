@@ -27,7 +27,7 @@ func NewRoleHandler(router *gin.Engine, roleUsecase domain.RoleUsecase) {
 	roleHandlerRoute.GET("/", roleHandler.Pagination())
 	roleHandlerRoute.DELETE("/:id", roleHandler.Delete())
 	roleHandlerRoute.PATCH("/:id", middleware.ValidateRequestJSON(&dto.RoleUpdateRequest{}), roleHandler.Update())
-	roleHandlerRoute.GET("/:id", roleHandler.FindById())
+	roleHandlerRoute.GET("/:id", roleHandler.Detail())
 	roleHandlerRoute.POST("/", middleware.ValidateRequestJSON(&dto.RoleCreateRequest{}), roleHandler.Create())
 }
 
@@ -55,20 +55,11 @@ func (roleHandler *RoleHandler) Create() gin.HandlerFunc {
 	}
 }
 
-func (roleHandler *RoleHandler) FindById() gin.HandlerFunc {
+func (roleHandler *RoleHandler) Detail() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
-		roleData, _ := roleHandler.roleUsecase.FindById(httpContext, id)
-
-		httpContext.JSON(http.StatusOK, utils.SucessResponse(roleData))
-	}
-}
-
-func (roleHandler *RoleHandler) FindByKey() gin.HandlerFunc {
-	return func(httpContext *gin.Context) {
-		paramKey := httpContext.Param("key")
-		roleData, _ := roleHandler.roleUsecase.FindByKey(httpContext, paramKey)
+		roleData := roleHandler.roleUsecase.FindOneById(httpContext, id)
 
 		httpContext.JSON(http.StatusOK, utils.SucessResponse(roleData))
 	}
