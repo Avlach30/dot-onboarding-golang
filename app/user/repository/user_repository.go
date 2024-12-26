@@ -82,7 +82,7 @@ func (user *UserRepository) querySort(query *gorm.DB, httpContext *gin.Context) 
 	return query
 }
 
-func (user *UserRepository) FindById(httpContext *gin.Context, id uuid.UUID, trashed bool) *domain.UserEntity {
+func (user *UserRepository) FindOneById(httpContext *gin.Context, id uuid.UUID, trashed bool) *domain.UserEntity {
 	user.model = user.model.WithContext(httpContext)
 	userEntity := &domain.UserEntity{}
 	if trashed {

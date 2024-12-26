@@ -9,7 +9,7 @@ import (
 type UserRepository interface {
 	Pagination(httpContext *gin.Context) ([]UserEntity, int)
 	Create(httpContext *gin.Context, payload *UserEntity)
-	FindById(httpContext *gin.Context, id uuid.UUID, trashed bool) *UserEntity
+	FindOneById(httpContext *gin.Context, id uuid.UUID, trashed bool) *UserEntity
 	Update(httpContext *gin.Context, id uuid.UUID, payload *UserEntity)
 	Delete(httpContext *gin.Context, id uuid.UUID)
 	IsEmailExist(httpContext *gin.Context, email string) bool

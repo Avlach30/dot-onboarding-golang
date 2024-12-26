@@ -88,6 +88,6 @@ func (userUsecase *UserUsecase) Delete(httpContext *gin.Context, id uuid.UUID) {
 }
 
 // FindById implements domain.UserUsecase.
-func (userUsecase *UserUsecase) FindById(httpContext *gin.Context, id uuid.UUID, trashed bool) *domain.UserEntity {
-	return userUsecase.userRepo.FindById(httpContext, id, trashed)
+func (userUsecase *UserUsecase) FindOneById(httpContext *gin.Context, id uuid.UUID, trashed bool) *domain.UserEntity {
+	return userUsecase.userRepo.FindOneById(httpContext, id, trashed)
 }
