@@ -12,5 +12,4 @@ type UserUsecase interface {
 	FindById(httpContext *gin.Context, id uuid.UUID, trashed bool) *UserEntity
 	Update(httpContext *gin.Context, id uuid.UUID, payload *dto.UserUpdateRequest)
 	Delete(httpContext *gin.Context, id uuid.UUID)
-	ForceDelete(httpContext *gin.Context, id uuid.UUID)
 }

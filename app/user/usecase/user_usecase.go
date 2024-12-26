@@ -1,13 +1,10 @@
 package usecase
 
 import (
-	"fmt"
-
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -92,19 +89,5 @@ func (userUsecase *UserUsecase) Delete(httpContext *gin.Context, id uuid.UUID) {
 
 // FindById implements domain.UserUsecase.
 func (userUsecase *UserUsecase) FindById(httpContext *gin.Context, id uuid.UUID, trashed bool) *domain.UserEntity {
-	user, err := userUsecase.userRepo.FindById(httpContext, id, trashed)
-
-	if err == gorm.ErrRecordNotFound {
-		panic(*exception.NotFoundException("User not found"))
-	} else if err != nil {
-		fmt.Println(err)
-		panic(*exception.ServerErrorException("Failed to find user"))
-	}
-
-	return user
-}
-
-// ForceDelete implements domain.UserUsecase.
-func (userUsecase *UserUsecase) ForceDelete(httpContext *gin.Context, id uuid.UUID) {
-	userUsecase.userRepo.ForceDelete(httpContext, id)
+	return userUsecase.userRepo.FindById(httpContext, id, trashed)
 }
