@@ -12,7 +12,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/jwt"
-	state "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/sso/ldap"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/sso/oidc"
 	"golang.org/x/crypto/bcrypt"
@@ -36,6 +36,7 @@ func (authUseCase *AuthUsecase) SignInByOIDCCode(httpContext *gin.Context, code 
 		panic(*exception.BussinessException("Email Not Found"))
 	}
 
+	SetPermissions(user)
 	// sign in jwt
 	return authUseCase.CreateJWTToken(user)
 }
@@ -66,28 +67,13 @@ func (authUseCase *AuthUsecase) SignInLDAP(httpContext *gin.Context, username st
 		panic(*exception.UnauthorizedException("Email Not Found"))
 	}
 
+	SetPermissions(user)
+
 	return authUseCase.CreateJWTToken(user)
 }
 
 // SignIn implements domain.AuthUsecase.
 func (authUseCase *AuthUsecase) CreateJWTToken(user *userDomain.UserEntity) (token string, expirationTime time.Time) {
-
-	// set up permissions
-	roles := user.Roles
-	authPermissions := make([]domain.AuthPermissionEntity, 0)
-	for _, role := range roles {
-		for _, permission := range role.Permissions {
-			authPermissions = append(authPermissions, domain.AuthPermissionEntity{
-				ID:   permission.ID,
-				Name: permission.Name,
-				Key:  permission.Key,
-			})
-		}
-	}
-
-	// set authPermissions in global state
-	globalState := state.GetGlobalState()
-	globalState.Set(GenerateHttpContextPermissionKey(user.ID), authPermissions)
 
 	// Generate JWT token
 	authInformation := &domain.AuthEntity{
@@ -110,6 +96,8 @@ func (authUseCase *AuthUsecase) CreateJWTToken(user *userDomain.UserEntity) (tok
 		panic(*exception.ServerErrorException("Error Create Token"))
 	}
 
+	SetPermissions(user)
+
 	// Return the token
 	return tokenString, expirationTime
 }
@@ -117,6 +105,28 @@ func (authUseCase *AuthUsecase) CreateJWTToken(user *userDomain.UserEntity) (tok
 func NewAuthUsecase(authRepo domain.AuthRepository) domain.AuthUsecase {
 	return &AuthUsecase{
 		authRepo: authRepo,
+	}
+}
+
+func SetPermissions(user *userDomain.UserEntity) {
+	// set up permissions
+	roles := user.Roles
+	authPermissions := make([]domain.AuthPermissionEntity, 0)
+	for _, role := range roles {
+		for _, permission := range role.Permissions {
+			authPermissions = append(authPermissions, domain.AuthPermissionEntity{
+				ID:   permission.ID,
+				Name: permission.Name,
+				Key:  permission.Key,
+			})
+		}
+	}
+
+	// set authPermissions in global state
+	globalState := singleton.GetGlobalState()
+	err := globalState.Set(GenerateHttpContextPermissionKey(user.ID), authPermissions)
+	if err != nil {
+		panic(*exception.ServerErrorException(err.Error()))
 	}
 }
 

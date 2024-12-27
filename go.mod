@@ -22,6 +22,7 @@ require (
 	github.com/mattbaird/gosaml v0.0.0-20151208173928-4cc6d457adea
 	github.com/minio/minio-go/v7 v7.0.82
 	github.com/shirou/gopsutil v3.21.11+incompatible
+	github.com/sony/gobreaker v1.0.0
 	golang.org/x/crypto v0.31.0
 	golang.org/x/exp v0.0.0-20241210194714-1829a127f884
 	golang.org/x/text v0.21.0

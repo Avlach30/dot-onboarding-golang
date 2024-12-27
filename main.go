@@ -178,8 +178,10 @@ func initializeWorkers(db *gorm.DB, storageManager storage.StorageManager) {
 func setupRouter() *gin.Engine {
 	router := gin.New()
 	gin.SetMode(config.GinMode)
+
 	router.Use(sentrygin.New(sentrygin.Options{}))
 	router.Use(handler.RecoverPanic())
+
 	healthCheck(router)
 	return router
 }
