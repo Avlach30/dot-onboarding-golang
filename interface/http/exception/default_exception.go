@@ -23,6 +23,14 @@ func ServerErrorException(errorMessage string) *Exception {
 	return panic
 }
 
+func ServiceUnavailable() *Exception {
+	panic := &Exception{}
+	panic.ErrorMessage = "Service Unavailable"
+	panic.StatusCode = http.StatusServiceUnavailable
+
+	return panic
+}
+
 func UnauthorizedException(errorMessage string) *Exception {
 	panic := &Exception{}
 	panic.ErrorMessage = errorMessage

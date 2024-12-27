@@ -7,7 +7,6 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
-	state "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 )
 
@@ -22,8 +21,11 @@ func PermissionGuard(permissionsToCheck ...string) gin.HandlerFunc {
 		userID := singleton.GetAuthUserID(httpContext)
 
 		// get global state
-		globalState := state.GetGlobalState()
-		permissions := state.Get[[]domain.AuthPermissionEntity](usecase.GenerateHttpContextPermissionKey(userID), globalState)
+		globalState := singleton.GetGlobalState()
+		permissions, err := singleton.Get[[]domain.AuthPermissionEntity](usecase.GenerateHttpContextPermissionKey(userID), globalState)
+		if err != nil {
+			panic(*exception.UnauthorizedException("Try again later"))
+		}
 
 		if permissions == nil {
 			panic(*exception.ForbiddenException("Not Allowed Access"))
