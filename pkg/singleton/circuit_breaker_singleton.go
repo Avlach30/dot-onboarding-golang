@@ -2,8 +2,6 @@ package singleton
 
 import (
 	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
 type CircuitBreakerSingleton struct {
@@ -20,6 +18,9 @@ const (
 	StateOpen     = "Open"
 	StateHalfOpen = "Half Open"
 	StateClose    = "Close"
+
+	InternalCircuitBreaker = "Internal"
+	ExternalCircuitBreaker = "External"
 )
 
 type CurrentErrorCondition struct {
@@ -29,16 +30,30 @@ type CurrentErrorCondition struct {
 	Requests      int64
 }
 
-func GetCircuitBreaker() *CircuitBreakerSingleton {
-	return cbs
+func GetCircuitBreaker(state string) *CircuitBreakerSingleton {
+	switch state {
+	case InternalCircuitBreaker:
+		return internalCbs
+	case ExternalCircuitBreaker:
+		return externalCbs
+	default:
+		return internalCbs
+	}
 }
 
-func CountRequestCircuitBreaker() {
-	cbs.CountRequest()
+func CountRequestCircuitBreaker(state string) {
+	switch state {
+	case InternalCircuitBreaker:
+		internalCbs.CountRequest()
+	case ExternalCircuitBreaker:
+		externalCbs.CountRequest()
+	default:
+		internalCbs.CountRequest()
+	}
 }
 
-func (cbs *CircuitBreakerSingleton) FailureHappend(httpContext *gin.Context) {
-	if cbs.IsEndpointIgnored(httpContext.Request.URL.Path) {
+func (cbs *CircuitBreakerSingleton) FailureHappend(path string) {
+	if cbs.IsEndpointIgnored(path) {
 		return
 	}
 
@@ -64,7 +79,6 @@ func (cbs *CircuitBreakerSingleton) CountRequest() {
 }
 
 func (cbs *CircuitBreakerSingleton) IsReadyToTrip() bool {
-	// beforeCondition := cbs.CurrentCondition.State
 	isReadyToTrip := cbs.CircuitBreaker.ReadyToTrip(&cbs.CurrentCondition)
 
 	if cbs.CurrentCondition.State == StateHalfOpen {

@@ -7,6 +7,7 @@ import (
 	roleDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
 	rolePermissionDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role_permission/domain"
 	userDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
+	userRoleDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user_role/domain"
 	"gorm.io/gorm"
 )
 
@@ -14,6 +15,7 @@ type AuthRepository struct {
 	userModel           *gorm.DB
 	permissionModel     *gorm.DB
 	roleModel           *gorm.DB
+	userRoleModel       *gorm.DB
 	rolePermissionModel *gorm.DB
 }
 
@@ -31,5 +33,6 @@ func NewAuthRepository(db *gorm.DB) domain.AuthRepository {
 		permissionModel:     db.Model(&permissionDomain.PermissionEntity{}),
 		roleModel:           db.Model(&roleDomain.RoleEntity{}),
 		rolePermissionModel: db.Model(&rolePermissionDomain.RolePermissionEntity{}),
+		userRoleModel:       db.Model(&userRoleDomain.UserRoleEntity{}),
 	}
 }

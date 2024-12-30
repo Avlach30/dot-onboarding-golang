@@ -1,19 +1,10 @@
 package config
 
 var (
-	// General
+	// GENERAL
 	AppMode = Get("APP_MODE", "PROD")
 	GinMode = Get("GIN_MODE", "release")
-
 	AppPort = Get("APP_PORT", "8080")
-	Storage = Get("STORAGE", "local")
-
-	SentryDSN         = Get("SENTRY_DSN", "")
-	SentrySampleTrace = Get("SENTRY_SAMPLE_TRACE", "0.1")
-
-	Secret           = GetRequired("JWT_SECRET")
-	JwtExpiredInDays = GetRequired("JWT_EXPIRED_IN_DAYS")
-	ServiceAuthToken = GetRequired("SERVICE_AUTH_TOKEN")
 
 	// DATABASE
 	DBHost     = GetRequired("DB_HOST")
@@ -31,40 +22,8 @@ var (
 
 	GlobalStateDriver = Get("GLOBAl_STATE_DRIVER", "runtime")
 
-	// REDIS
-	RedisHost     = Get("REDIS_HOST", "")
-	RedisPassword = Get("REDIS_PASS", "")
-	RedisPort     = Get("REDIS_PORT", "")
-
-	MaxWorkerQueue        = Get("MAX_WORKER_QUEUE", "3")
-	MaxParalelWorkerQueue = Get("MAX_PARALEL_WORKER_QUEUE", "3")
-	MaxTriesQueue         = Get("MAX_TRIES", "3")
-
 	MaxSizeUploadFile = Get("MAX_SIZE_UPLOAD_FILE", "10240000") // 10mb
-
-	S3BucketName      = Get("S3_BUCKET_NAME", "")
-	S3AccessKeyID     = Get("S3_ACCESS_KEY", "")
-	S3SecretAccessKey = Get("S3_SECRET_ACCESS_KEY", "")
-	S3Region          = Get("S3_REGION", "")
-	S3Endpoint        = Get("S3_ENDPOINT", "")
-
-	MinIOBucketName      = Get("MINIO_BUCKET_NAME", "")
-	MinIOAccessKeyID     = Get("MINIO_ACCESS_KEY", "")
-	MinIOSecretAccessKey = Get("MINIO_SECRET_ACCESS_KEY", "")
-	MinIORegion          = Get("MINIO_REGION", "")
-	MinIOEndpoint        = Get("MINIO_ENDPOINT", "")
-	MinIOPort            = Get("MINIO_PORT", "")
-
-	GCSCredentialsFilePath = Get("GCS_CREDENTIAL_FILE_PATH", "")
-	GCSBucketName          = Get("GCS_BUCKET_NAME", "")
 
 	LogDriver     = Get("LOG_DRIVER", "file")
 	LogFolderPath = Get("LOG_FOLDER_PATH", "log")
-
-	IsCircuitBreakerEnabled              = Get("IS_CIRCUIT_BREAKER_ENABLE", "false")
-	CircuitBreakerOpenDuration           = Get("CIRCUIT_BREAKER_OPEN_DURATION", "0.1")
-	CircuitBreakerHalfOpenDuration       = Get("CIRCUIT_BREAKER_HALF_OPEN_DURATION", "0.1")
-	CircuitBreakerIgnoreFailureEndpoints = Get("CIRCUIT_BREAKER_IGNORE_FAILURE_ENDPOINTS", "")
-	CircuitBreakerRequestFailedTreshold  = Get("CIRCUIT_BREAKER_REQUEST_FAILED_TRESHOLD", "3")
-	CircuitBreakerFailureRatioTreshold   = Get("CIRCUIT_BREAKER_FAILURE_RATIO_TRESHOLD", "0.5")
 )

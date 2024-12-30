@@ -17,7 +17,7 @@ func RecoverPanic() gin.HandlerFunc {
 
 		isCircuitBreakerEnable, _ := strconv.ParseBool(config.IsCircuitBreakerEnabled)
 		if isCircuitBreakerEnable {
-			singleton.CountRequestCircuitBreaker()
+			singleton.CountRequestCircuitBreaker(singleton.InternalCircuitBreaker)
 			isCircuitBreakerOpen := isCircuitBreakerOpen(httpContext)
 			if isCircuitBreakerOpen {
 				return
@@ -35,9 +35,9 @@ func handlePanic(httoContext *gin.Context) {
 		panicException := createPanicException(err)
 		stackTrace := getStackTrace()
 
-		cbs := singleton.GetCircuitBreaker()
+		cbs := singleton.GetCircuitBreaker(singleton.InternalCircuitBreaker)
 		if cbs != nil && panicException.StatusCode == http.StatusInternalServerError {
-			cbs.FailureHappend(httoContext)
+			cbs.FailureHappend(httoContext.Request.URL.Path)
 		}
 
 		errorResponse := utils.ErrorResponse(panicException.StatusCode, panicException.ErrorMessage, stackTrace)
@@ -47,7 +47,7 @@ func handlePanic(httoContext *gin.Context) {
 }
 
 func isCircuitBreakerOpen(httpContext *gin.Context) bool {
-	cbs := singleton.GetCircuitBreaker()
+	cbs := singleton.GetCircuitBreaker(singleton.InternalCircuitBreaker)
 	if !cbs.IsReadyToTrip() {
 		httpContext.JSON(http.StatusServiceUnavailable, utils.ErrorResponse(http.StatusServiceUnavailable, "Service Unavailable", ""))
 		httpContext.Abort()

@@ -3,14 +3,37 @@ package integration
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"strconv"
+
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 )
 
 func (client *Client) SendSOAPRequest(action string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
+	externalCircuitBreaker := singleton.GetCircuitBreaker(singleton.ExternalCircuitBreaker)
+
+	isCircuitBreakerEnable, _ := strconv.ParseBool(config.IsCircuitBreakerEnabled)
+	isReadyToTrip := externalCircuitBreaker.IsReadyToTrip()
+	if !isReadyToTrip && isCircuitBreakerEnable {
+		return nil, fmt.Errorf("Error circuit breaker is open, cannot send action to %s", action)
+	}
+
+	log.Println("=========================START SOAP REQUEST=========================")
 	envelope := createSOAPEnvelope(requestBody)
 	xmlBody, err := marshalEnvelope(envelope)
+	log.Println("==========================END SOAP REQUEST==========================")
+
+	if isCircuitBreakerEnable {
+		externalCircuitBreaker.CountRequest()
+		if err != nil {
+			externalCircuitBreaker.FailureHappend(action)
+		}
+	}
+
 	if err != nil {
 		return nil, err
 	}

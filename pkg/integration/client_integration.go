@@ -27,6 +27,7 @@ func NewClient(baseURL string) *Client {
 }
 
 func createLogIntegration(request *http.Request, response *http.Response) error {
+
 	logRequest(request)
 	logResponse(response)
 

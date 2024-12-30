@@ -5,9 +5,7 @@ ENV GO111MODULE=on
 WORKDIR /go/codespacex
 COPY go.mod ./
 
-RUN go mod download
-RUN go clean --modcache
-RUN apk add --no-cache make
+RUN go mod download && go clean --modcache && apk add --no-cache make
 
 COPY . .
 RUN go build -o main ./main.go

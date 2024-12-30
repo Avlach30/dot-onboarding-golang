@@ -1,7 +1,10 @@
 package config
 
 var (
-	// REDIS
+	Secret           = GetRequired("JWT_SECRET")
+	JwtExpiredInDays = GetRequired("JWT_EXPIRED_IN_DAYS")
+	ServiceAuthToken = GetRequired("SERVICE_AUTH_TOKEN")
+
 	OIDCBaseUrl             = Get("OIDC_BASE_URL", "")
 	OIDCClientId            = Get("OIDC_CLIENT_ID", "")
 	OIDCClientSecret        = Get("OIDC_CLIENT_SECRET", "")

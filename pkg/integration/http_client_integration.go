@@ -10,9 +10,12 @@ import (
 	"mime/multipart"
 	"net/http"
 	encodedUrl "net/url"
+	"strconv"
 	"strings"
 
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 )
 
@@ -38,6 +41,13 @@ func (client *Client) Delete(endpoint string, headers *Headers, responseBody any
 
 func (client *Client) SendHTTPRequest(method, endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
 	url := client.BaseURL + endpoint
+	externalCircuitBreaker := singleton.GetCircuitBreaker(singleton.ExternalCircuitBreaker)
+
+	isCircuitBreakerEnable, _ := strconv.ParseBool(config.IsCircuitBreakerEnabled)
+	isReadyToTrip := externalCircuitBreaker.IsReadyToTrip()
+	if !isReadyToTrip && isCircuitBreakerEnable {
+		return nil, fmt.Errorf("Error circuit breaker is open, cannot send request to %s", url)
+	}
 
 	reqBody, err := prepareRequestBody(headers.ContentType, requestBody)
 	if err != nil {
@@ -56,13 +66,21 @@ func (client *Client) SendHTTPRequest(method, endpoint string, headers *Headers,
 	createLogIntegration(req, resp)
 	log.Println("==========================END HTTP REQUEST==========================")
 
-	if err != nil {
+	if isCircuitBreakerEnable {
+		externalCircuitBreaker.CountRequest()
+		if err != nil || resp.StatusCode >= 500 {
+			externalCircuitBreaker.FailureHappend(endpoint)
+		}
+	}
+
+	if err != nil || resp.StatusCode >= 500 {
 		log.Printf("Error sending request: %v", err)
 		return nil, err
 	}
 
 	defer resp.Body.Close()
 	err = json.NewDecoder(resp.Body).Decode(&responseBody)
+
 	if err != nil {
 		log.Printf("Error decoding response: %v", err)
 		return nil, err
