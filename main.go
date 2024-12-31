@@ -64,9 +64,9 @@ func main() {
 
 	handleMigrationAndSeeding(db)
 
-	// storageManager := initializeStorageManager()
+	storageManager := initializeStorageManager()
 
-	// initializeWorkers(db, storageManager)
+	initializeWorkers(db, storageManager)
 
 	router := setupRouter()
 
