@@ -85,7 +85,7 @@ func (authUseCase *AuthUsecase) CreateJWTToken(user *userDomain.UserEntity) (tok
 	expiredInDays := config.JwtExpiredInDays
 	expInDays, err := strconv.Atoi(expiredInDays)
 	if err != nil {
-		panic(*exception.ServerErrorException("Error Create Token"))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	expirationDuration := time.Duration(expInDays) * 24 * time.Hour
@@ -93,7 +93,7 @@ func (authUseCase *AuthUsecase) CreateJWTToken(user *userDomain.UserEntity) (tok
 
 	tokenString, err := jwt.CreateToken(authInformation, expirationTime)
 	if err != nil {
-		panic(*exception.ServerErrorException("Error Create Token"))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	SetPermissions(user)
@@ -126,7 +126,7 @@ func SetPermissions(user *userDomain.UserEntity) {
 	globalState := singleton.GetGlobalState()
 	err := globalState.Set(GenerateHttpContextPermissionKey(user.ID), authPermissions)
 	if err != nil {
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 }
 

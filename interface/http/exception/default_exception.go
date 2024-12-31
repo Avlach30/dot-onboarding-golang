@@ -1,6 +1,10 @@
 package exception
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/getsentry/sentry-go"
+)
 
 type Exception struct {
 	StatusCode   int
@@ -15,10 +19,13 @@ func BussinessException(errorMessage string) *Exception {
 	return panic
 }
 
-func ServerErrorException(errorMessage string) *Exception {
+func ServerErrorException(err error) *Exception {
 	panic := &Exception{}
-	panic.ErrorMessage = errorMessage
+	panic.ErrorMessage = err.Error()
 	panic.StatusCode = http.StatusInternalServerError
+
+	// Capture error to sentry
+	sentry.CaptureException(err)
 
 	return panic
 }

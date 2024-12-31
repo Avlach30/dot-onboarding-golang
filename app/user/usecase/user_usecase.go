@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"log"
+
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
@@ -35,7 +37,8 @@ func (userUsecase *UserUsecase) Create(httpContext *gin.Context, payload *dto.Us
 	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
 	if err != nil {
-		panic(*exception.ServerErrorException("Failed to hash password"))
+		log.Println("Failed to hash password", err)
+		panic(*exception.ServerErrorException(err))
 	}
 
 	payload.Password = string(hashedPassword)
