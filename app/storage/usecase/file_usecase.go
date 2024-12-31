@@ -89,7 +89,8 @@ func (f *FileUsecase) UploadFiles(httpContext *gin.Context, files *dto.UploadFil
 	close(errChan)
 
 	if len(errChan) > 0 {
-		panic(*exception.ServerErrorException("Failed to upload one or more files"))
+		log.Println("Error uploading files")
+		panic(*exception.ServerErrorException(<-errChan))
 	} else {
 		log.Println("All files uploaded successfully")
 	}
@@ -144,7 +145,8 @@ func (f *FileUsecase) GetPresignUrlForUpload(httpContext *gin.Context, filePath 
 	targetPath := buildPathFileUpload(filePath)
 	presignUrl, err := singleton.GetPresignURLUpload(targetPath)
 	if err != nil {
-		panic(*exception.ServerErrorException(fmt.Sprintf("Error when generate presign url : %s", err.Error())))
+		log.Println("Error get presign url for upload", err)
+		panic(*exception.ServerErrorException(err))
 	}
 
 	return presignUrl, nil
@@ -155,7 +157,8 @@ func (f *FileUsecase) GetPresignUrlForDownload(httpContext *gin.Context, filePat
 	targetPath := buildPathFileUpload(filePath)
 	presignUrl, err := singleton.GetPresignURLDownload(targetPath)
 	if err != nil {
-		panic(*exception.ServerErrorException(fmt.Sprintf("Error when generate presign url : %s", err.Error())))
+		log.Println("Error get presign url for download", err)
+		panic(*exception.ServerErrorException(err))
 	}
 
 	return presignUrl, nil

@@ -39,7 +39,7 @@ func (role *RoleRepository) Pagination(ctx *gin.Context) ([]domain.RoleEntity, i
 
 	if err != nil {
 		log.Println("Error pagination role", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	return roles, int(total)
@@ -93,7 +93,7 @@ func (role *RoleRepository) FindOneById(ctx *gin.Context, id uuid.UUID, trashed 
 		panic(*exception.NotFoundException("Role not found"))
 	} else if err != nil {
 		log.Println("Error role find by id: ", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	return roleEntity
@@ -105,7 +105,7 @@ func (role *RoleRepository) Delete(ctx *gin.Context, id uuid.UUID) {
 
 	if err != nil {
 		log.Println("Error role delete: ", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 }
 
@@ -115,7 +115,7 @@ func (role *RoleRepository) Update(ctx *gin.Context, id uuid.UUID, payload *doma
 
 	if err != nil {
 		log.Println("Error role update: ", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 }
 
@@ -125,7 +125,7 @@ func (role *RoleRepository) Create(ctx *gin.Context, payload *domain.RoleEntity)
 
 	if err != nil {
 		log.Println("Error role create: ", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 }
 
@@ -138,7 +138,7 @@ func (role *RoleRepository) IsKeyExist(ctx *gin.Context, key string) bool {
 
 	if err != nil {
 		log.Println("Error role is key exist: ", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	return count > 0
@@ -153,7 +153,7 @@ func (role *RoleRepository) IsKeyExistExceptRoleId(ctx *gin.Context, key string,
 
 	if err != nil {
 		log.Println("Error role is key exist except role id: ", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	return count > 0

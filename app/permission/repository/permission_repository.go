@@ -39,7 +39,7 @@ func (permission *PermissionRepository) Pagination(ctx *gin.Context) ([]domain.P
 
 	if err != nil {
 		log.Println("Error pagination permission", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	return permissions, int(total)
@@ -89,7 +89,7 @@ func (permission *PermissionRepository) FindOneById(ctx *gin.Context, id uuid.UU
 		panic(*exception.NotFoundException("Permission not found"))
 	} else if err != nil {
 		log.Println("Error find permission by id", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	return permissionEntity
@@ -101,7 +101,7 @@ func (permission *PermissionRepository) Delete(ctx *gin.Context, id uuid.UUID) {
 
 	if err != nil {
 		log.Println("Error delete permission", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 }
 
@@ -110,7 +110,7 @@ func (permission *PermissionRepository) Update(ctx *gin.Context, id uuid.UUID, p
 	err := permission.model.Where("id = ?", id).Updates(&payload).Error
 	if err != nil {
 		log.Println("Error update permission", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 }
 
@@ -119,7 +119,7 @@ func (permission *PermissionRepository) Create(ctx *gin.Context, payload *domain
 	err := permission.model.Create(&payload).Error
 	if err != nil {
 		log.Println("Error create permission", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 }
 
@@ -132,7 +132,7 @@ func (permission *PermissionRepository) IsKeyExist(ctx *gin.Context, key string)
 
 	if err != nil {
 		log.Println("Error check key exist", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	return count > 0
@@ -147,7 +147,7 @@ func (permission *PermissionRepository) IsKeyExistExceptPermissionId(ctx *gin.Co
 
 	if err != nil {
 		log.Println("Error check key exist", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	return count > 0

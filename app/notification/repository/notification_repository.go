@@ -75,7 +75,7 @@ func (notification *NotificationRepository) HasUnread(ctx *gin.Context, userId u
 		Count(&total).Error
 
 	if err != nil {
-		panic(*exception.ServerErrorException("Failed to get unread notification"))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	return total > 0
@@ -91,7 +91,7 @@ func (notification *NotificationRepository) MarkAsRead(ctx *gin.Context, id uuid
 		Update("is_read", true).Error
 
 	if err != nil {
-		panic(*exception.ServerErrorException("Failed to mark notification as read"))
+		panic(*exception.ServerErrorException(err))
 	}
 }
 
@@ -110,7 +110,7 @@ func (notification *NotificationRepository) FindOneById(ctx *gin.Context, id uui
 		panic(*exception.NotFoundException("Notification not found"))
 	} else if err != nil {
 		log.Println("err detail notification", err)
-		panic(*exception.ServerErrorException("Failed to get notification detail"))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	return notificationEntity

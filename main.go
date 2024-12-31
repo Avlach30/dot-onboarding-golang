@@ -179,7 +179,9 @@ func setupRouter() *gin.Engine {
 	router := gin.New()
 	gin.SetMode(config.GinMode)
 
-	router.Use(sentrygin.New(sentrygin.Options{}))
+	router.Use(sentrygin.New(sentrygin.Options{
+		Repanic: true,
+	}))
 	router.Use(handler.RecoverPanic())
 
 	healthCheck(router)
@@ -192,6 +194,7 @@ func initializeSentry() {
 		Dsn:              config.SentryDSN,
 		EnableTracing:    true,
 		TracesSampleRate: tracesSampleRate,
+		Debug:            true,
 	}); err != nil {
 		fmt.Printf("Sentry initialization failed: %v\n", err)
 	} else {

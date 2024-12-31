@@ -42,7 +42,7 @@ func (user *UserRepository) Pagination(httpContext *gin.Context) ([]domain.UserE
 
 	if err != nil {
 		log.Println("Error pagination user", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	return users, int(total)
@@ -97,7 +97,7 @@ func (user *UserRepository) FindOneById(httpContext *gin.Context, id uuid.UUID, 
 		panic(*exception.NotFoundException("User not found"))
 	} else if err != nil {
 		log.Println("Error find user by id", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	return userEntity
@@ -109,7 +109,7 @@ func (user *UserRepository) Delete(httpContext *gin.Context, id uuid.UUID) {
 
 	if err != nil {
 		log.Println("Error delete user", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 }
 
@@ -138,7 +138,7 @@ func (user *UserRepository) Update(httpContext *gin.Context, id uuid.UUID, paylo
 
 	if err != nil {
 		log.Println("Error update user", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 }
 
@@ -148,7 +148,7 @@ func (user *UserRepository) Create(httpContext *gin.Context, payload *domain.Use
 
 	if err != nil {
 		log.Println("Error create user", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 }
 
@@ -200,6 +200,6 @@ func (user *UserRepository) DeleteUserRoles(httpContext *gin.Context, id uuid.UU
 
 	if err != nil {
 		log.Println("Error delete user roles", err)
-		panic(*exception.ServerErrorException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 }
