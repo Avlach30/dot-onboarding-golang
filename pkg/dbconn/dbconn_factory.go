@@ -45,7 +45,8 @@ func InitDb(databaseCredentials *DatabaseCredentials) (*gorm.DB, error) {
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		panic(*exception.ServerErrorException("Failed to get raw DB from GORM"))
+		log.Println("Failed to get raw DB from GORM", err)
+		panic(*exception.ServerErrorException(err))
 	}
 
 	// Set connection pool configuration
