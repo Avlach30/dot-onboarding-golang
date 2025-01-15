@@ -44,7 +44,11 @@ func (userHandler *UserHandler) Pagination() gin.HandlerFunc {
 func (userHandler *UserHandler) Create() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		request := singleton.GetHTTPRequest[dto.UserCreateRequest](httpContext)
-		userHandler.userUsecase.Create(httpContext, request)
+		newUser := domain.UserEntity{
+			Name:  request.Name,
+			Email: request.Email,
+		}
+		userHandler.userUsecase.Create(httpContext, &newUser, request.RoleIds)
 
 		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
