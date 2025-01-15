@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"golang.org/x/crypto/bcrypt"
 
@@ -57,26 +56,22 @@ func (userUsecase *UserUsecase) Create(httpContext *gin.Context, payload *domain
 }
 
 // Update implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Update(httpContext *gin.Context, id uuid.UUID, payload *dto.UserUpdateRequest) {
+func (userUsecase *UserUsecase) Update(httpContext *gin.Context, id uuid.UUID, payload *domain.UserEntity, roleIds []uuid.UUID) {
 	if userUsecase.userRepo.IsEmailExistExceptUserId(httpContext, payload.Email, id) {
 		panic(*exception.BussinessException("Email already exist"))
 	}
 
 	// Get role by role ids
-	roles := userUsecase.userRepo.FindRoleByIds(httpContext, payload.RoleIds)
+	roles := userUsecase.userRepo.FindRoleByIds(httpContext, roleIds)
 	// Validate roles length is same with role ids
-	if len(roles) != len(payload.RoleIds) {
+	if len(roles) != len(roleIds) {
 		panic(*exception.BussinessException("Role not found"))
 	}
 
-	// Extract payload to entity
-	payloadEntity := domain.UserEntity{
-		Name:  payload.Name,
-		Email: payload.Email,
-		Roles: roles,
-	}
+	// Assign payload
+	payload.Roles = roles
 
-	userUsecase.userRepo.Update(httpContext, id, &payloadEntity)
+	userUsecase.userRepo.Update(httpContext, id, payload)
 
 }
 
