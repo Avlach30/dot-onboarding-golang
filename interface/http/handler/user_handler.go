@@ -74,7 +74,7 @@ func (userHandler *UserHandler) Update() gin.HandlerFunc {
 		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
 
-		userHandler.userUsecase.Update(httpContext, id, newUser, request.RoleIds)
+		userHandler.userUsecase.Update(httpContext, id, &newUser, request.RoleIds)
 
 		httpContext.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}
