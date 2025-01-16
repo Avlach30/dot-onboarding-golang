@@ -6,5 +6,5 @@ import (
 )
 
 type AuthRepository interface {
-	FindUserByEmail(httpContext *gin.Context, email string) (*domain.UserEntity, error)
+	FindUserByEmailWithRoles(httpContext *gin.Context, email string) (*domain.UserEntity, error)
 }

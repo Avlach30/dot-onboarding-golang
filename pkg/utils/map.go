@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-func FindAnyIntersect(slice1, slice2 []string) []string {
+func FindAnyIntersect(slice1, slice2 []string) []string { // TODO: fix this permission compare func
 	// Create a map to store the values from slice1
 	valueMap := make(map[string]bool)
 	common := []string{}
