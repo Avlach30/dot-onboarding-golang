@@ -18,7 +18,7 @@ type PermissionHandler struct {
 }
 
 func NewPermissionHandler(router *gin.Engine, permissionUsecase domain.PermissionUsecase) {
-	permissionHandlerRoute := router.Group("/v1/api/permissions", guard.AuthGuard())
+	permissionHandlerRoute := router.Group("/api/v1/permissions", guard.AuthGuard())
 
 	permissionHandler := &PermissionHandler{
 		permissionUsecase: permissionUsecase,

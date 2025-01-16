@@ -18,7 +18,7 @@ type UserHandler struct {
 }
 
 func NewUserHandler(router *gin.Engine, userUsecase domain.UserUsecase) {
-	userHandlerRoute := router.Group("/v1/api/users", guard.AuthGuard())
+	userHandlerRoute := router.Group("/api/v1/users", guard.AuthGuard())
 
 	userHandler := &UserHandler{
 		userUsecase: userUsecase,

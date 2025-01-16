@@ -10,4 +10,4 @@
 **.bcfks
 
 credentials/*
-log
+**.log

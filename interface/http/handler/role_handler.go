@@ -18,7 +18,7 @@ type RoleHandler struct {
 }
 
 func NewRoleHandler(router *gin.Engine, roleUsecase domain.RoleUsecase) {
-	roleHandlerRoute := router.Group("/v1/api/roles", guard.AuthGuard())
+	roleHandlerRoute := router.Group("/api/v1/roles", guard.AuthGuard())
 
 	roleHandler := &RoleHandler{
 		roleUsecase: roleUsecase,

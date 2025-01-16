@@ -16,7 +16,7 @@ type NotificationHandler struct {
 }
 
 func NewNotificationHandler(router *gin.Engine, notificationUseCase domain.NotificationUseCase) {
-	notificationHandlerRoute := router.Group("/v1/api/notifications", guard.AuthGuard())
+	notificationHandlerRoute := router.Group("/api/v1/notifications", guard.AuthGuard())
 
 	notificationHandler := &NotificationHandler{
 		notificationUseCase: notificationUseCase,
