@@ -11,8 +11,10 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 )
 
-func ValidateRequestJSON[T any](obj *T) gin.HandlerFunc {
+func ValidateRequestJSON[T any]() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
+		obj := new(T)
+
 		if err := httpContext.ShouldBind(obj); err != nil {
 
 			if validationErrors, isNotValid := err.(validator.ValidationErrors); isNotValid {

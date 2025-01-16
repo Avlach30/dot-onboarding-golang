@@ -158,6 +158,7 @@ func (user *UserRepository) IsEmailExist(httpContext *gin.Context, email string)
 	user.model.
 		Where("email = ?", email).
 		Count(&count)
+
 	return count > 0
 }
 

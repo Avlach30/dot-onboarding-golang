@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 	"runtime/debug"
 	"strconv"
@@ -39,6 +40,8 @@ func handlePanic(httoContext *gin.Context) {
 		if cbs != nil && panicException.StatusCode == http.StatusInternalServerError {
 			cbs.FailureHappend(httoContext.Request.URL.Path)
 		}
+
+		log.Println(stackTrace)
 
 		errorResponse := utils.ErrorResponse(panicException.StatusCode, panicException.ErrorMessage, stackTrace)
 		httoContext.JSON(panicException.StatusCode, errorResponse)

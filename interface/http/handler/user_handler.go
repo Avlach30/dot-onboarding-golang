@@ -26,9 +26,9 @@ func NewUserHandler(router *gin.Engine, userUsecase domain.UserUsecase) {
 
 	userHandlerRoute.GET("/", userHandler.Pagination())
 	userHandlerRoute.DELETE("/:id", userHandler.Delete())
-	userHandlerRoute.PATCH("/:id", middleware.ValidateRequestJSON(&dto.UserUpdateRequest{}), userHandler.Update())
+	userHandlerRoute.PATCH("/:id", middleware.ValidateRequestJSON[dto.UserUpdateRequest](), userHandler.Update())
 	userHandlerRoute.GET("/:id", userHandler.Detail())
-	userHandlerRoute.POST("/", middleware.ValidateRequestJSON(&dto.UserCreateRequest{}), userHandler.Create())
+	userHandlerRoute.POST("/", middleware.ValidateRequestJSON[dto.UserCreateRequest](), userHandler.Create())
 }
 
 func (userHandler *UserHandler) Pagination() gin.HandlerFunc {

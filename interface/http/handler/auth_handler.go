@@ -23,9 +23,9 @@ func NewAuthHandler(router *gin.Engine, authUsecase domain.AuthUsecase) {
 		authUsecase: authUsecase,
 	}
 
-	authHandlerRoute.POST("/sign-in", middleware.ValidateRequestJSON(&dto.AuthSignInRequest{}), authHandler.SignIn())
-	authHandlerRoute.POST("/ldap", middleware.ValidateRequestJSON(&dto.AuthSignLDAPRequest{}), authHandler.SignLDAP())
-	authHandlerRoute.POST("/oidc", middleware.ValidateRequestJSON(&dto.AuthSignOIDCRequest{}), authHandler.SignOIDC())
+	authHandlerRoute.POST("/sign-in", middleware.ValidateRequestJSON[dto.AuthSignInRequest](), authHandler.SignIn())
+	authHandlerRoute.POST("/ldap", middleware.ValidateRequestJSON[dto.AuthSignLDAPRequest](), authHandler.SignLDAP())
+	authHandlerRoute.POST("/oidc", middleware.ValidateRequestJSON[dto.AuthSignOIDCRequest](), authHandler.SignOIDC())
 }
 
 func (authHandler *AuthHandler) SignIn() gin.HandlerFunc {
