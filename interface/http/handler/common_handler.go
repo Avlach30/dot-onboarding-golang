@@ -29,7 +29,7 @@ func NewCommonHandler(router *gin.Engine, fileUsecase domain.FileUsecase) {
 		fileUsecase: fileUsecase,
 	}
 
-	commonRoute.POST("/upload-files", middleware.ValidateRequestFormData(&dto.UploadFilesRequest{}), common.CreateFile())
+	commonRoute.POST("/upload-files", middleware.ValidateRequestFormData[dto.UploadFilesRequest](), common.CreateFile())
 	commonRoute.GET("/download-file", common.DownloadFile())
 	commonRoute.POST("/generate-presign-url", middleware.ValidateRequestJSON[dto.CreatePresignURLUploadRequest](), common.GeneratePresignURLUpload())
 	commonRoute.DELETE("/delete-files", common.DeleteFile())

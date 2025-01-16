@@ -42,8 +42,10 @@ func ValidateRequestJSON[T any]() gin.HandlerFunc {
 	}
 }
 
-func ValidateRequestFormData[T any](obj *T) gin.HandlerFunc {
+func ValidateRequestFormData[T any]() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
+		obj := new(T)
+
 		if err := httpContext.ShouldBind(obj); err != nil {
 			if validationErrors, isNotValid := err.(validator.ValidationErrors); isNotValid {
 				errors := make([]pkg.ErrorValidation, len(validationErrors))
