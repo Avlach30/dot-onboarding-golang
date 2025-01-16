@@ -80,7 +80,6 @@ func DelegateStandalone(taskName string, payload interface{}, jobTask task.JobTa
 func ExecuteJobTask() {
 	for {
 		time.Sleep(5 * time.Second)
-		continue
 
 		jobEntities := &[]domain.JobEntity{}
 		dbUtil.Clauses(clause.Locking{Strength: "UPDATE"}).
