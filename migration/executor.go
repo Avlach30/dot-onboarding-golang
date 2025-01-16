@@ -3,7 +3,6 @@ package migration
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gorm.io/gorm"
 )
 
@@ -26,12 +26,12 @@ func Create(db *gorm.DB, fileName string) {
 
 		if err := os.WriteFile(upFileName, []byte(""), 0644); err != nil {
 			fmt.Println("Failed to create up migration file", err)
-			log.Fatalf("failed to create up migration file : %v", err)
+			panic(*exception.ServerErrorException(err))
 		}
 
 		if err := os.WriteFile(downFileName, []byte(""), 0644); err != nil {
 			fmt.Println("Failed to create down migration file", err)
-			log.Fatalf("failed to create down migration file : %v", err)
+			panic(*exception.ServerErrorException(err))
 		}
 
 		fmt.Printf("Created migration files:\n%s\n%s\n", upFileName, downFileName)
@@ -43,21 +43,21 @@ func Run(db *gorm.DB, exec string) {
 	err := db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error
 	if err != nil {
 		fmt.Println("Failed to create UUID extension", err)
-		log.Fatalf("Failed to create UUID extension: %v", err)
+		panic(*exception.ServerErrorException(err))
 	}
 
 	// Extract raw SQL DB from GORM
 	sqlDB, err := db.DB()
 	if err != nil {
 		fmt.Println("Failed to get raw DB from GORM", err)
-		log.Fatalf("Failed to get raw DB from GORM: %v", err)
+		panic(*exception.ServerErrorException(err))
 	}
 
 	// Initialize migrator
 	migrator, err := initializeMigrator(sqlDB)
 	if err != nil {
 		fmt.Println("Failed to initialize migrator", err)
-		log.Fatalf("Failed to initialize migrator: %v", err)
+		panic(*exception.ServerErrorException(err))
 	}
 
 	// Handle dirty migrations
@@ -66,7 +66,7 @@ func Run(db *gorm.DB, exec string) {
 	err = executeMigration(migrator, exec)
 	if err != nil {
 		fmt.Println("Migration failed", err)
-		log.Fatalf("Migration failed: %v", err)
+		panic(*exception.ServerErrorException(err))
 	}
 	fmt.Println("Migration applied successfully!")
 
@@ -81,7 +81,7 @@ func initializeMigrator(sqlDB *sql.DB) (*migrate.Migrate, error) {
 
 	m, err := migrate.NewWithDatabaseInstance("file://migration/files", "postgres", driver)
 	if err != nil {
-		fmt.Println("Failed to create migrate instance")
+		fmt.Println("Failed to create migrate instance", err)
 		return nil, fmt.Errorf("could not create migrate instance: %v", err)
 	}
 
@@ -94,7 +94,7 @@ func handleDirtyMigration(m *migrate.Migrate) {
 		fmt.Printf("Migration is dirty. Forcing version %d\n", version)
 		if err := m.Force(int(version)); err != nil {
 			fmt.Println("Failed to force migration version", err)
-			log.Fatalf("Failed to force migration version: %v", err)
+			panic(*exception.ServerErrorException(err))
 		}
 	}
 
@@ -108,19 +108,19 @@ func executeMigration(m *migrate.Migrate, exec string) error {
 		err = m.Steps(-1)
 		if err != nil && err != migrate.ErrNoChange {
 			fmt.Println("Failed to run down migration", err)
-			log.Fatalf("failed to run down migration : %v", err)
+			panic(*exception.ServerErrorException(err))
 		}
 	case "fresh":
 		err = m.Down()
 		if err != nil && err != migrate.ErrNoChange {
 			fmt.Println("Failed to run down all", err)
-			log.Fatalf("failed to run down all migration : %v", err)
+			panic(*exception.ServerErrorException(err))
 		}
 
 		err = m.Up()
 		if err != nil && err != migrate.ErrNoChange {
 			fmt.Println("Failed to run up migration", err)
-			log.Fatalf("failed to run up migration : %v", err)
+			panic(*exception.ServerErrorException(err))
 		}
 	default:
 		err = m.Up()
