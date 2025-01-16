@@ -66,13 +66,11 @@ func (f *FileUsecase) UploadFiles(httpContext *gin.Context, files *dto.UploadFil
 		go func(name string, content []byte, filePaths *map[string]string) {
 			defer wg.Done()
 			uuiDrandomStr := uuid.New().String() + "-" + utils.GenerateRandomString(10)
-			fileExtension := string(name[len(strings.Split(name, "."))-1])
-			replaceSpaceAndComma := strings.ReplaceAll(strings.ReplaceAll(name, " ", "_"), ",", "_")
-			fileName := fmt.Sprintf("%d-%s", index, replaceSpaceAndComma)
+			fileExtension := strings.Split(name, ".")[len(strings.Split(name, "."))-1]
 			objectName := fmt.Sprintf("%s/%s", FileUploads, uuiDrandomStr)
 
 			paths := *filePaths
-			paths[fileName] = objectName + "." + fileExtension
+			paths[name] = objectName + "." + fileExtension
 
 			log.Printf("Starting upload for file: %s", objectName)
 			err := singleton.StoreFileBuff(content, objectName)
@@ -82,6 +80,7 @@ func (f *FileUsecase) UploadFiles(httpContext *gin.Context, files *dto.UploadFil
 			} else {
 				log.Printf("Successfully uploaded file: %s", name)
 			}
+
 			index++
 		}(fileName, fileContent, &filePaths)
 	}
