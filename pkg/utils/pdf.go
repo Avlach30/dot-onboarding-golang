@@ -24,11 +24,11 @@ func (o OrientationType) String() string {
 	case OrientationPotrait:
 		return wkhtmltopdf.OrientationPortrait
 	default:
-		return fmt.Sprintf("Orientation(%d)", o)
+		return wkhtmltopdf.OrientationPortrait
 	}
 }
 
-func ExportHtmlToPDF(htmlContent string, orientation OrientationType) {
+func ExportToPDF(htmlContentOrUrl string, filePath string, orientation OrientationType) {
 	// Create new PDF generator
 	pdfg, err := wkhtmltopdf.NewPDFGenerator()
 	if err != nil {
@@ -36,17 +36,9 @@ func ExportHtmlToPDF(htmlContent string, orientation OrientationType) {
 	}
 
 	// Set global options
-	pdfg.Dpi.Set(300)
 	pdfg.Orientation.Set(orientation.String())
-	pdfg.Grayscale.Set(true)
 
-	// Create a new input page from an URL
-	page := NewPage("https://godoc.org/github.com/SebastiaanKlippert/go-wkhtmltopdf")
-
-	// Set options for this page
-	page.FooterRight.Set("[page]")
-	page.FooterFontSize.Set(10)
-	page.Zoom.Set(0.95)
+	page := wkhtmltopdf.NewPage(htmlContentOrUrl)
 
 	// Add to document
 	pdfg.AddPage(page)
@@ -58,7 +50,7 @@ func ExportHtmlToPDF(htmlContent string, orientation OrientationType) {
 	}
 
 	// Write buffer contents to file on disk
-	err = pdfg.WriteFile("./simplesample.pdf")
+	err = pdfg.WriteFile(filePath)
 	if err != nil {
 		log.Fatal(err)
 	}
