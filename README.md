@@ -41,7 +41,7 @@
 ## 🌊 The Utils
 
 The **Scheduler** running in diff goroutine, set your schedule of task inside pkg/task/manager_task.go
-- e.g
+1. this example to add MonitorResource run every minute
     ```
     // ... existing code ...
 
