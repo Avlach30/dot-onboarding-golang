@@ -27,11 +27,13 @@ func NewMinIOManager() (StorageManager, error) {
 	s3AccessKeyID := localConfig.MinIOAccessKeyID
 	s3SecretAccessKey := localConfig.MinIOSecretAccessKey
 	minioEndpoint := localConfig.MinIOEndpoint
+	minioPort := localConfig.MinIOPort
+	minioIsUseSSL := localConfig.MinIOIsUseSSL
 
 	// Create a custom MinIO configuration.
-	minioClient, err := minio.New(minioEndpoint+":9999", &minio.Options{
+	minioClient, err := minio.New(minioEndpoint+":"+minioPort, &minio.Options{
 		Creds:  credentials.NewStaticV4(s3AccessKeyID, s3SecretAccessKey, ""),
-		Secure: false,
+		Secure: minioIsUseSSL == "true",
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to load MinIO configuration: %v", err)
@@ -69,6 +71,7 @@ func (minioManager *MinIOManager) GeneratePresignURL(method string, key string, 
 	case "get":
 		req, err = minioManager.Client.PresignedGetObject(context.TODO(), minioManager.Bucket, key, expiration, nil)
 	case "put":
+		log.Println("put")
 		req, err = minioManager.Client.PresignedPutObject(context.TODO(), minioManager.Bucket, key, expiration)
 	default:
 		err = fmt.Errorf("unsupported method: %s", method)

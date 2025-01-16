@@ -16,7 +16,8 @@ var (
 	MinIOSecretAccessKey = Get("MINIO_SECRET_ACCESS_KEY", "")
 	MinIORegion          = Get("MINIO_REGION", "")
 	MinIOEndpoint        = Get("MINIO_ENDPOINT", "")
-	MinIOPort            = Get("MINIO_PORT", "")
+	MinIOPort            = Get("MINIO_PORT", "9999")
+	MinIOIsUseSSL        = Get("MINIO_IS_USE_SSL", "false")
 
 	GCSCredentialsFilePath = Get("GCS_CREDENTIAL_FILE_PATH", "")
 	GCSBucketName          = Get("GCS_BUCKET_NAME", "")

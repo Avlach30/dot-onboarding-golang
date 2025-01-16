@@ -32,7 +32,7 @@ func NewCommonHandler(router *gin.Engine, fileUsecase domain.FileUsecase) {
 	commonRoute.POST("/upload-files", middleware.ValidateRequestFormData(&dto.UploadFilesRequest{}), common.CreateFile())
 	commonRoute.GET("/download-file", common.DownloadFile())
 	commonRoute.POST("/generate-presign-url", middleware.ValidateRequestJSON(&dto.CreatePresignURLUploadRequest{}), common.GeneratePresignURLUpload())
-	commonRoute.DELETE("/delete-files", middleware.ValidateRequestJSON(&dto.CreatePresignURLUploadRequest{}), common.GeneratePresignURLUpload())
+	commonRoute.DELETE("/delete-files", common.DeleteFile())
 }
 
 func (common *CommonHandler) CreateFile() gin.HandlerFunc {
@@ -61,6 +61,10 @@ func (common *CommonHandler) CreateFile() gin.HandlerFunc {
 
 func (common *CommonHandler) DeleteFile() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
+		if httpContext.Query("file_paths") == "" {
+			panic(*exception.BussinessException("file_paths is required"))
+		}
+
 		filePaths := strings.Split(httpContext.Query("file_paths"), ",")
 
 		common.fileUsecase.Delete(httpContext, filePaths)
