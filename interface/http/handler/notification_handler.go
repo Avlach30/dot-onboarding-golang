@@ -36,7 +36,7 @@ func (notificationHandler *NotificationHandler) Pagination() gin.HandlerFunc {
 
 		meta := utils.PaginationMetaBuilder(ctx, total)
 
-		ctx.JSON(http.StatusOK, utils.PaginationBuilder(data, *meta))
+		ctx.JSON(http.StatusOK, utils.SucessResponse(utils.PaginationBuilder(data, *meta)))
 	}
 }
 

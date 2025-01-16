@@ -37,7 +37,7 @@ func (roleHandler *RoleHandler) Pagination() gin.HandlerFunc {
 
 		meta := utils.PaginationMetaBuilder(httpContext, total)
 
-		httpContext.JSON(http.StatusOK, utils.PaginationBuilder(data, *meta))
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(utils.PaginationBuilder(data, *meta)))
 	}
 }
 
