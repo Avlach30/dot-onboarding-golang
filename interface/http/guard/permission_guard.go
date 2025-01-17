@@ -36,7 +36,7 @@ func PermissionGuard(permissionsToCheck ...string) gin.HandlerFunc {
 
 		// check user permission is allowed access or not
 		isPermissionsIntersect := utils.IsAnyIntersect(permissionsToCheck, permissionKeys)
-		if isPermissionsIntersect {
+		if isPermissionsIntersect == false {
 			panic(*exception.ForbiddenException("Not Allowed Access"))
 		}
 
