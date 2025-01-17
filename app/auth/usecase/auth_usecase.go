@@ -31,7 +31,7 @@ func (authUseCase *AuthUsecase) SignInByOIDCCode(httpContext *gin.Context, code 
 		panic(*exception.UnauthorizedException("Not Valid Code"))
 	}
 
-	user, err := authUseCase.authRepo.FindUserByEmail(httpContext, emailSSO)
+	user, err := authUseCase.authRepo.FindUserByEmailWithRoles(httpContext, emailSSO)
 	if err != nil || user.ID == uuid.Nil {
 		panic(*exception.BussinessException("Email Not Found"))
 	}
@@ -43,7 +43,7 @@ func (authUseCase *AuthUsecase) SignInByOIDCCode(httpContext *gin.Context, code 
 
 // SignIn implements domain.AuthUsecase.
 func (authUseCase *AuthUsecase) SignInBasic(httpContext *gin.Context, email string, password string) (token string, expirationTime time.Time) {
-	user, err := authUseCase.authRepo.FindUserByEmail(httpContext, email)
+	user, err := authUseCase.authRepo.FindUserByEmailWithRoles(httpContext, email)
 	if err != nil {
 		panic(*exception.BussinessException("Email and Password did not match"))
 	}
@@ -62,7 +62,7 @@ func (authUseCase *AuthUsecase) SignInLDAP(httpContext *gin.Context, username st
 		panic(*exception.UnauthorizedException("Email Not Found"))
 	}
 
-	user, err := authUseCase.authRepo.FindUserByEmail(httpContext, userLDAP.Email)
+	user, err := authUseCase.authRepo.FindUserByEmailWithRoles(httpContext, userLDAP.Email)
 	if err != nil {
 		panic(*exception.UnauthorizedException("Email Not Found"))
 	}

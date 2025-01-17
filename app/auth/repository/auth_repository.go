@@ -19,14 +19,6 @@ type AuthRepository struct {
 	rolePermissionModel *gorm.DB
 }
 
-// FindUserByEmail implements domain.AuthRepository.
-func (authRepo *AuthRepository) FindUserByEmail(httpContext *gin.Context, email string) (*userDomain.UserEntity, error) {
-	authRepo.userModel = authRepo.userModel.WithContext(httpContext)
-	user := &userDomain.UserEntity{}
-	err := authRepo.userModel.Where("email = ?", email).Find(&user).Error
-	return user, err
-}
-
 func NewAuthRepository(db *gorm.DB) domain.AuthRepository {
 	return &AuthRepository{
 		userModel:           db.Model(&userDomain.UserEntity{}),
@@ -35,4 +27,16 @@ func NewAuthRepository(db *gorm.DB) domain.AuthRepository {
 		rolePermissionModel: db.Model(&rolePermissionDomain.RolePermissionEntity{}),
 		userRoleModel:       db.Model(&userRoleDomain.UserRoleEntity{}),
 	}
+}
+
+// FindUserByEmail implements domain.AuthRepository.
+func (authRepo *AuthRepository) FindUserByEmailWithRoles(httpContext *gin.Context, email string) (*userDomain.UserEntity, error) {
+	authRepo.userModel = authRepo.userModel.WithContext(httpContext)
+	user := &userDomain.UserEntity{}
+	err := authRepo.userModel.
+		Preload("Roles").
+		Preload("Roles.Permissions").
+		Where("email = ?", email).
+		Find(&user).Error
+	return user, err
 }

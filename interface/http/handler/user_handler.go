@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/constant"
 	domain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
@@ -24,11 +25,11 @@ func NewUserHandler(router *gin.Engine, userUsecase domain.UserUsecase) {
 		userUsecase: userUsecase,
 	}
 
-	userHandlerRoute.GET("/", userHandler.Pagination())
-	userHandlerRoute.DELETE("/:id", userHandler.Delete())
-	userHandlerRoute.PATCH("/:id", middleware.ValidateRequestJSON[dto.UserUpdateRequest](), userHandler.Update())
-	userHandlerRoute.GET("/:id", userHandler.Detail())
-	userHandlerRoute.POST("/", middleware.ValidateRequestJSON[dto.UserCreateRequest](), userHandler.Create())
+	userHandlerRoute.GET("/", guard.PermissionGuard(constant.ReadUser), userHandler.Pagination())
+	userHandlerRoute.DELETE("/:id", guard.PermissionGuard(constant.DeleteUser), userHandler.Delete())
+	userHandlerRoute.PATCH("/:id", guard.PermissionGuard(constant.UpdateUser), middleware.ValidateRequestJSON[dto.UserUpdateRequest](), userHandler.Update(), guard.PermissionGuard(constant.UpdateUser))
+	userHandlerRoute.GET("/:id", guard.PermissionGuard(constant.ReadUser), userHandler.Detail())
+	userHandlerRoute.POST("/", guard.PermissionGuard(constant.CreateUser), middleware.ValidateRequestJSON[dto.UserCreateRequest](), userHandler.Create())
 }
 
 func (userHandler *UserHandler) Pagination() gin.HandlerFunc {

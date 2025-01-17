@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/constant"
 	domain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
@@ -24,11 +25,11 @@ func NewRoleHandler(router *gin.Engine, roleUsecase domain.RoleUsecase) {
 		roleUsecase: roleUsecase,
 	}
 
-	roleHandlerRoute.GET("/", roleHandler.Pagination())
-	roleHandlerRoute.DELETE("/:id", roleHandler.Delete())
-	roleHandlerRoute.PATCH("/:id", middleware.ValidateRequestJSON[dto.RoleUpdateRequest](), roleHandler.Update())
-	roleHandlerRoute.GET("/:id", roleHandler.Detail())
-	roleHandlerRoute.POST("/", middleware.ValidateRequestJSON[dto.RoleCreateRequest](), roleHandler.Create())
+	roleHandlerRoute.GET("/", guard.PermissionGuard(constant.ReadRole), roleHandler.Pagination())
+	roleHandlerRoute.DELETE("/:id", guard.PermissionGuard(constant.DeleteRole), roleHandler.Delete())
+	roleHandlerRoute.PATCH("/:id", guard.PermissionGuard(constant.UpdateRole), middleware.ValidateRequestJSON[dto.RoleUpdateRequest](), roleHandler.Update())
+	roleHandlerRoute.GET("/:id", guard.PermissionGuard(constant.ReadRole), roleHandler.Detail())
+	roleHandlerRoute.POST("/", guard.PermissionGuard(constant.CreateRole), middleware.ValidateRequestJSON[dto.RoleCreateRequest](), roleHandler.Create())
 }
 
 func (roleHandler *RoleHandler) Pagination() gin.HandlerFunc {
