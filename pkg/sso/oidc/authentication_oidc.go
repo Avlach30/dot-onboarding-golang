@@ -9,7 +9,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/sso/oidc/dto"
 )
 
-func GetAuthToken(code string) (string, error) {
+func GetAuthToken(code string, redirectUri string) (string, error) {
 	log.Println("=========================START GET AUTH TOKEN OIDC=========================")
 
 	grantType := config.OIDCGrantType
@@ -22,6 +22,7 @@ func GetAuthToken(code string) (string, error) {
 		ClientId:     clientId,
 		ClientSecret: clientSecret,
 		Code:         code,
+		RedirectUri:  redirectUri,
 	}
 
 	httpClientGetToken := integration.NewClient("")
@@ -73,11 +74,11 @@ func GetEmail(bearerTokenSSO string) (string, error) {
 	return emailSSO, nil
 }
 
-func GetEmailByCode(code string) (string, error) {
+func GetEmailByCode(code string, redirectUri string) (string, error) {
 	log.Println("=========================START GET EMAIL BY CODE OIDC=========================")
 
 	emailSSO := ""
-	bearerTokenSSO, err := GetAuthToken(code)
+	bearerTokenSSO, err := GetAuthToken(code, redirectUri)
 	if err != nil {
 		log.Printf("Error in GetEmailByCode : %v", err)
 		return emailSSO, err

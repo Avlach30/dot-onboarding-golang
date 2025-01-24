@@ -22,11 +22,16 @@ type AuthUsecase struct {
 	authRepo domain.AuthRepository
 }
 
-// SignInURLOpenIDClient implements domain.AuthUsecase.
-func (authUseCase *AuthUsecase) SignInByOIDCCode(httpContext *gin.Context, code string) (token string, expiredAt time.Time) {
+func NewAuthUsecase(authRepo domain.AuthRepository) domain.AuthUsecase {
+	return &AuthUsecase{
+		authRepo: authRepo,
+	}
+}
 
+// SignInURLOpenIDClient implements domain.AuthUsecase.
+func (authUseCase *AuthUsecase) SignInByOIDCCode(httpContext *gin.Context, code string, redirectUri string) (token string, expiredAt time.Time) {
 	// get email from token
-	emailSSO, err := oidc.GetEmailByCode(code)
+	emailSSO, err := oidc.GetEmailByCode(code, redirectUri)
 	if err != nil || emailSSO == "" {
 		panic(*exception.UnauthorizedException("Not Valid Code"))
 	}
@@ -100,12 +105,6 @@ func (authUseCase *AuthUsecase) CreateJWTToken(user *userDomain.UserEntity) (tok
 
 	// Return the token
 	return tokenString, expirationTime
-}
-
-func NewAuthUsecase(authRepo domain.AuthRepository) domain.AuthUsecase {
-	return &AuthUsecase{
-		authRepo: authRepo,
-	}
 }
 
 func SetPermissions(user *userDomain.UserEntity) {

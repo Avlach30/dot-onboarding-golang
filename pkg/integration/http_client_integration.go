@@ -20,30 +20,56 @@ import (
 )
 
 func (client *Client) Get(endpoint string, headers *Headers, responseBody any) (any, error) {
-	return client.SendHTTPRequest(http.MethodGet, endpoint, headers, nil, responseBody)
+	response, err := client.SendHTTPRequest(http.MethodGet, endpoint, headers, nil, responseBody)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
 
 func (client *Client) Post(endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
-	return client.SendHTTPRequest(http.MethodPost, endpoint, headers, requestBody, responseBody)
+	response, err := client.SendHTTPRequest(http.MethodPost, endpoint, headers, requestBody, responseBody)
+	if err != nil {
+		return response, err
+	}
+
+	return response, nil
 }
 
 func (client *Client) Put(endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
-	return client.SendHTTPRequest(http.MethodPut, endpoint, headers, requestBody, responseBody)
+	response, err := client.SendHTTPRequest(http.MethodPut, endpoint, headers, requestBody, responseBody)
+	if err != nil {
+		return response, err
+	}
+
+	return response, nil
 }
 
 func (client *Client) Patch(endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
-	return client.SendHTTPRequest(http.MethodPatch, endpoint, headers, requestBody, responseBody)
+	response, err := client.SendHTTPRequest(http.MethodPatch, endpoint, headers, requestBody, responseBody)
+	if err != nil {
+		return response, err
+	}
+
+	return response, nil
 }
 
 func (client *Client) Delete(endpoint string, headers *Headers, responseBody any) (any, error) {
-	return client.SendHTTPRequest(http.MethodDelete, endpoint, headers, nil, responseBody)
+	response, err := client.SendHTTPRequest(http.MethodDelete, endpoint, headers, nil, responseBody)
+	if err != nil {
+		return response, err
+	}
+
+	return response, nil
 }
 
 func (client *Client) SendHTTPRequest(method, endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
 	url := client.BaseURL + endpoint
 	externalCircuitBreaker := singleton.GetCircuitBreaker(singleton.ExternalCircuitBreaker)
 
-	isCircuitBreakerEnable, _ := strconv.ParseBool(config.IsCircuitBreakerEnabled)
+	isCircuitBreakerEnable, err := strconv.ParseBool(config.IsCircuitBreakerEnabled)
+
 	isReadyToTrip := externalCircuitBreaker.IsReadyToTrip()
 	if !isReadyToTrip && isCircuitBreakerEnable {
 		return nil, fmt.Errorf("Error circuit breaker is open, cannot send request to %s", url)
@@ -63,17 +89,21 @@ func (client *Client) SendHTTPRequest(method, endpoint string, headers *Headers,
 	setHeaders(req, headers)
 	log.Println("=========================START HTTP REQUEST=========================")
 	resp, err := client.HTTPClient.Do(req)
+	if err != nil {
+		log.Printf("Error sending request: %v", err)
+		return nil, err
+	}
 	createLogIntegration(req, resp)
 	log.Println("==========================END HTTP REQUEST==========================")
 
 	if isCircuitBreakerEnable {
 		externalCircuitBreaker.CountRequest()
-		if err != nil || resp.StatusCode >= 500 {
+		if resp.StatusCode >= http.StatusInternalServerError {
 			externalCircuitBreaker.FailureHappend(endpoint)
 		}
 	}
 
-	if err != nil || resp.StatusCode >= 500 {
+	if resp.StatusCode >= http.StatusInternalServerError {
 		log.Printf("Error sending request: %v", err)
 		return nil, err
 	}

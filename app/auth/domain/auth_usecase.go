@@ -10,6 +10,6 @@ import (
 type AuthUsecase interface {
 	SignInBasic(httpContext *gin.Context, email string, password string) (token string, expirationTime time.Time)
 	SignInLDAP(httpContext *gin.Context, username string, password string) (token string, expirationTime time.Time)
-	SignInByOIDCCode(httpContext *gin.Context, code string) (token string, expirationTime time.Time)
+	SignInByOIDCCode(httpContext *gin.Context, code string, redirectUri string) (token string, expirationTime time.Time)
 	CreateJWTToken(user *domain.UserEntity) (token string, expirationTime time.Time)
 }
