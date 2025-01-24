@@ -65,7 +65,7 @@ func (authHandler *AuthHandler) SignLDAP() gin.HandlerFunc {
 func (authHandler *AuthHandler) SignOIDC() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		authRequest := singleton.GetHTTPRequest[dto.AuthSignOIDCRequest](httpContext)
-		token, expirationTime := authHandler.authUsecase.SignInByOIDCCode(httpContext, authRequest.Code)
+		token, expirationTime := authHandler.authUsecase.SignInByOIDCCode(httpContext, authRequest.Code, authRequest.RedirectUri)
 
 		data := &dto.AuthSignInResponse{
 			Token:     token,
