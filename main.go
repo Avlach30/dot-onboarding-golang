@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"fmt"
 	"log"
@@ -47,12 +48,19 @@ import (
 )
 
 var (
+	// global variable
+	db             *gorm.DB
+	router         *gin.Engine
+	storageManager storage.StorageManager
+
+	// args variable
 	execMigration     *string
 	runMigration      *string
+	onlyJobExecutor   *string
+	withJobExecutor   *string
 	migrationFileName *string
-
-	runSeeder   *string
-	seederClass *string
+	runSeeder         *string
+	seederClass       *string
 )
 
 func main() {
@@ -60,19 +68,30 @@ func main() {
 
 	extractArgs()
 
-	db := initializeDatabase()
+	if err := initializeDatabase(); err != nil {
+		panic(err)
+	}
 
-	handleMigrationAndSeeding(db)
+	handleMigrationAndSeeding()
 
-	storageManager := initializeStorageManager()
-
-	initializeWorkers(db, storageManager)
-
-	router := setupRouter()
+	setupRouter()
 
 	initializeSentry()
 
-	initializeModule(db, router)
+	initializeModule()
+
+	if err := initializeStorageManager(); err != nil {
+		panic(err)
+	}
+
+	initializeWorkers()
+
+	if *onlyJobExecutor == "true" {
+		log.Println("Only job executor mode")
+		for {
+			time.Sleep(time.Second)
+		}
+	}
 
 	log.Printf("Starting server on port %s...", config.AppPort)
 	if err := router.Run(":" + config.AppPort); err != nil {
@@ -90,11 +109,16 @@ func extractArgs() {
 	runSeeder = flag.String("dbseed", "false", "")
 	seederClass = flag.String("class", "", "Add multiple values (e.g., --class UserSeed,RoleSeeder,...)")
 
+	// job executor args requirement
+	onlyJobExecutor = flag.String("onlyJobExecutor", "false", "true for only job executor, otherwise false")
+	withJobExecutor = flag.String("withJobExecutor", "false", "true for run server with job executor, otherwise false")
+
 	flag.Parse()
 }
 
-func initializeDatabase() *gorm.DB {
-	db, err := dbconn.InitDb(&dbconn.DatabaseCredentials{
+func initializeDatabase() error {
+	var err error
+	db, err = dbconn.InitDb(&dbconn.DatabaseCredentials{
 		Host:     config.DBHost,
 		Username: config.DBUsername,
 		Password: config.DBPassword,
@@ -102,10 +126,12 @@ func initializeDatabase() *gorm.DB {
 		Name:     config.DBName,
 		TimeZome: config.DBTimeZone,
 	})
+
 	if err != nil {
 		log.Fatal(err)
 	}
-	return db
+
+	return err
 }
 
 func initializeLog() {
@@ -113,7 +139,7 @@ func initializeLog() {
 	log.SetOutput(logWriter)
 }
 
-func handleMigrationAndSeeding(db *gorm.DB) {
+func handleMigrationAndSeeding() {
 	if *runMigration == "true" {
 		if *execMigration == "create" {
 			migration.Create(db, *migrationFileName)
@@ -136,10 +162,10 @@ func handleMigrationAndSeeding(db *gorm.DB) {
 	}
 }
 
-func initializeStorageManager() storage.StorageManager {
-	var storageManager storage.StorageManager
+func initializeStorageManager() error {
 	var err error
 
+	log.Printf("Using storage type: %s\n", config.Storage)
 	switch config.Storage {
 	case "gcs":
 		storageManager, err = storage.NewGCSManager()
@@ -147,25 +173,25 @@ func initializeStorageManager() storage.StorageManager {
 		storageManager, err = storage.NewS3Manager()
 	case "minio":
 		storageManager, err = storage.NewMinIOManager()
-	case "local":
 	default:
-		log.Fatalf("Invalid storage type: %s", config.Storage)
+		log.Printf("Invalid storage type: %s\n", config.Storage)
 	}
 
 	if err != nil {
-		log.Fatalf("Failed to initialize storage manager: %v", err)
+		log.Printf("Failed to initialize storage manager: %v\n", err)
 	}
 
-	return storageManager
+	return err
 }
 
-func initializeWorkers(db *gorm.DB, storageManager storage.StorageManager) {
+func initializeWorkers() {
 	workers := task.InitQueueWorkerTask()
 	singleton.InitGlobal(workers, db, &storageManager)
 
-	withJobExecutor := flag.String("withJobExecutor", "true", "")
-	if *withJobExecutor == "true" {
-		singleton.AddJobDictionary(authJob.InitJob())
+	if *withJobExecutor == "true" || *onlyJobExecutor == "true" {
+
+		singleton.AddJobDictionary(authJob.Jobs())
+
 		go singleton.ExecuteJobTask()
 
 		schedulerExecutor := task.InitAllSchedulerTask()
@@ -175,8 +201,9 @@ func initializeWorkers(db *gorm.DB, storageManager storage.StorageManager) {
 	go task.RunAllActiveWorker(workers)
 }
 
-func setupRouter() *gin.Engine {
-	router := gin.New()
+func setupRouter() {
+	router = gin.New()
+
 	gin.SetMode(config.GinMode)
 
 	router.Use(sentrygin.New(sentrygin.Options{
@@ -185,7 +212,6 @@ func setupRouter() *gin.Engine {
 	router.Use(handler.RecoverPanic())
 
 	healthCheck(router)
-	return router
 }
 
 func initializeSentry() {
@@ -202,7 +228,7 @@ func initializeSentry() {
 	}
 }
 
-func initializeModule(db *gorm.DB, router *gin.Engine) {
+func initializeModule() {
 	// Initialize repositories
 	userRepo := userRepo.NewUserRepository(db)
 	roleRepo := roleRepo.NewRoleRepository(db)

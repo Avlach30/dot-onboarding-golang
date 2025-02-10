@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 
 	"github.com/gin-gonic/gin"
@@ -18,12 +19,12 @@ func NewPermissionUsecase(permissionRepo domain.PermissionRepository) domain.Per
 	}
 }
 
-func (permissionUsecase *PermissionUsecase) Pagination(httpContext *gin.Context) ([]domain.PermissionEntity, int) {
+func (permissionUsecase *PermissionUsecase) Pagination(httpContext *gin.Context) ([]entities.PermissionEntity, int) {
 	return permissionUsecase.permissionRepo.Pagination(httpContext)
 }
 
 // Create implements domain.PermissionUsecase.
-func (permissionUsecase *PermissionUsecase) Create(httpContext *gin.Context, payload *domain.PermissionEntity) {
+func (permissionUsecase *PermissionUsecase) Create(httpContext *gin.Context, payload *entities.PermissionEntity) {
 	isKeyExist := permissionUsecase.permissionRepo.IsKeyExist(httpContext, payload.Key)
 
 	if isKeyExist {
@@ -39,14 +40,14 @@ func (permissionUsecase *PermissionUsecase) Delete(httpContext *gin.Context, id 
 }
 
 // FindOneById implements domain.PermissionUsecase.
-func (permissionUsecase *PermissionUsecase) FindOneById(httpContext *gin.Context, id uuid.UUID) *domain.PermissionEntity {
+func (permissionUsecase *PermissionUsecase) FindOneById(httpContext *gin.Context, id uuid.UUID) *entities.PermissionEntity {
 	permission := permissionUsecase.permissionRepo.FindOneById(httpContext, id, false)
 
 	return permission
 }
 
 // Update implements domain.PermissionUsecase.
-func (permissionUsecase *PermissionUsecase) Update(httpContext *gin.Context, id uuid.UUID, payload *domain.PermissionEntity) {
+func (permissionUsecase *PermissionUsecase) Update(httpContext *gin.Context, id uuid.UUID, payload *entities.PermissionEntity) {
 	if permissionUsecase.permissionRepo.IsKeyExistExceptPermissionId(httpContext, payload.Key, id) {
 		panic(*exception.BussinessException("Key already exist"))
 	}

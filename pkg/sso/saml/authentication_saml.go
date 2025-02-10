@@ -8,7 +8,7 @@ import (
 )
 
 func GenerateSAML() (string, error) {
-	log.Println("=========================START GENERATE SAML=========================")
+	log.Println("========================= START GENERATE SAML =========================")
 
 	samlAssertationServiceUrl := config.SAMLAssertionServiceUrl
 	samlIssuer := config.SAMLIssuer
@@ -37,6 +37,6 @@ func GenerateSAML() (string, error) {
 		return "", err
 	}
 
-	log.Println("==========================END GENERATE SAML==========================")
+	log.Println("========================== END GENERATE SAML ==========================")
 	return samlStr, nil
 }

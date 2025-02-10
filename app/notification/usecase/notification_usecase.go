@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/entities"
 )
 
 type NotificationUseCase struct {
@@ -16,7 +17,7 @@ func NewNotificationUseCase(notificationRepo domain.NotificationRepository) doma
 	}
 }
 
-func (notification *NotificationUseCase) Pagination(httpContext *gin.Context, userId uuid.UUID) ([]domain.NotificationEntity, int) {
+func (notification *NotificationUseCase) Pagination(httpContext *gin.Context, userId uuid.UUID) ([]entities.NotificationEntity, int) {
 	return notification.notificationRepo.Pagination(httpContext, userId)
 }
 
@@ -28,6 +29,6 @@ func (notification *NotificationUseCase) MarkAsRead(httpContext *gin.Context, id
 	notification.notificationRepo.MarkAsRead(httpContext, id, userId)
 }
 
-func (notification *NotificationUseCase) Detail(httpContext *gin.Context, id uuid.UUID, userId uuid.UUID) domain.NotificationEntity {
+func (notification *NotificationUseCase) Detail(httpContext *gin.Context, id uuid.UUID, userId uuid.UUID) entities.NotificationEntity {
 	return notification.notificationRepo.FindOneById(httpContext, id, userId)
 }

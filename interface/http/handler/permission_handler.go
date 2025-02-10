@@ -6,6 +6,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/constant"
 	domain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/dto"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
@@ -45,7 +46,7 @@ func (permissionHandler *PermissionHandler) Pagination() gin.HandlerFunc {
 func (permissionHandler *PermissionHandler) Create() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		permissionRequest := singleton.GetHTTPRequest[dto.PermissionCreateRequest](httpContext)
-		newPermission := domain.PermissionEntity{
+		newPermission := entities.PermissionEntity{
 			Key:  permissionRequest.Key,
 			Name: permissionRequest.Name,
 		}
@@ -70,7 +71,7 @@ func (permissionHandler *PermissionHandler) Update() gin.HandlerFunc {
 		permissionRequest := singleton.GetHTTPRequest[dto.PermissionUpdateRequest](httpContext)
 		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
-		updatePermission := domain.PermissionEntity{
+		updatePermission := entities.PermissionEntity{
 			Key:  permissionRequest.Key,
 			Name: permissionRequest.Name,
 		}

@@ -6,6 +6,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/constant"
 	domain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/dto"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
@@ -45,7 +46,7 @@ func (roleHandler *RoleHandler) Pagination() gin.HandlerFunc {
 func (roleHandler *RoleHandler) Create() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		roleRequest := singleton.GetHTTPRequest[dto.RoleCreateRequest](httpContext)
-		newRole := domain.RoleEntity{
+		newRole := entities.RoleEntity{
 			Key:  roleRequest.Key,
 			Name: roleRequest.Name,
 		}
@@ -71,7 +72,7 @@ func (roleHandler *RoleHandler) Update() gin.HandlerFunc {
 		roleRequest := singleton.GetHTTPRequest[dto.RoleUpdateRequest](httpContext)
 		paramId := httpContext.Param("id")
 		id := utils.UUIDChecker(paramId)
-		updateRole := domain.RoleEntity{
+		updateRole := entities.RoleEntity{
 			Key:  roleRequest.Key,
 			Name: roleRequest.Name,
 		}

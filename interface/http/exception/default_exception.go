@@ -2,6 +2,7 @@ package exception
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/getsentry/sentry-go"
 )
@@ -25,6 +26,14 @@ func ServerErrorException(err error) *Exception {
 	panic.StatusCode = http.StatusInternalServerError
 
 	// Capture error to sentry
+	sentry.AddBreadcrumb(&sentry.Breadcrumb{
+		Category: "error",
+		Message:  err.Error(),
+		Level:    sentry.LevelError,
+		Data: map[string]interface{}{
+			"timestamp": time.Now().Unix(),
+		},
+	})
 	sentry.CaptureException(err)
 
 	return panic

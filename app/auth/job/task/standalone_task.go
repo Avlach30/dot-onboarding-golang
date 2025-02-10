@@ -14,6 +14,11 @@ func (jobTask *StandaloneJobTask) Handle(payload interface{}) error {
 	return nil
 }
 
+// Handle implements domain.JobTask.
+func (jobTask *StandaloneJobTask) Name() string {
+	return "AuthStandaloneJobTask"
+}
+
 func AuthStandaloneJobTask() task.JobTask {
 	return &StandaloneJobTask{}
 }

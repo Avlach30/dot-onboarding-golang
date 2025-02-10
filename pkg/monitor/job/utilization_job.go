@@ -11,7 +11,7 @@ import (
 )
 
 func MonitorResources() {
-	log.Println("=====START MONITOR RESOURCES=====")
+	log.Println("===== START MONITOR RESOURCES =====")
 	// Get CPU usage
 	cpuPercent, err := cpu.Percent(time.Second, false)
 	if err != nil {
@@ -30,5 +30,5 @@ func MonitorResources() {
 
 	// Get number of goroutines
 	fmt.Printf("Number of Goroutines: %d\n", runtime.NumGoroutine())
-	log.Println("=====END MONITOR RESOURCES=====")
+	log.Println("===== END MONITOR RESOURCES =====")
 }

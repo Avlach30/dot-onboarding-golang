@@ -10,7 +10,7 @@ import (
 )
 
 func GetAuthToken(code string, redirectUri string) (string, error) {
-	log.Println("=========================START GET AUTH TOKEN OIDC=========================")
+	log.Println("========================= START GET AUTH TOKEN OIDC =========================")
 
 	grantType := config.OIDCGrantType
 	clientId := config.OIDCClientId
@@ -41,12 +41,12 @@ func GetAuthToken(code string, redirectUri string) (string, error) {
 		bearerTokenSSO = tokenResponse.TokenType + " " + tokenResponse.AccessToken
 	}
 
-	log.Println("==========================END GET AUTH TOKEN OIDC==========================")
+	log.Println("========================== END GET AUTH TOKEN OIDC ==========================")
 	return bearerTokenSSO, nil
 }
 
 func GetEmail(bearerTokenSSO string) (string, error) {
-	log.Println("==========================START GET EMAIL OIDC==========================")
+	log.Println("========================== START GET EMAIL OIDC ==========================")
 
 	userInfoUrl := config.OIDCUserInfoUrl
 
@@ -70,12 +70,12 @@ func GetEmail(bearerTokenSSO string) (string, error) {
 		emailSSO = userInfoResponse.Email
 	}
 
-	log.Println("==========================END GET EMAIL OIDC==========================")
+	log.Println("========================== END GET EMAIL OIDC ==========================")
 	return emailSSO, nil
 }
 
 func GetEmailByCode(code string, redirectUri string) (string, error) {
-	log.Println("=========================START GET EMAIL BY CODE OIDC=========================")
+	log.Println("========================= START GET EMAIL BY CODE OIDC =========================")
 
 	emailSSO := ""
 	bearerTokenSSO, err := GetAuthToken(code, redirectUri)
@@ -90,6 +90,6 @@ func GetEmailByCode(code string, redirectUri string) (string, error) {
 		return emailSSO, err
 	}
 
-	log.Println("=========================END GET EMAIL BY CODE OIDC=========================")
+	log.Println("========================= END GET EMAIL BY CODE OIDC =========================")
 	return email, nil
 }

@@ -3,11 +3,9 @@ package repository
 import (
 	"github.com/gin-gonic/gin"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
-	permissionDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
-	roleDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
-	rolePermissionDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role_permission/domain"
-	userDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
-	userRoleDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user_role/domain"
+	permissionEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/entities"
+	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/entities"
+	userEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/entities"
 	"gorm.io/gorm"
 )
 
@@ -21,18 +19,18 @@ type AuthRepository struct {
 
 func NewAuthRepository(db *gorm.DB) domain.AuthRepository {
 	return &AuthRepository{
-		userModel:           db.Model(&userDomain.UserEntity{}),
-		permissionModel:     db.Model(&permissionDomain.PermissionEntity{}),
-		roleModel:           db.Model(&roleDomain.RoleEntity{}),
-		rolePermissionModel: db.Model(&rolePermissionDomain.RolePermissionEntity{}),
-		userRoleModel:       db.Model(&userRoleDomain.UserRoleEntity{}),
+		userModel:           db.Model(&userEntities.UserEntity{}),
+		permissionModel:     db.Model(&permissionEntities.PermissionEntity{}),
+		roleModel:           db.Model(&roleEntities.RoleEntity{}),
+		rolePermissionModel: db.Model(&roleEntities.RolePermissionEntity{}),
+		userRoleModel:       db.Model(&userEntities.UserRoleEntity{}),
 	}
 }
 
 // FindUserByEmail implements domain.AuthRepository.
-func (authRepo *AuthRepository) FindUserByEmailWithRoles(httpContext *gin.Context, email string) (*userDomain.UserEntity, error) {
+func (authRepo *AuthRepository) FindUserByEmailWithRoles(httpContext *gin.Context, email string) (*userEntities.UserEntity, error) {
 	authRepo.userModel = authRepo.userModel.WithContext(httpContext)
-	user := &userDomain.UserEntity{}
+	user := &userEntities.UserEntity{}
 	err := authRepo.userModel.
 		Preload("Roles").
 		Preload("Roles.Permissions").

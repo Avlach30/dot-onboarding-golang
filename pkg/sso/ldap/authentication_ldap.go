@@ -10,7 +10,7 @@ import (
 )
 
 func AuthUsingLDAP(username, password string) (*dto.LDAPUserData, error) {
-	log.Println("=========================START GENERATE SAML=========================")
+	log.Println("========================= START GENERATE SAML=========================")
 
 	ldapServer := config.LDAPServer
 	ldapPort := config.LDAPPort
@@ -81,6 +81,6 @@ func AuthUsingLDAP(username, password string) (*dto.LDAPUserData, error) {
 		}
 	}
 
-	log.Println("==========================END GENERATE SAML==========================")
+	log.Println("========================== END GENERATE SAML==========================")
 	return userLDAPData, nil
 }

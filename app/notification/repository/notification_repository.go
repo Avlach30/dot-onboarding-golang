@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 	"gorm.io/gorm"
@@ -17,14 +18,14 @@ type NotificationRepository struct {
 
 func NewNotificationRepository(db *gorm.DB) domain.NotificationRepository {
 	return &NotificationRepository{
-		notificationModel: db.Model(&domain.NotificationEntity{}),
+		notificationModel: db.Model(&entities.NotificationEntity{}),
 	}
 }
 
 // Pagination get notification data with pagination
-func (notification *NotificationRepository) Pagination(ctx *gin.Context, userId uuid.UUID) ([]domain.NotificationEntity, int) {
+func (notification *NotificationRepository) Pagination(ctx *gin.Context, userId uuid.UUID) ([]entities.NotificationEntity, int) {
 	notification.notificationModel = notification.notificationModel.WithContext(ctx)
-	var notifications []domain.NotificationEntity
+	var notifications []entities.NotificationEntity
 	var total int64
 
 	// Query filter
@@ -96,9 +97,9 @@ func (notification *NotificationRepository) MarkAsRead(ctx *gin.Context, id uuid
 }
 
 // FindOneById get notification detail by id
-func (notification *NotificationRepository) FindOneById(ctx *gin.Context, id uuid.UUID, userId uuid.UUID) domain.NotificationEntity {
+func (notification *NotificationRepository) FindOneById(ctx *gin.Context, id uuid.UUID, userId uuid.UUID) entities.NotificationEntity {
 	notification.notificationModel = notification.notificationModel.WithContext(ctx)
-	notificationEntity := domain.NotificationEntity{}
+	notificationEntity := entities.NotificationEntity{}
 
 	err := notification.notificationModel.
 		Joins("User").

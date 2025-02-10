@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 	"gorm.io/gorm"
@@ -17,14 +18,14 @@ type PermissionRepository struct {
 
 func NewPermissionRepository(db *gorm.DB) domain.PermissionRepository {
 	return &PermissionRepository{
-		model: db.Model(&domain.PermissionEntity{}),
+		model: db.Model(&entities.PermissionEntity{}),
 	}
 }
 
 // Pagination get permission data with pagination
-func (permission *PermissionRepository) Pagination(ctx *gin.Context) ([]domain.PermissionEntity, int) {
+func (permission *PermissionRepository) Pagination(ctx *gin.Context) ([]entities.PermissionEntity, int) {
 	query := permission.model.WithContext(ctx)
-	var permissions []domain.PermissionEntity
+	var permissions []entities.PermissionEntity
 	var total int64
 
 	// Query filter
@@ -77,9 +78,9 @@ func (permission *PermissionRepository) querySort(query *gorm.DB, ctx *gin.Conte
 	return query
 }
 
-func (permission *PermissionRepository) FindOneById(ctx *gin.Context, id uuid.UUID, trashed bool) *domain.PermissionEntity {
+func (permission *PermissionRepository) FindOneById(ctx *gin.Context, id uuid.UUID, trashed bool) *entities.PermissionEntity {
 	permission.model = permission.model.WithContext(ctx)
-	permissionEntity := &domain.PermissionEntity{}
+	permissionEntity := &entities.PermissionEntity{}
 	if trashed {
 		permission.model = permission.model.Unscoped()
 	}
@@ -97,7 +98,7 @@ func (permission *PermissionRepository) FindOneById(ctx *gin.Context, id uuid.UU
 
 func (permission *PermissionRepository) Delete(ctx *gin.Context, id uuid.UUID) {
 	permission.model = permission.model.WithContext(ctx)
-	err := permission.model.Delete(&domain.PermissionEntity{}, id).Error
+	err := permission.model.Delete(&entities.PermissionEntity{}, id).Error
 
 	if err != nil {
 		log.Println("Error delete permission", err)
@@ -105,7 +106,7 @@ func (permission *PermissionRepository) Delete(ctx *gin.Context, id uuid.UUID) {
 	}
 }
 
-func (permission *PermissionRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.PermissionEntity) {
+func (permission *PermissionRepository) Update(ctx *gin.Context, id uuid.UUID, payload *entities.PermissionEntity) {
 	permission.model = permission.model.WithContext(ctx)
 	err := permission.model.Where("id = ?", id).Updates(&payload).Error
 	if err != nil {
@@ -114,7 +115,7 @@ func (permission *PermissionRepository) Update(ctx *gin.Context, id uuid.UUID, p
 	}
 }
 
-func (permission *PermissionRepository) Create(ctx *gin.Context, payload *domain.PermissionEntity) {
+func (permission *PermissionRepository) Create(ctx *gin.Context, payload *entities.PermissionEntity) {
 	permission.model = permission.model.WithContext(ctx)
 	err := permission.model.Create(&payload).Error
 	if err != nil {

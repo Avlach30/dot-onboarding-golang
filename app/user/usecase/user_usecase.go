@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"golang.org/x/crypto/bcrypt"
 
@@ -22,12 +23,12 @@ func NewUserUsecase(userRepo domain.UserRepository) domain.UserUsecase {
 }
 
 // Pagination implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Pagination(httpContext *gin.Context) ([]domain.UserEntity, int) {
+func (userUsecase *UserUsecase) Pagination(httpContext *gin.Context) ([]entities.UserEntity, int) {
 	return userUsecase.userRepo.Pagination(httpContext)
 }
 
 // Create implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Create(httpContext *gin.Context, payload *domain.UserEntity, roleIds []uuid.UUID) {
+func (userUsecase *UserUsecase) Create(httpContext *gin.Context, payload *entities.UserEntity, roleIds []uuid.UUID) {
 	isUserExist := userUsecase.userRepo.IsEmailExist(httpContext, payload.Email)
 	if isUserExist {
 		panic(*exception.BussinessException("Email already exist"))
@@ -56,7 +57,7 @@ func (userUsecase *UserUsecase) Create(httpContext *gin.Context, payload *domain
 }
 
 // Update implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Update(httpContext *gin.Context, id uuid.UUID, payload *domain.UserEntity, roleIds []uuid.UUID) {
+func (userUsecase *UserUsecase) Update(httpContext *gin.Context, id uuid.UUID, payload *entities.UserEntity, roleIds []uuid.UUID) {
 	if userUsecase.userRepo.IsEmailExistExceptUserId(httpContext, payload.Email, id) {
 		panic(*exception.BussinessException("Email already exist"))
 	}
@@ -81,6 +82,6 @@ func (userUsecase *UserUsecase) Delete(httpContext *gin.Context, id uuid.UUID) {
 }
 
 // FindById implements domain.UserUsecase.
-func (userUsecase *UserUsecase) FindOneById(httpContext *gin.Context, id uuid.UUID, trashed bool) *domain.UserEntity {
+func (userUsecase *UserUsecase) FindOneById(httpContext *gin.Context, id uuid.UUID, trashed bool) *entities.UserEntity {
 	return userUsecase.userRepo.FindOneById(httpContext, id, trashed)
 }

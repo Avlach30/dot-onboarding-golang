@@ -1,10 +1,10 @@
-package domain
+package entities
 
 import (
 	"time"
 
 	"github.com/google/uuid"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/entities"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +18,7 @@ type UserEntity struct {
 	CreatedAt time.Time      `gorm:"autoCreateTime:true index" json:"created_at"`
 
 	// Relations
-	Roles []domain.RoleEntity `gorm:"many2many:user_roles;foreignKey:ID;joinForeignKey:user_id;References:ID;joinReferences:role_id" json:"roles"`
+	Roles []entities.RoleEntity `gorm:"many2many:user_roles;foreignKey:ID;joinForeignKey:user_id;References:ID;joinReferences:role_id" json:"roles"`
 }
 
 // Specify the table name for the User struct

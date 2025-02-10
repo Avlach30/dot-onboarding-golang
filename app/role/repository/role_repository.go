@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 	"gorm.io/gorm"
@@ -17,14 +18,14 @@ type RoleRepository struct {
 
 func NewRoleRepository(db *gorm.DB) domain.RoleRepository {
 	return &RoleRepository{
-		model: db.Model(&domain.RoleEntity{}),
+		model: db.Model(&entities.RoleEntity{}),
 	}
 }
 
 // Pagination get role data with pagination
-func (role *RoleRepository) Pagination(ctx *gin.Context) ([]domain.RoleEntity, int) {
+func (role *RoleRepository) Pagination(ctx *gin.Context) ([]entities.RoleEntity, int) {
 	query := role.model.WithContext(ctx)
-	var roles []domain.RoleEntity
+	var roles []entities.RoleEntity
 	var total int64
 
 	// Query filter
@@ -77,9 +78,9 @@ func (role *RoleRepository) querySort(query *gorm.DB, ctx *gin.Context) *gorm.DB
 	return query
 }
 
-func (role *RoleRepository) FindOneById(ctx *gin.Context, id uuid.UUID, trashed bool) *domain.RoleEntity {
+func (role *RoleRepository) FindOneById(ctx *gin.Context, id uuid.UUID, trashed bool) *entities.RoleEntity {
 	role.model = role.model.WithContext(ctx)
-	roleEntity := &domain.RoleEntity{}
+	roleEntity := &entities.RoleEntity{}
 	if trashed {
 		role.model = role.model.Unscoped()
 	}
@@ -101,7 +102,7 @@ func (role *RoleRepository) FindOneById(ctx *gin.Context, id uuid.UUID, trashed 
 
 func (role *RoleRepository) Delete(ctx *gin.Context, id uuid.UUID) {
 	role.model = role.model.WithContext(ctx)
-	err := role.model.Delete(&domain.RoleEntity{}, id).Error
+	err := role.model.Delete(&entities.RoleEntity{}, id).Error
 
 	if err != nil {
 		log.Println("Error role delete: ", err)
@@ -109,7 +110,7 @@ func (role *RoleRepository) Delete(ctx *gin.Context, id uuid.UUID) {
 	}
 }
 
-func (role *RoleRepository) Update(ctx *gin.Context, id uuid.UUID, payload *domain.RoleEntity) {
+func (role *RoleRepository) Update(ctx *gin.Context, id uuid.UUID, payload *entities.RoleEntity) {
 	role.model = role.model.WithContext(ctx)
 	err := role.model.Where("id = ?", id).Updates(&payload).Error
 
@@ -119,7 +120,7 @@ func (role *RoleRepository) Update(ctx *gin.Context, id uuid.UUID, payload *doma
 	}
 }
 
-func (role *RoleRepository) Create(ctx *gin.Context, payload *domain.RoleEntity) {
+func (role *RoleRepository) Create(ctx *gin.Context, payload *entities.RoleEntity) {
 	role.model = role.model.WithContext(ctx)
 	err := role.model.Create(&payload).Error
 

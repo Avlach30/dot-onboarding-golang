@@ -5,7 +5,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
 )
 
@@ -17,7 +17,7 @@ type CustomClaims struct {
 }
 
 // CreateToken generates a new JWT token
-func CreateToken(authEntity *domain.AuthEntity, expirationTime time.Time) (res string, err error) {
+func CreateToken(authEntity *entities.AuthEntity, expirationTime time.Time) (res string, err error) {
 	secret := []byte(config.Secret)
 
 	claims := CustomClaims{

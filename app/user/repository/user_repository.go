@@ -5,8 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	roleDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
+	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 	"gorm.io/gorm"
@@ -19,15 +20,15 @@ type UserRepository struct {
 
 func NewUserRepository(db *gorm.DB) domain.UserRepository {
 	return &UserRepository{
-		model:     db.Model(&domain.UserEntity{}),
-		roleModel: db.Model(&roleDomain.RoleEntity{}),
+		model:     db.Model(&entities.UserEntity{}),
+		roleModel: db.Model(&roleEntities.RoleEntity{}),
 	}
 }
 
 // Pagination get user data with pagination
-func (user *UserRepository) Pagination(httpContext *gin.Context) ([]domain.UserEntity, int) {
+func (user *UserRepository) Pagination(httpContext *gin.Context) ([]entities.UserEntity, int) {
 	query := user.model.WithContext(httpContext)
-	var users []domain.UserEntity
+	var users []entities.UserEntity
 	var total int64
 
 	// Query filter
@@ -80,9 +81,9 @@ func (user *UserRepository) querySort(query *gorm.DB, httpContext *gin.Context) 
 	return query
 }
 
-func (user *UserRepository) FindOneById(httpContext *gin.Context, id uuid.UUID, trashed bool) *domain.UserEntity {
+func (user *UserRepository) FindOneById(httpContext *gin.Context, id uuid.UUID, trashed bool) *entities.UserEntity {
 	user.model = user.model.WithContext(httpContext)
-	userEntity := &domain.UserEntity{}
+	userEntity := &entities.UserEntity{}
 	if trashed {
 		user.model = user.model.Unscoped()
 	}
@@ -105,7 +106,7 @@ func (user *UserRepository) FindOneById(httpContext *gin.Context, id uuid.UUID, 
 
 func (user *UserRepository) Delete(httpContext *gin.Context, id uuid.UUID) {
 	user.model = user.model.WithContext(httpContext)
-	err := user.model.Delete(&domain.UserEntity{}, id).Error
+	err := user.model.Delete(&entities.UserEntity{}, id).Error
 
 	if err != nil {
 		log.Println("Error delete user", err)
@@ -113,9 +114,9 @@ func (user *UserRepository) Delete(httpContext *gin.Context, id uuid.UUID) {
 	}
 }
 
-func (user *UserRepository) Update(httpContext *gin.Context, id uuid.UUID, payload *domain.UserEntity) {
+func (user *UserRepository) Update(httpContext *gin.Context, id uuid.UUID, payload *entities.UserEntity) {
 	user.model = user.model.WithContext(httpContext)
-	userEntity := &domain.UserEntity{}
+	userEntity := &entities.UserEntity{}
 
 	err := user.model.Transaction(func(tx *gorm.DB) error {
 		// Find user within transaction
@@ -142,7 +143,7 @@ func (user *UserRepository) Update(httpContext *gin.Context, id uuid.UUID, paylo
 	}
 }
 
-func (user *UserRepository) Create(httpContext *gin.Context, payload *domain.UserEntity) {
+func (user *UserRepository) Create(httpContext *gin.Context, payload *entities.UserEntity) {
 	user.model = user.model.WithContext(httpContext)
 	err := user.model.Create(&payload).Error
 
@@ -177,9 +178,9 @@ func (user *UserRepository) IsEmailExistExceptUserId(httpContext *gin.Context, e
 	return count > 0
 }
 
-func (user *UserRepository) FindRoleByIds(httpContext *gin.Context, ids []uuid.UUID) []roleDomain.RoleEntity {
+func (user *UserRepository) FindRoleByIds(httpContext *gin.Context, ids []uuid.UUID) []roleEntities.RoleEntity {
 	user.roleModel = user.roleModel.WithContext(httpContext)
-	var roleEntities []roleDomain.RoleEntity
+	var roleEntities []roleEntities.RoleEntity
 	err := user.roleModel.Where("id IN ?", ids).Find(&roleEntities).Error
 
 	if err != nil {

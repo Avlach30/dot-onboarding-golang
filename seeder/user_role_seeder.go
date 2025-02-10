@@ -8,8 +8,8 @@ import (
 	"os"
 
 	"github.com/google/uuid"
-	domainRole "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
-	domainUser "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
+	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/entities"
+	userEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/entities"
 	"gorm.io/gorm"
 )
 
@@ -42,14 +42,14 @@ func (userRoleSeeder *UserRoleSeeder) Handle(db *gorm.DB) error {
 	// Insert each user into the database
 	db.Exec(`DELETE FROM user_roles`)
 	for _, userRole := range userRoles {
-		role := &domainRole.RoleEntity{}
+		role := &roleEntities.RoleEntity{}
 		errorFindRole := db.Where("key = ?", userRole.RoleKey).First(role)
 		if errorFindRole.Error != nil {
 			log.Println("Error querying role:", errorFindRole.Error)
 			continue
 		}
 
-		user := &domainUser.UserEntity{}
+		user := &userEntities.UserEntity{}
 		errorFindUser := db.Where("email = ?", userRole.Email).First(user)
 		if errorFindUser.Error != nil {
 			log.Println("Error querying user:", errorFindUser.Error)

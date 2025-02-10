@@ -44,9 +44,9 @@ func (listRegisteredJob *ListRegisteredJob) RegisterJob(jobDictionary JobDiction
 	*listRegisteredJob = merged
 }
 
-func (listRegisteredJob *ListRegisteredJob) RegisterSingleJob(taskName string, jobDictionary JobTask) {
+func (listRegisteredJob *ListRegisteredJob) RegisterSingleJob(taskName string, jobTask JobTask) {
 	merged := make(map[string]JobTask)
-	merged[taskName] = jobDictionary
+	merged[taskName] = jobTask
 
 	for key, value := range *listRegisteredJob {
 		merged[key] = value
@@ -93,7 +93,7 @@ func NewWorker(wg *sync.WaitGroup, name string) *Worker {
 
 func DoWork(id int, job Job) {
 	fmt.Printf("Worker-%d : started task [%s]\n", id, job.Name)
-	log.Println("==========RUN TASK========")
+	log.Println("========== START TASK ========")
 	maxTries, err := strconv.ParseInt(config.MaxTriesQueue, 10, 64)
 	if err != nil {
 		log.Println("Parse error maxTries : ", err)
@@ -103,7 +103,7 @@ func DoWork(id int, job Job) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			log.Println("==========ERROR TASK========")
+			log.Println("========== ERROR TASK ========")
 			return
 		}
 	}()
@@ -127,7 +127,7 @@ func DoWork(id int, job Job) {
 		tries++
 	}
 
-	log.Println("==========END TASK========")
+	log.Println("========== END TASK ========")
 
 	fmt.Printf("Worker-%d : completed %s!\n", id, job.Name)
 }

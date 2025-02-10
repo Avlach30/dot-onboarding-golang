@@ -28,6 +28,12 @@
     ```cli
     go run main.go --dbseed true --class UserSeeder,RoleSeeder
     ```
+    ```cli
+    go run main.go --dbseed true --class UserSeeder,RoleSeeder --withJobExecutor true
+    ```
+    ```cli
+    go run main.go --withJobExecutor true --onlyJobExecutor true
+    ```
 
 ## 🍰 The Layer
 
@@ -59,7 +65,7 @@ The **Queue** running in diff goroutine, set your task global using this example
 4. now you can use your job anywhere
     ```
     singleton.Delegate(taskName, payload)
-    ## or using standalone
+    ## or using standalone, note: standalone can only use for single in same runtime
     singleton.DelegateStandalone("AuthSomeStandaonle", "string", &authTask.StandaloneJobTask{})
     ```
 Note: Remember the payload type, example can be found at `app/auth/job`

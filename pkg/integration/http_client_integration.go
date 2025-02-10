@@ -66,13 +66,21 @@ func (client *Client) Delete(endpoint string, headers *Headers, responseBody any
 
 func (client *Client) SendHTTPRequest(method, endpoint string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
 	url := client.BaseURL + endpoint
-	externalCircuitBreaker := singleton.GetCircuitBreaker(singleton.ExternalCircuitBreaker)
+	var resp *http.Response
 
-	isCircuitBreakerEnable, err := strconv.ParseBool(config.IsCircuitBreakerEnabled)
+	externalCircuitBreaker := singleton.GetCircuitBreaker(singleton.ExternalCircuitBreaker)
+	isCircuitBreakerEnable, _ := strconv.ParseBool(config.IsCircuitBreakerExternalEnabled)
 
 	isReadyToTrip := externalCircuitBreaker.IsReadyToTrip()
 	if !isReadyToTrip && isCircuitBreakerEnable {
 		return nil, fmt.Errorf("Error circuit breaker is open, cannot send request to %s", url)
+	} else if isCircuitBreakerEnable {
+		defer func() {
+			externalCircuitBreaker.CountRequest()
+			if resp.StatusCode >= http.StatusInternalServerError {
+				externalCircuitBreaker.FailureHappend(endpoint)
+			}
+		}()
 	}
 
 	reqBody, err := prepareRequestBody(headers.ContentType, requestBody)
@@ -80,6 +88,7 @@ func (client *Client) SendHTTPRequest(method, endpoint string, headers *Headers,
 		log.Printf("Error preparing request body: %v", err)
 		return nil, err
 	}
+
 	req, err := http.NewRequest(method, url, reqBody)
 	if err != nil {
 		log.Printf("Error creating request: %v", err)
@@ -87,21 +96,14 @@ func (client *Client) SendHTTPRequest(method, endpoint string, headers *Headers,
 	}
 
 	setHeaders(req, headers)
-	log.Println("=========================START HTTP REQUEST=========================")
-	resp, err := client.HTTPClient.Do(req)
+	log.Println("========================= START HTTP REQUEST =========================")
+	resp, err = client.HTTPClient.Do(req)
 	if err != nil {
 		log.Printf("Error sending request: %v", err)
 		return nil, err
 	}
 	createLogIntegration(req, resp)
-	log.Println("==========================END HTTP REQUEST==========================")
-
-	if isCircuitBreakerEnable {
-		externalCircuitBreaker.CountRequest()
-		if resp.StatusCode >= http.StatusInternalServerError {
-			externalCircuitBreaker.FailureHappend(endpoint)
-		}
-	}
+	log.Println("========================== END HTTP REQUEST ==========================")
 
 	if resp.StatusCode >= http.StatusInternalServerError {
 		log.Printf("Error sending request: %v", err)

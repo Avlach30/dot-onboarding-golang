@@ -43,9 +43,9 @@ func InitGlobal(workers *task.Workers, db *gorm.DB, storageManager *storage.Stor
 		// ini db for global util
 		dbUtil = db
 
-		internalCbs = newDefaultCircuitBreaker()
+		internalCbs = newDefaultCircuitBreaker(InternalCircuitBreaker)
 
-		externalCbs = newDefaultCircuitBreaker()
+		externalCbs = newDefaultCircuitBreaker(ExternalCircuitBreaker)
 
 		// global presistence state
 		stateDriver := config.GlobalStateDriver
@@ -63,17 +63,32 @@ func InitGlobal(workers *task.Workers, db *gorm.DB, storageManager *storage.Stor
 	})
 }
 
-func newDefaultCircuitBreaker() *CircuitBreakerSingleton {
+func newDefaultCircuitBreaker(typeCbs string) *CircuitBreakerSingleton {
 
 	// init circuit breaker
-	circuitBreakerOpenDuration, _ := strconv.ParseFloat(config.CircuitBreakerOpenDuration, 32)
-	circuitBreakerHalfOpenDuration, _ := strconv.ParseFloat(config.CircuitBreakerHalfOpenDuration, 32)
-	circuitBreakerRequestFailedTreshold, _ := strconv.ParseInt(config.CircuitBreakerRequestFailedTreshold, 10, 64)
-	circuitBreakerFailureRatioTreshold, _ := strconv.ParseFloat(config.CircuitBreakerFailureRatioTreshold, 64)
+	var circuitBreakerOpenDuration float64
+	var circuitBreakerHalfOpenDuration float64
+	var circuitBreakerRequestFailedTreshold int64
+	var circuitBreakerIgnoreFailureEndpoints []string
+	var circuitBreakerFailureRatioTreshold float64
+
+	if typeCbs == InternalCircuitBreaker {
+		circuitBreakerIgnoreFailureEndpoints = strings.Split(config.CircuitBreakerInternalIgnoreFailureEndpoints, ",")
+		circuitBreakerOpenDuration, _ = strconv.ParseFloat(config.CircuitBreakerInternalOpenDuration, 32)
+		circuitBreakerHalfOpenDuration, _ = strconv.ParseFloat(config.CircuitBreakerInternalHalfOpenDuration, 32)
+		circuitBreakerRequestFailedTreshold, _ = strconv.ParseInt(config.CircuitBreakerInternalRequestFailedTreshold, 10, 64)
+		circuitBreakerFailureRatioTreshold, _ = strconv.ParseFloat(config.CircuitBreakerInternalFailureRatioTreshold, 64)
+	} else {
+		circuitBreakerIgnoreFailureEndpoints = strings.Split(config.CircuitBreakerExternalIgnoreFailureEndpoints, ",")
+		circuitBreakerOpenDuration, _ = strconv.ParseFloat(config.CircuitBreakerExternalOpenDuration, 32)
+		circuitBreakerHalfOpenDuration, _ = strconv.ParseFloat(config.CircuitBreakerExternalHalfOpenDuration, 32)
+		circuitBreakerRequestFailedTreshold, _ = strconv.ParseInt(config.CircuitBreakerExternalRequestFailedTreshold, 10, 64)
+		circuitBreakerFailureRatioTreshold, _ = strconv.ParseFloat(config.CircuitBreakerExternalFailureRatioTreshold, 64)
+	}
 
 	return &CircuitBreakerSingleton{
 		CircuitBreaker: CircuitBreaker{
-			IgnoreFailureEndpoints: strings.Split(config.CircuitBreakerIgnoreFailureEndpoints, ","),
+			IgnoreFailureEndpoints: circuitBreakerIgnoreFailureEndpoints,
 			ReadyToTrip: func(currentCondition *CurrentErrorCondition) bool {
 
 				failureRatio := float64(currentCondition.TotalFailures) / float64(currentCondition.Requests)

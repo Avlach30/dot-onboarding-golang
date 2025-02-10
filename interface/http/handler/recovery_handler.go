@@ -13,20 +13,28 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 )
 
+func isCheckCircuitBreakerOpen(httpContext *gin.Context) bool {
+	isCircuitBreakerEnable, _ := strconv.ParseBool(config.IsCircuitBreakerIneternalEnabled)
+	if isCircuitBreakerEnable {
+		singleton.CountRequestCircuitBreaker(singleton.InternalCircuitBreaker)
+		cbs := singleton.GetCircuitBreaker(singleton.InternalCircuitBreaker)
+		if !cbs.IsReadyToTrip() {
+			httpContext.JSON(http.StatusServiceUnavailable, utils.ErrorResponse(http.StatusServiceUnavailable, "Service Unavailable", ""))
+			httpContext.Abort()
+			return true
+		}
+	}
+
+	return false
+}
+
 func RecoverPanic() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
-
-		isCircuitBreakerEnable, _ := strconv.ParseBool(config.IsCircuitBreakerEnabled)
-		if isCircuitBreakerEnable {
-			singleton.CountRequestCircuitBreaker(singleton.InternalCircuitBreaker)
-			isCircuitBreakerOpen := isCircuitBreakerOpen(httpContext)
-			if isCircuitBreakerOpen {
-				return
-			}
+		if isCheckCircuitBreakerOpen(httpContext) {
+			return
 		}
 
 		defer handlePanic(httpContext)
-
 		httpContext.Next()
 	}
 }
@@ -47,17 +55,6 @@ func handlePanic(httoContext *gin.Context) {
 		httoContext.JSON(panicException.StatusCode, errorResponse)
 		httoContext.Abort()
 	}
-}
-
-func isCircuitBreakerOpen(httpContext *gin.Context) bool {
-	cbs := singleton.GetCircuitBreaker(singleton.InternalCircuitBreaker)
-	if !cbs.IsReadyToTrip() {
-		httpContext.JSON(http.StatusServiceUnavailable, utils.ErrorResponse(http.StatusServiceUnavailable, "Service Unavailable", ""))
-		httpContext.Abort()
-		return true
-	}
-
-	return false
 }
 
 func createPanicException(err interface{}) exception.Exception {

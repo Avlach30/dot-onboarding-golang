@@ -2,7 +2,7 @@ package guard
 
 import (
 	"github.com/gin-gonic/gin"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/usecase"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
@@ -22,7 +22,7 @@ func PermissionGuard(permissionsToCheck ...string) gin.HandlerFunc {
 
 		// get global state
 		globalState := singleton.GetGlobalState()
-		permissions, err := singleton.Get[[]domain.AuthPermissionEntity](usecase.GenerateHttpContextPermissionKey(userID), globalState)
+		permissions, err := singleton.Get[[]entities.AuthPermissionEntity](usecase.GenerateHttpContextPermissionKey(userID), globalState)
 		if err != nil {
 			panic(*exception.UnauthorizedException("Try again later"))
 		}
@@ -31,7 +31,7 @@ func PermissionGuard(permissionsToCheck ...string) gin.HandlerFunc {
 			panic(*exception.ForbiddenException("Not Allowed Access"))
 		}
 
-		permissionInState := permissions.([]domain.AuthPermissionEntity)
+		permissionInState := permissions.([]entities.AuthPermissionEntity)
 		permissionKeys := authPermissionEntityMapToKeys(&permissionInState)
 
 		// check user permission is allowed access or not
@@ -47,7 +47,7 @@ func PermissionGuard(permissionsToCheck ...string) gin.HandlerFunc {
 	}
 }
 
-func authPermissionEntityMapToKeys(authPermissionEntities *[]domain.AuthPermissionEntity) []string {
+func authPermissionEntityMapToKeys(authPermissionEntities *[]entities.AuthPermissionEntity) []string {
 	entities := *authPermissionEntities
 	keys := make([]string, len(entities))
 	for i, entity := range entities {
