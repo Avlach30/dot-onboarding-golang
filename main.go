@@ -76,6 +76,18 @@ func main() {
 
 	setupRouter()
 
+	if *withJobExecutor == "true" || *onlyJobExecutor == "true" {
+		initializeWorkers()
+	}
+
+	if *onlyJobExecutor != "true" {
+		defer startHttpServer()
+	} else {
+		defer startIdleServer()
+	}
+
+	setupRouter()
+
 	initializeSentry()
 
 	initializeModule()
@@ -83,16 +95,18 @@ func main() {
 	if err := initializeStorageManager(); err != nil {
 		panic(err)
 	}
+}
 
-	initializeWorkers()
-
+func startIdleServer() {
 	if *onlyJobExecutor == "true" {
 		log.Println("Only job executor mode")
 		for {
 			time.Sleep(time.Second)
 		}
 	}
+}
 
+func startHttpServer() {
 	log.Printf("Starting server on port %s...", config.AppPort)
 	if err := router.Run(":" + config.AppPort); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
