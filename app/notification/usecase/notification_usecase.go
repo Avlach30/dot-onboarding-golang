@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/domain"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/entities"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 )
 
 type NotificationUseCase struct {

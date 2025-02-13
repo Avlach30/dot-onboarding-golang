@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/entities"
 	"gorm.io/gorm"
 )
 
@@ -19,8 +18,8 @@ type NotificationEntity struct {
 	CreatedAt time.Time      `gorm:"autoCreateTime:true index" json:"created_at"`
 
 	// Relations
-	UserID uuid.UUID           `gorm:"type:uuid;not null" json:"-"`
-	User   entities.UserEntity `gorm:"foreignKey:UserID;references:ID" json:"user,omitempty"`
+	UserID uuid.UUID  `gorm:"type:uuid;not null" json:"-"`
+	User   UserEntity `gorm:"foreignKey:UserID;references:ID" json:"user,omitempty"`
 }
 
 // Specify the table name for the Notification struct

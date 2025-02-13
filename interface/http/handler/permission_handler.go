@@ -6,7 +6,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/constant"
 	domain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/dto"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/entities"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"

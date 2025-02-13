@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/entities"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 
 	"github.com/gin-gonic/gin"

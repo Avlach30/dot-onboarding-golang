@@ -8,8 +8,8 @@ import (
 	"os"
 
 	"github.com/google/uuid"
-	permissionEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/entities"
-	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/entities"
+	permissionEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
+	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gorm.io/gorm"
 )
 

@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/entities"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 )
 
 type AuthUsecase interface {

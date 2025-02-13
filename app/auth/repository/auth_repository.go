@@ -3,9 +3,9 @@ package repository
 import (
 	"github.com/gin-gonic/gin"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
-	permissionEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/entities"
-	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/entities"
-	userEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/entities"
+	permissionEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
+	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
+	userEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gorm.io/gorm"
 )
 

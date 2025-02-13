@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/entities"
 	"gorm.io/gorm"
 )
 
@@ -17,7 +16,7 @@ type RoleEntity struct {
 	CreatedAt time.Time      `gorm:"autoCreateTime:true index" json:"created_at"`
 
 	// Relations
-	Permissions []entities.PermissionEntity `gorm:"many2many:role_permissions;foreignKey:id;joinForeignKey:role_id;References:id;joinReferences:permission_id" json:"permissions"`
+	Permissions []PermissionEntity `gorm:"many2many:role_permissions;foreignKey:id;joinForeignKey:role_id;References:id;joinReferences:permission_id" json:"permissions"`
 }
 
 func (RoleEntity) TableName() string {

@@ -3,8 +3,8 @@ package domain
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/entities"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/entities"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
+	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 )
 
 type UserRepository interface {

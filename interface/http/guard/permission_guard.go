@@ -2,9 +2,9 @@ package guard
 
 import (
 	"github.com/gin-gonic/gin"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/usecase"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"

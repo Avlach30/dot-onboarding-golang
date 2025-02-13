@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/entities"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"golang.org/x/crypto/bcrypt"
 

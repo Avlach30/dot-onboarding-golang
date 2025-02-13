@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/entities"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
+	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 	"gorm.io/gorm"
