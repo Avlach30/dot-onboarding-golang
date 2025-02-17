@@ -40,7 +40,7 @@ func GenerateRandomString(length int) string {
 func UUIDChecker(uuidString string) uuid.UUID {
 	id, err := uuid.Parse(uuidString)
 	if err != nil {
-		panic(exception.BussinessException("Invalid UUID format"))
+		panic(*exception.BussinessException("Invalid UUID format"))
 	}
 
 	return id
