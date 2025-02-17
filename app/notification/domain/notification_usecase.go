@@ -7,8 +7,8 @@ import (
 )
 
 type NotificationUseCase interface {
-	Pagination(ctx *gin.Context, userId uuid.UUID) ([]entities.NotificationEntity, int)
-	HasUnread(ctx *gin.Context, userId uuid.UUID) bool
-	MarkAsRead(ctx *gin.Context, id uuid.UUID, userId uuid.UUID)
-	Detail(ctx *gin.Context, id uuid.UUID, userId uuid.UUID) entities.NotificationEntity
+	Pagination(httpContext *gin.Context, userId uuid.UUID) ([]entities.NotificationEntity, int)
+	HasUnread(httpContext *gin.Context, userId uuid.UUID) bool
+	MarkAsRead(httpContext *gin.Context, id uuid.UUID, userId uuid.UUID)
+	Detail(httpContext *gin.Context, id uuid.UUID, userId uuid.UUID) entities.NotificationEntity
 }

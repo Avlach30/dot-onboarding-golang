@@ -33,13 +33,20 @@ func (user *UserRepository) Pagination(httpContext *gin.Context) ([]entities.Use
 
 	// Query filter
 	query = user.queryFilter(query, httpContext)
+
 	// Query sort
 	query = user.querySort(query, httpContext)
 
-	err := query.Session(&gorm.Session{}).
+	// Count all column first before paginate the query
+	err := query.Count(&total).Error
+	if err != nil {
+		log.Println("Error count user", err)
+		panic(*exception.ServerErrorException(err))
+	}
+
+	err = query.Session(&gorm.Session{}).
 		Scopes(utils.Paginate(httpContext)).
-		Find(&users).
-		Count(&total).Error
+		Find(&users).Error
 
 	if err != nil {
 		log.Println("Error pagination user", err)

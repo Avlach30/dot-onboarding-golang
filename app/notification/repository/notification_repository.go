@@ -23,51 +23,72 @@ func NewNotificationRepository(db *gorm.DB) domain.NotificationRepository {
 }
 
 // Pagination get notification data with pagination
-func (notification *NotificationRepository) Pagination(ctx *gin.Context, userId uuid.UUID) ([]entities.NotificationEntity, int) {
-	notification.notificationModel = notification.notificationModel.WithContext(ctx)
+func (notification *NotificationRepository) Pagination(httpContext *gin.Context, userId uuid.UUID) ([]entities.NotificationEntity, int) {
+	query := notification.notificationModel.WithContext(httpContext)
 	var notifications []entities.NotificationEntity
 	var total int64
 
 	// Query filter
-	notification.queryFilter(ctx)
-	// Query sort
-	notification.querySort(ctx)
+	query = notification.queryFilter(query, httpContext)
 
-	notification.notificationModel.Session(&gorm.Session{}).
-		Scopes(utils.Paginate(ctx)).
+	// Query sort
+	query = notification.querySort(query, httpContext)
+
+	// Count all column first before paginate the query
+	err := query.Count(&total).Error
+	if err != nil {
+		log.Println("Error count user", err)
+		panic(*exception.ServerErrorException(err))
+	}
+
+	err = query.Session(&gorm.Session{}).
+		Scopes(utils.Paginate(httpContext)).
 		Where("user_id = ?", userId).
-		Find(&notifications).
-		Count(&total)
+		Find(&notifications).Error
+
+	if err != nil {
+		log.Println("Error pagination permission", err)
+		panic(*exception.ServerErrorException(err))
+	}
 
 	return notifications, int(total)
 }
 
 // func filter for pagination
-func (notification *NotificationRepository) queryFilter(ctx *gin.Context) *gorm.DB {
-	if search := ctx.Query("search"); search != "" {
-		notification.notificationModel = notification.notificationModel.
-			Where("title LIKE ?", search+"%")
+func (notification *NotificationRepository) queryFilter(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
+	if search := httpContext.Query("search"); search != "" {
+		query = query.Where("title LIKE ?", search+"%")
 	}
 
-	return notification.notificationModel
+	return query
 }
 
 // func query sort for pagination
-func (notification *NotificationRepository) querySort(ctx *gin.Context) *gorm.DB {
-	sortableColumns := []string{"created_at"}
+func (notification *NotificationRepository) querySort(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
+	sortableColumns := []string{"title", "created_at", "updated_at"}
 
-	if sort := ctx.Query("sort_by"); sort != "" {
+	if sort := httpContext.Query("sort_by"); sort != "" {
 		if !utils.Contains(sortableColumns, sort) {
-			notification.notificationModel = notification.notificationModel.Order(sort + " " + ctx.Query("order"))
+			panic(*exception.BussinessException("Invalid sort column"))
+		}
+
+		// Handle order query
+		if order := httpContext.Query("order"); order != "" {
+			if order != "asc" && order != "desc" {
+				panic(*exception.BussinessException("Invalid order value"))
+			}
+			query = query.Order(sort + " " + order)
+		} else {
+			query = query.Order(sort)
 		}
 	}
 
-	return notification.notificationModel
+	return query
 }
 
 // HasUnread check if user has unread notification
-func (notification *NotificationRepository) HasUnread(ctx *gin.Context, userId uuid.UUID) bool {
-	notification.notificationModel = notification.notificationModel.WithContext(ctx)
+func (notification *NotificationRepository) HasUnread(httpContext *gin.Context, userId uuid.UUID) bool {
+	notification.notificationModel = notification.notificationModel.WithContext(httpContext)
 	var total int64
 
 	err := notification.notificationModel.
@@ -83,8 +104,8 @@ func (notification *NotificationRepository) HasUnread(ctx *gin.Context, userId u
 }
 
 // MarkAsRead mark notification as read
-func (notification *NotificationRepository) MarkAsRead(ctx *gin.Context, id uuid.UUID, userId uuid.UUID) {
-	notification.notificationModel = notification.notificationModel.WithContext(ctx)
+func (notification *NotificationRepository) MarkAsRead(httpContext *gin.Context, id uuid.UUID, userId uuid.UUID) {
+	notification.notificationModel = notification.notificationModel.WithContext(httpContext)
 
 	err := notification.notificationModel.
 		Where("id = ?", id).
@@ -97,8 +118,8 @@ func (notification *NotificationRepository) MarkAsRead(ctx *gin.Context, id uuid
 }
 
 // FindOneById get notification detail by id
-func (notification *NotificationRepository) FindOneById(ctx *gin.Context, id uuid.UUID, userId uuid.UUID) entities.NotificationEntity {
-	notification.notificationModel = notification.notificationModel.WithContext(ctx)
+func (notification *NotificationRepository) FindOneById(httpContext *gin.Context, id uuid.UUID, userId uuid.UUID) entities.NotificationEntity {
+	notification.notificationModel = notification.notificationModel.WithContext(httpContext)
 	notificationEntity := entities.NotificationEntity{}
 
 	err := notification.notificationModel.
