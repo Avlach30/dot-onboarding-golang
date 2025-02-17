@@ -1,9 +1,9 @@
 package config
 
 var (
-	Secret           = GetRequired("JWT_SECRET")
-	JwtExpiredInDays = GetRequired("JWT_EXPIRED_IN_DAYS")
-	ServiceAuthToken = GetRequired("SERVICE_AUTH_TOKEN")
+	Secret              = GetRequired("JWT_SECRET")
+	JwtExpiredInMinutes = GetRequired("JWT_EXPIRED_IN_MINUTES")
+	ServiceAuthToken    = GetRequired("SERVICE_AUTH_TOKEN")
 
 	OIDCBaseUrl             = Get("OIDC_BASE_URL", "")
 	OIDCClientId            = Get("OIDC_CLIENT_ID", "")

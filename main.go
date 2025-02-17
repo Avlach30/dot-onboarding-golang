@@ -51,6 +51,7 @@ var (
 	// global variable
 	db             *gorm.DB
 	router         *gin.Engine
+	workers        *task.Workers
 	storageManager storage.StorageManager
 
 	// args variable
@@ -74,26 +75,23 @@ func main() {
 
 	handleMigrationAndSeeding()
 
-	setupRouter()
+	initializeSingleton()
 
 	if *withJobExecutor == "true" || *onlyJobExecutor == "true" {
 		initializeWorkers()
 	}
 
-	if *onlyJobExecutor != "true" {
-		defer startHttpServer()
-	} else {
-		defer startIdleServer()
-	}
-
-	setupRouter()
-
-	initializeSentry()
-
-	initializeModule()
-
 	if err := initializeStorageManager(); err != nil {
 		panic(err)
+	}
+
+	if *onlyJobExecutor != "true" {
+		initializeRouter()
+		initializeModule()
+		initializeSentry()
+		startHttpServer()
+	} else {
+		startIdleServer()
 	}
 }
 
@@ -198,9 +196,12 @@ func initializeStorageManager() error {
 	return err
 }
 
-func initializeWorkers() {
-	workers := task.InitQueueWorkerTask()
+func initializeSingleton() {
 	singleton.InitGlobal(workers, db, &storageManager)
+}
+
+func initializeWorkers() {
+	workers = task.InitQueueWorkerTask()
 
 	if *withJobExecutor == "true" || *onlyJobExecutor == "true" {
 
@@ -215,7 +216,7 @@ func initializeWorkers() {
 	go task.RunAllActiveWorker(workers)
 }
 
-func setupRouter() {
+func initializeRouter() {
 	router = gin.New()
 
 	gin.SetMode(config.GinMode)
@@ -223,6 +224,7 @@ func setupRouter() {
 	router.Use(sentrygin.New(sentrygin.Options{
 		Repanic: true,
 	}))
+
 	router.Use(handler.RecoverPanic())
 
 	healthCheck(router)

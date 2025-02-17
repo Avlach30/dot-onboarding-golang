@@ -88,13 +88,13 @@ func (authUseCase *AuthUsecase) CreateJWTToken(user *userEntities.UserEntity) (t
 		Name:  user.Name,
 	}
 
-	expiredInDays := config.JwtExpiredInDays
-	expInDays, err := strconv.Atoi(expiredInDays)
+	expiredInMinutes := config.JwtExpiredInMinutes
+	expInMinutes, err := strconv.Atoi(expiredInMinutes)
 	if err != nil {
 		panic(*exception.ServerErrorException(err))
 	}
 
-	expirationDuration := time.Duration(expInDays) * 24 * time.Hour
+	expirationDuration := time.Duration(expInMinutes) * time.Minute
 	expirationTime = time.Now().Add(expirationDuration)
 
 	tokenString, err := jwt.CreateToken(authInformation, expirationTime)
