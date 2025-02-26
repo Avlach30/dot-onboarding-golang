@@ -22,10 +22,10 @@ func NewNotificationHandler(router *gin.Engine, notificationUseCase domain.Notif
 		notificationUseCase: notificationUseCase,
 	}
 
-	notificationHandlerRoute.GET("/", notificationHandler.Pagination())
-	notificationHandlerRoute.GET("/has-unread", notificationHandler.HasUnread())
-	notificationHandlerRoute.PATCH("/mark-as-read/:id", notificationHandler.MarkAsRead())
-	notificationHandlerRoute.GET("/:id", notificationHandler.Detail())
+	notificationHandlerRoute.GET("", notificationHandler.Pagination())
+	notificationHandlerRoute.GET("has-unread", notificationHandler.HasUnread())
+	notificationHandlerRoute.PATCH("mark-as-read/:id", notificationHandler.MarkAsRead())
+	notificationHandlerRoute.GET(":id", notificationHandler.Detail())
 }
 
 func (notificationHandler *NotificationHandler) Pagination() gin.HandlerFunc {
