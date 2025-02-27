@@ -14,6 +14,7 @@ import (
 
 	handler "gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/handler"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/seeder"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/watcher"
 	"gorm.io/gorm"
 
 	userRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/repository"
@@ -62,12 +63,17 @@ var (
 	migrationFileName *string
 	runSeeder         *string
 	seederClass       *string
+	watch             *bool
 )
 
 func main() {
 	initializeLog()
 
 	extractArgs()
+
+	if watch != nil && *watch {
+		go watcher.StartWatcher()
+	}
 
 	if err := initializeDatabase(); err != nil {
 		panic(err)
@@ -124,6 +130,9 @@ func extractArgs() {
 	// job executor args requirement
 	onlyJobExecutor = flag.String("onlyJobExecutor", "false", "true for only job executor, otherwise false")
 	withJobExecutor = flag.String("withJobExecutor", "false", "true for run server with job executor, otherwise false")
+
+	// watch args requirement
+	watch = flag.Bool("watch", false, "true for watch mode, otherwise false")
 
 	flag.Parse()
 }

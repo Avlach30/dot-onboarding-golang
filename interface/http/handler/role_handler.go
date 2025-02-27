@@ -26,11 +26,11 @@ func NewRoleHandler(router *gin.Engine, roleUsecase domain.RoleUsecase) {
 		roleUsecase: roleUsecase,
 	}
 
-	roleHandlerRoute.GET("/", guard.PermissionGuard(constant.ReadRole), roleHandler.Pagination())
-	roleHandlerRoute.DELETE("/:id", guard.PermissionGuard(constant.DeleteRole), roleHandler.Delete())
-	roleHandlerRoute.PATCH("/:id", guard.PermissionGuard(constant.UpdateRole), middleware.ValidateRequestJSON[dto.RoleUpdateRequest](), roleHandler.Update())
-	roleHandlerRoute.GET("/:id", guard.PermissionGuard(constant.ReadRole), roleHandler.Detail())
-	roleHandlerRoute.POST("/", guard.PermissionGuard(constant.CreateRole), middleware.ValidateRequestJSON[dto.RoleCreateRequest](), roleHandler.Create())
+	roleHandlerRoute.GET("", guard.PermissionGuard(constant.ReadRole), roleHandler.Pagination())
+	roleHandlerRoute.DELETE(":id", guard.PermissionGuard(constant.DeleteRole), roleHandler.Delete())
+	roleHandlerRoute.PATCH(":id", guard.PermissionGuard(constant.UpdateRole), middleware.ValidateRequestJSON[dto.RoleUpdateRequest](), roleHandler.Update())
+	roleHandlerRoute.GET(":id", guard.PermissionGuard(constant.ReadRole), roleHandler.Detail())
+	roleHandlerRoute.POST("", guard.PermissionGuard(constant.CreateRole), middleware.ValidateRequestJSON[dto.RoleCreateRequest](), roleHandler.Create())
 }
 
 func (roleHandler *RoleHandler) Pagination() gin.HandlerFunc {

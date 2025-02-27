@@ -26,11 +26,11 @@ func NewPermissionHandler(router *gin.Engine, permissionUsecase domain.Permissio
 		permissionUsecase: permissionUsecase,
 	}
 
-	permissionHandlerRoute.GET("/", guard.PermissionGuard(constant.ReadPermission), permissionHandler.Pagination())
-	permissionHandlerRoute.DELETE("/:id", guard.PermissionGuard(constant.DeletePermission), permissionHandler.Delete())
-	permissionHandlerRoute.PATCH("/:id", guard.PermissionGuard(constant.UpdatePermission), middleware.ValidateRequestJSON[dto.PermissionUpdateRequest](), permissionHandler.Update())
-	permissionHandlerRoute.GET("/:id", guard.PermissionGuard(constant.UpdatePermission), permissionHandler.Detail())
-	permissionHandlerRoute.POST("/", guard.PermissionGuard(constant.ReadPermission), middleware.ValidateRequestJSON[dto.PermissionCreateRequest](), permissionHandler.Create())
+	permissionHandlerRoute.GET("", guard.PermissionGuard(constant.ReadPermission), permissionHandler.Pagination())
+	permissionHandlerRoute.DELETE(":id", guard.PermissionGuard(constant.DeletePermission), permissionHandler.Delete())
+	permissionHandlerRoute.PATCH(":id", guard.PermissionGuard(constant.UpdatePermission), middleware.ValidateRequestJSON[dto.PermissionUpdateRequest](), permissionHandler.Update())
+	permissionHandlerRoute.GET(":id", guard.PermissionGuard(constant.UpdatePermission), permissionHandler.Detail())
+	permissionHandlerRoute.POST("", guard.PermissionGuard(constant.ReadPermission), middleware.ValidateRequestJSON[dto.PermissionCreateRequest](), permissionHandler.Create())
 }
 
 func (permissionHandler *PermissionHandler) Pagination() gin.HandlerFunc {
