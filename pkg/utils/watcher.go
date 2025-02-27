@@ -18,6 +18,7 @@ var (
 
 func StartWatcher(cancel context.CancelFunc) {
 	log.Println("Starting watcher...")
+	flags := strings.Join(os.Args[1:], " ")
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -50,7 +51,7 @@ func StartWatcher(cancel context.CancelFunc) {
 					}
 
 					time.Sleep(2 * time.Second)
-					restartApp()
+					restartApp(flags)
 				}
 
 				// Handle new directory creation
@@ -82,9 +83,8 @@ func StartWatcher(cancel context.CancelFunc) {
 	<-make(chan struct{})
 }
 
-func restartApp() {
-	log.Println("Restarting asd the application...")
-
+func restartApp(flags string) {
+	log.Println("Restarting the application...")
 	if debounce != nil {
 		select {
 		case debounce <- true:
@@ -92,9 +92,11 @@ func restartApp() {
 		}
 	}
 
-	log.Println(os.Args)
 	// Build and run the application
-	cmd := exec.Command("go", "run", "main.go", "--watch")
+	args := []string{"run", "main.go"}
+	args = append(args, os.Args[1:]...)
+
+	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -146,7 +148,6 @@ func addDirectoryToWatcher(watcher *fsnotify.Watcher, path string) {
 			return filepath.SkipDir
 		}
 
-		log.Printf("Watching directory: %s", path)
 		return watcher.Add(path)
 	})
 

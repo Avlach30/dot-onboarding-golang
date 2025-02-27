@@ -71,7 +71,6 @@ var (
 )
 
 func main() {
-
 	// Create a cancelable context
 	ctx, cancel = context.WithCancel(context.Background())
 
