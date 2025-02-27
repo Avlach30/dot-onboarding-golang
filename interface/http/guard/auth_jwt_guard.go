@@ -6,12 +6,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/jwt"
 )
 
 // Custom guard to check JWT token in Authorization header
 func AuthGuard() gin.HandlerFunc {
-	return func(httpContext *gin.Context) {
+	handler := func(httpContext *gin.Context) {
 		authHeader := httpContext.GetHeader("Authorization")
 		if authHeader == "" {
 			panic(*exception.UnauthorizedException("Authorization header is required"))
@@ -28,7 +29,7 @@ func AuthGuard() gin.HandlerFunc {
 		// Here, you would normally verify the token (e.g., using JWT)
 		claimToken, err := jwt.ParseToken(tokenString)
 		if err != nil {
-			panic(*exception.UnauthorizedException("Token not valid (Claim Token)"))
+			panic(*exception.UnauthorizedException("Token not valid"))
 		}
 
 		// Set a boolean flag to indicate that the user is authorized and user info
@@ -40,4 +41,5 @@ func AuthGuard() gin.HandlerFunc {
 		// Token is valid, continue processing the request
 		httpContext.Next()
 	}
+	return middleware.SkipOptionsRequest(handler)
 }
