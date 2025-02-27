@@ -28,7 +28,7 @@ func AuthGuard() gin.HandlerFunc {
 		// Here, you would normally verify the token (e.g., using JWT)
 		claimToken, err := jwt.ParseToken(tokenString)
 		if err != nil {
-			panic(*exception.UnauthorizedException("Token not valid"))
+			panic(*exception.UnauthorizedException("Token not valid (Claim Token)"))
 		}
 
 		// Set a boolean flag to indicate that the user is authorized and user info

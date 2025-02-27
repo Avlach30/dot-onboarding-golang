@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
 	permissionEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
@@ -36,5 +37,17 @@ func (authRepo *AuthRepository) FindUserByEmailWithRoles(httpContext *gin.Contex
 		Preload("Roles.Permissions").
 		Where("email = ?", email).
 		Find(&user).Error
+	return user, err
+}
+
+func (authRepo *AuthRepository) FindUserByIDWithRoles(httpContext *gin.Context, id uuid.UUID) (*userEntities.UserEntity, error) {
+	authRepo.userModel = authRepo.userModel.WithContext(httpContext)
+	user := &userEntities.UserEntity{}
+	err := authRepo.userModel.
+		Preload("Roles").
+		Preload("Roles.Permissions").
+		Where("id = ?", id).
+		Find(&user).Error
+
 	return user, err
 }
