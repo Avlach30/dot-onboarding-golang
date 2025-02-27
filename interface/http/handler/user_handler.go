@@ -26,11 +26,11 @@ func NewUserHandler(router *gin.Engine, userUsecase domain.UserUsecase) {
 		userUsecase: userUsecase,
 	}
 
-	userHandlerRoute.GET("/", guard.PermissionGuard(constant.ReadUser), userHandler.Pagination())
-	userHandlerRoute.DELETE("/:id", guard.PermissionGuard(constant.DeleteUser), userHandler.Delete())
-	userHandlerRoute.PATCH("/:id", guard.PermissionGuard(constant.UpdateUser), middleware.ValidateRequestJSON[dto.UserUpdateRequest](), userHandler.Update(), guard.PermissionGuard(constant.UpdateUser))
-	userHandlerRoute.GET("/:id", guard.PermissionGuard(constant.ReadUser), userHandler.Detail())
-	userHandlerRoute.POST("/", guard.PermissionGuard(constant.CreateUser), middleware.ValidateRequestJSON[dto.UserCreateRequest](), userHandler.Create())
+	userHandlerRoute.GET("", guard.PermissionGuard(constant.ReadUser), userHandler.Pagination())
+	userHandlerRoute.DELETE(":id", guard.PermissionGuard(constant.DeleteUser), userHandler.Delete())
+	userHandlerRoute.PATCH(":id", guard.PermissionGuard(constant.UpdateUser), middleware.ValidateRequestJSON[dto.UserUpdateRequest](), userHandler.Update(), guard.PermissionGuard(constant.UpdateUser))
+	userHandlerRoute.GET(":id", guard.PermissionGuard(constant.ReadUser), userHandler.Detail())
+	userHandlerRoute.POST("", guard.PermissionGuard(constant.CreateUser), middleware.ValidateRequestJSON[dto.UserCreateRequest](), userHandler.Create())
 }
 
 func (userHandler *UserHandler) Pagination() gin.HandlerFunc {

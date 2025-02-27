@@ -108,6 +108,15 @@ func (authUseCase *AuthUsecase) CreateJWTToken(user *userEntities.UserEntity) (t
 	return tokenString, expirationTime
 }
 
+func (authUseCase *AuthUsecase) Me(httpContext *gin.Context, userID uuid.UUID) *entities.UserEntity {
+	user, err := authUseCase.authRepo.FindUserByIDWithRoles(httpContext, userID)
+	if err != nil {
+		panic(*exception.NotFoundException("User with ID not found"))
+	}
+
+	return user
+}
+
 func SetPermissions(user *userEntities.UserEntity) {
 	// set up permissions
 	roles := user.Roles

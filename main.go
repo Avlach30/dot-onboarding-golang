@@ -39,6 +39,7 @@ import (
 	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
 
+	"github.com/gin-contrib/cors"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/dbconn"
@@ -256,6 +257,17 @@ func initializeRouter() {
 	router = gin.New()
 
 	gin.SetMode(config.GinMode)
+
+	corsConfig := cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}
+
+	router.Use(cors.New(corsConfig))
 
 	router.Use(sentrygin.New(sentrygin.Options{
 		Repanic: true,
