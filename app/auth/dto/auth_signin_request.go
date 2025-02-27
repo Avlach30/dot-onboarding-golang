@@ -11,5 +11,6 @@ type AuthSignLDAPRequest struct {
 }
 
 type AuthSignOIDCRequest struct {
-	Code string `json:"code" binding:"required"`
+	Code        string `json:"code" binding:"required"`
+	RedirectUri string `json:"redirect_uri" binding:"required"`
 }

@@ -14,25 +14,26 @@ import (
 )
 
 func (client *Client) SendSOAPRequest(action string, headers *Headers, requestBody interface{}, responseBody any) (any, error) {
-	externalCircuitBreaker := singleton.GetCircuitBreaker(singleton.ExternalCircuitBreaker)
+	var resp *http.Response
 
-	isCircuitBreakerEnable, _ := strconv.ParseBool(config.IsCircuitBreakerEnabled)
+	externalCircuitBreaker := singleton.GetCircuitBreaker(singleton.ExternalCircuitBreaker)
+	isCircuitBreakerEnable, _ := strconv.ParseBool(config.IsCircuitBreakerExternalEnabled)
 	isReadyToTrip := externalCircuitBreaker.IsReadyToTrip()
 	if !isReadyToTrip && isCircuitBreakerEnable {
 		return nil, fmt.Errorf("Error circuit breaker is open, cannot send action to %s", action)
+	} else if isCircuitBreakerEnable {
+		defer func() {
+			externalCircuitBreaker.CountRequest()
+			if resp.StatusCode >= http.StatusInternalServerError {
+				externalCircuitBreaker.FailureHappend(action)
+			}
+		}()
 	}
 
-	log.Println("=========================START SOAP REQUEST=========================")
+	log.Println("========================= START SOAP REQUEST =========================")
 	envelope := createSOAPEnvelope(requestBody)
 	xmlBody, err := marshalEnvelope(envelope)
-	log.Println("==========================END SOAP REQUEST==========================")
-
-	if isCircuitBreakerEnable {
-		externalCircuitBreaker.CountRequest()
-		if err != nil {
-			externalCircuitBreaker.FailureHappend(action)
-		}
-	}
+	log.Println("========================== END SOAP REQUEST ==========================")
 
 	if err != nil {
 		return nil, err
@@ -43,7 +44,7 @@ func (client *Client) SendSOAPRequest(action string, headers *Headers, requestBo
 		return nil, err
 	}
 
-	resp, err := sendRequest(client.HTTPClient, req)
+	resp, err = sendRequest(client.HTTPClient, req)
 	if err != nil {
 		return nil, err
 	}
@@ -94,15 +95,15 @@ func createHTTPRequest(url string, xmlBody []byte, action string, headers *Heade
 }
 
 func sendRequest(client *http.Client, req *http.Request) (*http.Response, error) {
-	log.Println("=========================START SOAP REQUEST=========================")
+	log.Println("========================= START SOAP REQUEST =========================")
 	logRequest(req)
 	resp, err := client.Do(req)
 	logResponse(resp)
-	log.Println("==========================END SOAP REQUEST==========================")
+	log.Println("========================== END SOAP REQUEST ==========================")
 
 	if err != nil {
 		log.Printf("Error sending request: %v", err)
-		return nil, err
+		return resp, err
 	}
 
 	return resp, nil

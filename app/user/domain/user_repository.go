@@ -3,17 +3,18 @@ package domain
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
+	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 )
 
 type UserRepository interface {
-	Pagination(httpContext *gin.Context) ([]UserEntity, int)
-	Create(httpContext *gin.Context, payload *UserEntity)
-	FindOneById(httpContext *gin.Context, id uuid.UUID, trashed bool) *UserEntity
-	Update(httpContext *gin.Context, id uuid.UUID, payload *UserEntity)
+	Pagination(httpContext *gin.Context) ([]entities.UserEntity, int)
+	Create(httpContext *gin.Context, payload *entities.UserEntity)
+	FindOneById(httpContext *gin.Context, id uuid.UUID, trashed bool) *entities.UserEntity
+	Update(httpContext *gin.Context, id uuid.UUID, payload *entities.UserEntity)
 	Delete(httpContext *gin.Context, id uuid.UUID)
 	IsEmailExist(httpContext *gin.Context, email string) bool
 	IsEmailExistExceptUserId(httpContext *gin.Context, email string, id uuid.UUID) bool
-	FindRoleByIds(httpContext *gin.Context, ids []uuid.UUID) []domain.RoleEntity
+	FindRoleByIds(httpContext *gin.Context, ids []uuid.UUID) []roleEntities.RoleEntity
 	DeleteUserRoles(httpContext *gin.Context, id uuid.UUID)
 }

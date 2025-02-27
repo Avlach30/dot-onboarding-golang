@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/config"
 )
 
@@ -22,6 +23,22 @@ func NewLogWriter() *LogWriter {
 	}
 }
 
+// Write implements the io.Writer interface. It processes and writes log messages to both files and standard output.
+// The method categorizes logs based on content within square brackets (e.g., [category]) and writes them to separate log files.
+//
+// Parameters:
+//   - content: byte slice containing the log message to be written
+//
+// Returns:
+//   - n: number of bytes written
+//   - err: any error encountered during writing
+//
+// The function performs the following operations:
+//  1. Extracts log category from the message (defaults to "default" if not found)
+//  2. Writes to category-specific log files when log driver is set to "file"
+//  3. Always writes to standard output regardless of log driver setting
+//
+// Thread-safety is ensured through mutex locking.
 func (logWriter *LogWriter) Write(content []byte) (n int, err error) {
 	logMessage := string(content)
 
@@ -32,6 +49,15 @@ func (logWriter *LogWriter) Write(content []byte) (n int, err error) {
 	if len(matches) > 1 {
 		category = matches[1]
 	}
+
+	sentry.AddBreadcrumb(&sentry.Breadcrumb{
+		Category: "log",
+		Message:  logMessage,
+		Level:    sentry.LevelInfo,
+		Data: map[string]interface{}{
+			"timestamp": time.Now().Unix(),
+		},
+	})
 
 	logWriter.mu.Lock()
 	defer logWriter.mu.Unlock()

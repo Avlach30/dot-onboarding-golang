@@ -6,6 +6,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/constant"
 	domain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/dto"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
@@ -25,11 +26,11 @@ func NewUserHandler(router *gin.Engine, userUsecase domain.UserUsecase) {
 		userUsecase: userUsecase,
 	}
 
-	userHandlerRoute.GET("/", guard.PermissionGuard(constant.ReadUser), userHandler.Pagination())
-	userHandlerRoute.DELETE("/:id", guard.PermissionGuard(constant.DeleteUser), userHandler.Delete())
-	userHandlerRoute.PATCH("/:id", guard.PermissionGuard(constant.UpdateUser), middleware.ValidateRequestJSON[dto.UserUpdateRequest](), userHandler.Update(), guard.PermissionGuard(constant.UpdateUser))
-	userHandlerRoute.GET("/:id", guard.PermissionGuard(constant.ReadUser), userHandler.Detail())
-	userHandlerRoute.POST("/", guard.PermissionGuard(constant.CreateUser), middleware.ValidateRequestJSON[dto.UserCreateRequest](), userHandler.Create())
+	userHandlerRoute.GET("", guard.PermissionGuard(constant.ReadUser), userHandler.Pagination())
+	userHandlerRoute.DELETE(":id", guard.PermissionGuard(constant.DeleteUser), userHandler.Delete())
+	userHandlerRoute.PATCH(":id", guard.PermissionGuard(constant.UpdateUser), middleware.ValidateRequestJSON[dto.UserUpdateRequest](), userHandler.Update(), guard.PermissionGuard(constant.UpdateUser))
+	userHandlerRoute.GET(":id", guard.PermissionGuard(constant.ReadUser), userHandler.Detail())
+	userHandlerRoute.POST("", guard.PermissionGuard(constant.CreateUser), middleware.ValidateRequestJSON[dto.UserCreateRequest](), userHandler.Create())
 }
 
 func (userHandler *UserHandler) Pagination() gin.HandlerFunc {
@@ -45,7 +46,7 @@ func (userHandler *UserHandler) Pagination() gin.HandlerFunc {
 func (userHandler *UserHandler) Create() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		request := singleton.GetHTTPRequest[dto.UserCreateRequest](httpContext)
-		newUser := domain.UserEntity{
+		newUser := entities.UserEntity{
 			Name:  request.Name,
 			Email: request.Email,
 		}
@@ -68,7 +69,7 @@ func (userHandler *UserHandler) Detail() gin.HandlerFunc {
 func (userHandler *UserHandler) Update() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		request := singleton.GetHTTPRequest[dto.UserUpdateRequest](httpContext)
-		newUser := domain.UserEntity{
+		newUser := entities.UserEntity{
 			Name:  request.Name,
 			Email: request.Email,
 		}

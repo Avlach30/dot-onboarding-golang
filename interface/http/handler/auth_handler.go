@@ -5,11 +5,14 @@ import (
 
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/auth/dto"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/jwt"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
 	"github.com/gin-gonic/gin"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 )
 
 type AuthHandler struct {
@@ -23,9 +26,23 @@ func NewAuthHandler(router *gin.Engine, authUsecase domain.AuthUsecase) {
 		authUsecase: authUsecase,
 	}
 
+	authHandlerRoute.GET("/me", guard.AuthGuard(), authHandler.Me())
+
 	authHandlerRoute.POST("/sign-in", middleware.ValidateRequestJSON[dto.AuthSignInRequest](), authHandler.SignIn())
 	authHandlerRoute.POST("/ldap", middleware.ValidateRequestJSON[dto.AuthSignLDAPRequest](), authHandler.SignLDAP())
 	authHandlerRoute.POST("/oidc", middleware.ValidateRequestJSON[dto.AuthSignOIDCRequest](), authHandler.SignOIDC())
+}
+
+func (authHandler *AuthHandler) Me() gin.HandlerFunc {
+	return func(httpContext *gin.Context) {
+		claimToken := httpContext.MustGet(constant.AuthUserInfoKey)
+		userID := claimToken.(*jwt.CustomClaims).ID
+
+		data := authHandler.authUsecase.Me(httpContext, userID)
+		responseData := dto.AuthMeResponseFromEntity(*data)
+
+		httpContext.JSON(http.StatusOK, utils.SucessResponse(responseData))
+	}
 }
 
 func (authHandler *AuthHandler) SignIn() gin.HandlerFunc {
@@ -65,7 +82,7 @@ func (authHandler *AuthHandler) SignLDAP() gin.HandlerFunc {
 func (authHandler *AuthHandler) SignOIDC() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		authRequest := singleton.GetHTTPRequest[dto.AuthSignOIDCRequest](httpContext)
-		token, expirationTime := authHandler.authUsecase.SignInByOIDCCode(httpContext, authRequest.Code)
+		token, expirationTime := authHandler.authUsecase.SignInByOIDCCode(httpContext, authRequest.Code, authRequest.RedirectUri)
 
 		data := &dto.AuthSignInResponse{
 			Token:     token,

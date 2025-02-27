@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
+	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 )
 
@@ -17,12 +18,12 @@ func NewRoleUsecase(roleRepo domain.RoleRepository) domain.RoleUsecase {
 	}
 }
 
-func (roleUsecase *RoleUsecase) Pagination(httpContext *gin.Context) ([]domain.RoleEntity, int) {
+func (roleUsecase *RoleUsecase) Pagination(httpContext *gin.Context) ([]entities.RoleEntity, int) {
 	return roleUsecase.roleRepo.Pagination(httpContext)
 }
 
 // Create implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) Create(httpContext *gin.Context, payload *domain.RoleEntity) {
+func (roleUsecase *RoleUsecase) Create(httpContext *gin.Context, payload *entities.RoleEntity) {
 	isKeyExist := roleUsecase.roleRepo.IsKeyExist(httpContext, payload.Key)
 
 	if isKeyExist {
@@ -38,12 +39,12 @@ func (roleUsecase *RoleUsecase) Delete(httpContext *gin.Context, id uuid.UUID) {
 }
 
 // FindOneById implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) FindOneById(httpContext *gin.Context, id uuid.UUID) *domain.RoleEntity {
+func (roleUsecase *RoleUsecase) FindOneById(httpContext *gin.Context, id uuid.UUID) *entities.RoleEntity {
 	return roleUsecase.roleRepo.FindOneById(httpContext, id, false)
 }
 
 // Update implements domain.RoleUsecase.
-func (roleUsecase *RoleUsecase) Update(httpContext *gin.Context, id uuid.UUID, payload *domain.RoleEntity) {
+func (roleUsecase *RoleUsecase) Update(httpContext *gin.Context, id uuid.UUID, payload *entities.RoleEntity) {
 	if roleUsecase.roleRepo.IsKeyExistExceptRoleId(httpContext, payload.Key, id) {
 		panic(*exception.BussinessException("Key already exist"))
 	}

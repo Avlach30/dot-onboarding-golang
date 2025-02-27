@@ -8,8 +8,8 @@ import (
 	"os"
 
 	"github.com/google/uuid"
-	domainPermission "gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
-	domainRole "gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
+	permissionEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
+	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gorm.io/gorm"
 )
 
@@ -42,7 +42,7 @@ func (userRolePermissionSeeder *RolePermissionSeeder) Handle(db *gorm.DB) error 
 	// Insert each user into the database
 	db.Exec(`DELETE FROM role_permissions`)
 	for _, rolePermission := range rolePermissions {
-		role := &domainRole.RoleEntity{}
+		role := &roleEntities.RoleEntity{}
 
 		errorFindRole := db.Where("key = ?", rolePermission.RoleKey).First(role)
 		if errorFindRole.Error != nil {
@@ -50,7 +50,7 @@ func (userRolePermissionSeeder *RolePermissionSeeder) Handle(db *gorm.DB) error 
 			continue
 		}
 
-		permission := &domainPermission.PermissionEntity{}
+		permission := &permissionEntities.PermissionEntity{}
 		errorFindPermission := db.Where("key = ?", rolePermission.PermissionKey).First(permission)
 		if errorFindPermission.Error != nil {
 			log.Println("Error querying permission:", errorFindPermission.Error)

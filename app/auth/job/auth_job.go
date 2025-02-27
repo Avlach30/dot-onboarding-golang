@@ -10,8 +10,8 @@ type JobDictionary struct {
 }
 
 // AddJob implements globalTask.JobDictionary.
-func (jobDictionary *JobDictionary) AddJob(taskName string, job globalTask.JobTask) {
-	jobDictionary.listJob[taskName] = job
+func (jobDictionary *JobDictionary) AddJob(job globalTask.JobTask) {
+	jobDictionary.listJob[job.Name()] = job
 }
 
 // GetAllJob implements globalTask.JobDictionary.
@@ -25,10 +25,9 @@ func NewAuthJobDictionary(listJob map[string]globalTask.JobTask) globalTask.JobD
 	}
 }
 
-func InitJob() globalTask.JobDictionary {
+func Jobs() globalTask.JobDictionary {
 	jobDictionary := NewAuthJobDictionary(map[string]globalTask.JobTask{})
-	jobDictionary.AddJob(task.CompleteTaskName, task.AuthCompleteJobTask())
-	jobDictionary.AddJob(task.StartTaskName, task.AuthStartJobTask())
+	jobDictionary.AddJob(task.AuthSampleJobTask())
 
 	return jobDictionary
 }
