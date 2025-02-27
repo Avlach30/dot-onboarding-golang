@@ -26,10 +26,10 @@ func ErrorResponse(statusCode int, errorMessage string, stackTrace string) *pkg.
 	})
 }
 
-func ErrorValidationResponse(statusCode int, errors []pkg.ErrorValidation) *pkg.BaseResponse {
+func ErrorValidationResponse(statusCode int, errors []pkg.ErrorValidation, errorMessage string) *pkg.BaseResponse {
 	return &(pkg.BaseResponse{
 		StatusCode:   statusCode,
-		ErrorMessage: "Validation Error",
+		ErrorMessage: errorMessage,
 		Errors:       &errors,
 		Version:      "1.0.0",
 	})

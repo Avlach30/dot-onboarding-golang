@@ -16,7 +16,6 @@ func ValidateRequestJSON[T any]() gin.HandlerFunc {
 		obj := new(T)
 
 		if err := httpContext.ShouldBind(obj); err != nil {
-
 			if validationErrors, isNotValid := err.(validator.ValidationErrors); isNotValid {
 				// Convert validation errors to ErrorValidation struct
 				errors := make([]pkg.ErrorValidation, 0)
@@ -24,14 +23,19 @@ func ValidateRequestJSON[T any]() gin.HandlerFunc {
 				for _, validationErr := range validationErrors {
 					errors = append(errors, pkg.ErrorValidation{
 						Key:     utils.StringToSnakeCase(validationErr.Field()), // Fully qualified field name
-						Message: fmt.Sprintf("Error %s", validationErr.Tag()),
+						Message: fmt.Sprintf("Error %s", validationErr.Error()),
 					})
 				}
 
 				// Print errors as JSON
-				httpContext.JSON(http.StatusBadRequest, utils.ErrorValidationResponse(http.StatusBadRequest, errors))
+				httpContext.JSON(http.StatusBadRequest, utils.ErrorValidationResponse(http.StatusBadRequest, errors, "Validation error"))
 			} else {
-				httpContext.JSON(http.StatusBadRequest, utils.ErrorValidationResponse(http.StatusBadRequest, nil))
+				errors := make([]pkg.ErrorValidation, 0)
+				errors = append(errors, pkg.ErrorValidation{
+					Key:     "error",
+					Message: err.Error(),
+				})
+				httpContext.JSON(http.StatusBadRequest, utils.ErrorValidationResponse(http.StatusBadRequest, errors, "Validation error"))
 			}
 
 			httpContext.Abort()
@@ -53,13 +57,13 @@ func ValidateRequestFormData[T any]() gin.HandlerFunc {
 				for i, validationErr := range validationErrors {
 					errors[i] = pkg.ErrorValidation{
 						Key:     utils.StringToSnakeCase(validationErr.Field()),
-						Message: fmt.Sprintf("Error %s", validationErr.Tag()),
+						Message: fmt.Sprintf("Error %s", validationErr.Error()),
 					}
 				}
 
-				httpContext.JSON(http.StatusBadRequest, utils.ErrorValidationResponse(http.StatusBadRequest, errors))
+				httpContext.JSON(http.StatusBadRequest, utils.ErrorValidationResponse(http.StatusBadRequest, errors, "Validation error"))
 			} else {
-				httpContext.JSON(http.StatusBadRequest, utils.ErrorValidationResponse(http.StatusBadRequest, nil))
+				httpContext.JSON(http.StatusBadRequest, utils.ErrorValidationResponse(http.StatusBadRequest, nil, err.Error()))
 			}
 
 			httpContext.Abort()
