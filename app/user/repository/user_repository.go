@@ -59,7 +59,7 @@ func (user *UserRepository) Pagination(httpContext *gin.Context) ([]entities.Use
 // func filter for pagination
 func (user *UserRepository) queryFilter(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
 	if search := httpContext.Query("search"); search != "" {
-		query = query.Where("name LIKE ?", search+"%")
+		query = query.Where("name ILIKE ?", search+"%")
 	}
 
 	return query
@@ -80,9 +80,9 @@ func (user *UserRepository) querySort(query *gorm.DB, httpContext *gin.Context) 
 				panic(*exception.BussinessException("Invalid order value"))
 			}
 			query = query.Order(sort + " " + order)
-		} else {
-			query = query.Order(sort)
 		}
+	} else {
+		query = query.Order("updated_at desc")
 	}
 
 	return query
@@ -131,13 +131,19 @@ func (user *UserRepository) Update(httpContext *gin.Context, id uuid.UUID, paylo
 			return err
 		}
 
-		// Update roles within transaction
-		if err := tx.Model(&userEntity).Association("Roles").Replace(payload.Roles); err != nil {
+		// Permanently delete user roles relationships
+		if err := tx.Unscoped().Model(&userEntity).
+			Association("Roles").Unscoped().Clear(); err != nil {
 			return err
 		}
 
 		// Update user data within transaction
 		if err := tx.Where("id = ?", id).Updates(&payload).Error; err != nil {
+			return err
+		}
+
+		// Create user roles
+		if err := tx.Model(&userEntity).Association("Roles").Append(payload.Roles); err != nil {
 			return err
 		}
 
@@ -190,9 +196,11 @@ func (user *UserRepository) FindRoleByIds(httpContext *gin.Context, ids []uuid.U
 	var roleEntities []roleEntities.RoleEntity
 	err := user.roleModel.Where("id IN ?", ids).Find(&roleEntities).Error
 
-	if err != nil {
+	if err == gorm.ErrRecordNotFound {
+		panic(*exception.NotFoundException("Roles not found"))
+	} else if err != nil {
 		log.Println("Error finding roles", err)
-		panic(*exception.BussinessException(err.Error()))
+		panic(*exception.ServerErrorException(err))
 	}
 
 	if len(roleEntities) == 0 {
@@ -205,7 +213,8 @@ func (user *UserRepository) FindRoleByIds(httpContext *gin.Context, ids []uuid.U
 // Delete user's roles using association table without deleting the user
 func (user *UserRepository) DeleteUserRoles(httpContext *gin.Context, id uuid.UUID) {
 	user.model = user.model.WithContext(httpContext)
-	err := user.model.Association("Roles").Clear()
+	// Permanently delete user roles relationships
+	err := user.model.Unscoped().Association("Roles").Unscoped().Clear()
 
 	if err != nil {
 		log.Println("Error delete user roles", err)

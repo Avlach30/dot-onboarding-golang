@@ -22,7 +22,7 @@ import (
 func (client *Client) Get(endpoint string, headers *Headers, responseBody any) (any, error) {
 	response, err := client.SendHTTPRequest(http.MethodGet, endpoint, headers, nil, responseBody)
 	if err != nil {
-		return nil, err
+		return response, err
 	}
 
 	return response, nil
@@ -87,6 +87,10 @@ func (client *Client) SendHTTPRequest(method, endpoint string, headers *Headers,
 	if err != nil {
 		log.Printf("Error preparing request body: %v", err)
 		return nil, err
+	}
+
+	if method == http.MethodGet {
+		reqBody = nil
 	}
 
 	req, err := http.NewRequest(method, url, reqBody)

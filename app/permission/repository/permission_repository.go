@@ -54,7 +54,7 @@ func (permission *PermissionRepository) Pagination(httpContext *gin.Context) ([]
 // func filter for pagination
 func (permission *PermissionRepository) queryFilter(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
 	if search := httpContext.Query("search"); search != "" {
-		query = query.Where("name LIKE ?", search+"%")
+		query = query.Where("name ILIKE ?", search+"%")
 	}
 
 	return query
@@ -75,9 +75,9 @@ func (permission *PermissionRepository) querySort(query *gorm.DB, httpContext *g
 				panic(*exception.BussinessException("Invalid order value"))
 			}
 			query = query.Order(sort + " " + order)
-		} else {
-			query = query.Order(sort)
 		}
+	} else {
+		query = query.Order("updated_at desc")
 	}
 
 	return query

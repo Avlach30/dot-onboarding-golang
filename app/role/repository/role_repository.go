@@ -55,7 +55,7 @@ func (role *RoleRepository) Pagination(httpContext *gin.Context) ([]entities.Rol
 // func filter for pagination
 func (role *RoleRepository) queryFilter(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
 	if search := httpContext.Query("search"); search != "" {
-		query = query.Where("name LIKE ?", search+"%")
+		query = query.Where("name ILIKE ?", search+"%")
 	}
 
 	return query
@@ -76,9 +76,9 @@ func (role *RoleRepository) querySort(query *gorm.DB, httpContext *gin.Context) 
 				panic(*exception.BussinessException("Invalid order value"))
 			}
 			query = query.Order(sort + " " + order)
-		} else {
-			query = query.Order(sort)
 		}
+	} else {
+		query = query.Order("updated_at desc")
 	}
 
 	return query
