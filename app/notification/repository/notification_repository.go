@@ -29,7 +29,7 @@ func (notification *NotificationRepository) Pagination(httpContext *gin.Context,
 	var total int64
 
 	// Query filter
-	query = notification.queryFilter(query, httpContext)
+	query = notification.queryFilter(query, httpContext, userId)
 
 	// Query sort
 	query = notification.querySort(query, httpContext)
@@ -43,11 +43,10 @@ func (notification *NotificationRepository) Pagination(httpContext *gin.Context,
 
 	err = query.Session(&gorm.Session{}).
 		Scopes(utils.Paginate(httpContext)).
-		Where("user_id = ?", userId).
 		Find(&notifications).Error
 
 	if err != nil {
-		log.Println("Error pagination permission", err)
+		log.Println("Error pagination notification", err)
 		panic(*exception.ServerErrorException(err))
 	}
 
@@ -55,9 +54,11 @@ func (notification *NotificationRepository) Pagination(httpContext *gin.Context,
 }
 
 // func filter for pagination
-func (notification *NotificationRepository) queryFilter(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
+func (notification *NotificationRepository) queryFilter(query *gorm.DB, httpContext *gin.Context, userId uuid.UUID) *gorm.DB {
+	query = query.Where("user_id = ?", userId)
+
 	if search := httpContext.Query("search"); search != "" {
-		query = query.Where("title LIKE ?", search+"%")
+		query = query.Where("title ILIKE ?", search+"%")
 	}
 
 	return query
@@ -78,9 +79,9 @@ func (notification *NotificationRepository) querySort(query *gorm.DB, httpContex
 				panic(*exception.BussinessException("Invalid order value"))
 			}
 			query = query.Order(sort + " " + order)
-		} else {
-			query = query.Order(sort)
 		}
+	} else {
+		query = query.Order("created_at desc")
 	}
 
 	return query
