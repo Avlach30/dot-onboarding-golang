@@ -48,6 +48,7 @@ func (logWriter *LogWriter) Write(content []byte) (n int, err error) {
 
 	if len(matches) > 1 {
 		category = matches[1]
+
 	}
 
 	sentry.AddBreadcrumb(&sentry.Breadcrumb{

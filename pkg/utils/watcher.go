@@ -1,6 +1,7 @@
-package watcher
+package utils
 
 import (
+	"context"
 	"log"
 	"os"
 	"os/exec"
@@ -15,7 +16,7 @@ var (
 	debounce = make(chan bool, 1)
 )
 
-func StartWatcher() {
+func StartWatcher(cancel context.CancelFunc) {
 	log.Println("Starting watcher...")
 
 	watcher, err := fsnotify.NewWatcher()
@@ -36,25 +37,26 @@ func StartWatcher() {
 				if isGoFile(event.Name) {
 					switch {
 					case event.Op&fsnotify.Write == fsnotify.Write:
-						log.Printf("Modified file: %s", event.Name)
+						cancel()
 					case event.Op&fsnotify.Create == fsnotify.Create:
-						log.Printf("New file created: %s", event.Name)
+						cancel()
 					case event.Op&fsnotify.Remove == fsnotify.Remove:
-						log.Printf("File deleted: %s", event.Name)
+						cancel()
 					case event.Op&fsnotify.Rename == fsnotify.Rename:
-						log.Printf("File renamed/moved: %s", event.Name)
 						// For renamed files, we need to re-add the watch for the new location
 						if newPath := findNewPath(event.Name); newPath != "" {
-							log.Printf("Found renamed file at new location: %s", newPath)
+							cancel()
 						}
 					}
+
+					time.Sleep(2 * time.Second)
+					restartApp()
 				}
 
 				// Handle new directory creation
 				if event.Op&fsnotify.Create == fsnotify.Create {
 					fi, err := os.Stat(event.Name)
 					if err == nil && fi.IsDir() {
-						log.Printf("New directory created: %s", event.Name)
 						addDirectoryToWatcher(watcher, event.Name)
 					}
 				}
@@ -81,7 +83,7 @@ func StartWatcher() {
 }
 
 func restartApp() {
-	log.Println("Restarting the application...")
+	log.Println("Restarting asd the application...")
 
 	if debounce != nil {
 		select {
@@ -90,6 +92,7 @@ func restartApp() {
 		}
 	}
 
+	log.Println(os.Args)
 	// Build and run the application
 	cmd := exec.Command("go", "run", "main.go", "--watch")
 	cmd.Stdout = os.Stdout

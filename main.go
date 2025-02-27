@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"net/http"
@@ -14,7 +15,6 @@ import (
 
 	handler "gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/handler"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/seeder"
-	"gitlab.dot.co.id/playground/boilerplates/golang-service/watcher"
 	"gorm.io/gorm"
 
 	userRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/repository"
@@ -64,24 +64,31 @@ var (
 	runSeeder         *string
 	seederClass       *string
 	watch             *bool
+
+	ctx    context.Context
+	cancel context.CancelFunc
 )
 
 func main() {
-	initializeLog()
 
-	extractArgs()
-
-	if watch != nil && *watch {
-		go watcher.StartWatcher()
-	}
+	// Create a cancelable context
+	ctx, cancel = context.WithCancel(context.Background())
 
 	if err := initializeDatabase(); err != nil {
 		panic(err)
 	}
 
+	initializeLog()
+
+	extractArgs()
+
 	handleMigrationAndSeeding()
 
 	initializeSingleton()
+
+	if watch != nil && *watch {
+		go utils.StartWatcher(cancel)
+	}
 
 	if *withJobExecutor == "true" || *onlyJobExecutor == "true" {
 		initializeWorkers()
@@ -111,10 +118,32 @@ func startIdleServer() {
 }
 
 func startHttpServer() {
-	log.Printf("Starting server on port %s...", config.AppPort)
-	if err := router.Run(":" + config.AppPort); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+	server := &http.Server{
+		Addr:    ":" + config.AppPort,
+		Handler: router,
 	}
+
+	// Start the server in a goroutine
+	go func() {
+		log.Println("Starting server on port 8080...")
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Server failed: %v", err)
+		}
+	}()
+
+	// Wait for the shutdown signal
+	<-ctx.Done()
+
+	// Gracefully shutdown the server
+	log.Println("Shutting down server...")
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdownCancel()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		log.Fatalf("Server forced to  shutdown: %v", err)
+	}
+
+	log.Println("Server exited.")
 }
 
 func extractArgs() {
@@ -213,9 +242,7 @@ func initializeWorkers() {
 	workers = task.InitQueueWorkerTask()
 
 	if *withJobExecutor == "true" || *onlyJobExecutor == "true" {
-
 		singleton.AddJobDictionary(authJob.Jobs())
-
 		go singleton.ExecuteJobTask()
 
 		schedulerExecutor := task.InitAllSchedulerTask()
