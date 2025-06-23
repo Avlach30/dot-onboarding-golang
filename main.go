@@ -223,6 +223,8 @@ func initializeStorageManager() error {
 		storageManager, err = storage.NewS3Manager()
 	case "minio":
 		storageManager, err = storage.NewMinIOManager()
+	case "local":
+		storageManager, err = storage.NewLocalManager()
 	default:
 		log.Printf("Invalid storage type: %s\n", config.Storage)
 	}

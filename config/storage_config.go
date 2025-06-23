@@ -21,4 +21,6 @@ var (
 
 	GCSCredentialsFilePath = Get("GCS_CREDENTIAL_FILE_PATH", "")
 	GCSBucketName          = Get("GCS_BUCKET_NAME", "")
+
+	LocalStoragePath		= Get("LOCAL_STORAGE_PATH", "uploads")
 )
