@@ -43,7 +43,7 @@ func (movieStudioHandler *MovieStudioHandler) Pagination() gin.HandlerFunc {
 				Id:            movieStudio.ID,
 				Name:          movieStudio.Name,
 				ChairCapacity: movieStudio.ChairCapacity,
-				CreatedAt:     movieStudio.CreatedAt,
+				UpdatedAt:     movieStudio.UpdatedAt,
 			}
 		}
 		meta := utils.PaginationMetaBuilder(c, total)
