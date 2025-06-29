@@ -41,6 +41,9 @@ import (
 	movieRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/master_data/movie/repository"
 	movieUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/master_data/movie/usecase"
 
+	movieScheduleRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/master_data/movie_schedule/repository"
+	movieScheduleUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/master_data/movie_schedule/usecase"
+
 	"github.com/getsentry/sentry-go"
 	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
@@ -308,6 +311,7 @@ func initializeModule() {
 	notificationRepo := notificationRepo.NewNotificationRepository(db)
 	movieStudioRepo := movieStudioRepo.NewMovieStudioRepository(db)
 	movieRepo := movieRepo.NewMovieRepository(db)
+	movieScheduleRepo := movieScheduleRepo.NewMovieScheduleRepository(db)
 
 	// Initialize usecases
 	userUsecase := userUC.NewUserUsecase(userRepo)
@@ -318,6 +322,7 @@ func initializeModule() {
 	notificationUsecase := notificationUC.NewNotificationUseCase(notificationRepo)
 	movieStudioUsecase := movieStudioUC.NewMovieStudioUsecase(movieStudioRepo)
 	movieUsecase := movieUC.NewMovieUsecase(movieRepo)
+	movieScheduleUsecase := movieScheduleUC.NewMovieScheduleUsecase(movieScheduleRepo)
 
 	// Setup handlers
 	handler.NewUserHandler(router, userUsecase)
@@ -328,6 +333,7 @@ func initializeModule() {
 	handler.NewNotificationHandler(router, notificationUsecase)
 	handler.NewMovieStudioHandler(router, movieStudioUsecase)
 	handler.NewMovieHandler(router, movieUsecase, fileUsecase)
+	handler.NewMovieScheduleHandler(router, movieScheduleUsecase, movieStudioUsecase, movieUsecase)
 }
 
 func healthCheck(router *gin.Engine) {
