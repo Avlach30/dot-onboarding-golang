@@ -60,7 +60,7 @@ func (movieStudio *MovieStudioRepository) queryFilter(query *gorm.DB, httpContex
 }
 
 func (movieStudio *MovieStudioRepository) querySort(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
-	sortableColumns := []string{"name", "chair_capacity", "created_at", "updated_at"}
+	sortableColumns := []string{"name", "chair_capacity", "updated_at"}
 
 	if sort := httpContext.Query("sort_by"); sort != "" {
 		// Check if the sort column is valid

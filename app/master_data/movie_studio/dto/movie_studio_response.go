@@ -11,7 +11,7 @@ type MovieStudioIndexResponse struct {
 	Id            uuid.UUID `json:"id"`
 	Name          string    `json:"name"`
 	ChairCapacity int       `json:"chair_capacity"`
-	CreatedAt     time.Time    `json:"created_at"`
+	UpdatedAt     time.Time    `json:"updated_at"`
 }
 
 type MovieStudioDetailResponse struct {
@@ -27,7 +27,7 @@ func NewMovieStudioIndexResponse(datas []entities.MovieStudioEntity) []MovieStud
 			Id:            data.ID,
 			Name:          data.Name,
 			ChairCapacity: data.ChairCapacity,
-			CreatedAt:     data.CreatedAt,
+			UpdatedAt:     data.UpdatedAt,
 		})
 	}
 	return movieStudios
@@ -39,7 +39,7 @@ func NewMovieStudioDetailResponse(movieStudio entities.MovieStudioEntity) MovieS
 			Id:            movieStudio.ID,
 			Name:          movieStudio.Name,
 			ChairCapacity: movieStudio.ChairCapacity,
-			CreatedAt:     movieStudio.CreatedAt,
+			UpdatedAt:     movieStudio.UpdatedAt,
 		},
 		AdditionalCapacities: movieStudio.AdditionalCapacities,
 	}
