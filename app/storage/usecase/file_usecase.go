@@ -70,10 +70,11 @@ func (f *FileUsecase) UploadFiles(httpContext *gin.Context, files *dto.UploadFil
 			objectName := fmt.Sprintf("%s/%s", FileUploads, uuiDrandomStr)
 
 			paths := *filePaths
-			paths[name] = objectName + "." + fileExtension
+			fileName := objectName + "." + fileExtension
+			paths[name] = fileName
 
-			log.Printf("Starting upload for file: %s", objectName)
-			err := singleton.StoreFileBuff(content, objectName)
+			log.Printf("Starting upload for file: %s", fileName)
+			err := singleton.StoreFileBuff(content, fileName)
 			if err != nil {
 				log.Printf("Error uploading file %s: %v", name, err)
 				errChan <- err
