@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/master_data/movie/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 )
 
 type MovieUsecase struct {
@@ -17,8 +18,8 @@ func NewMovieUsecase(movieRepository domain.MovieRepository) *MovieUsecase {
 	}
 }
 
-func (u *MovieUsecase) Pagination(c *gin.Context) ([]entities.MovieEntity, int) {
-	movies, total := u.movieRepository.Pagination(c)
+func (u *MovieUsecase) Pagination(c *gin.Context, queryDto *querydto.QueryDto) ([]entities.MovieEntity, int) {
+	movies, total := u.movieRepository.Pagination(queryDto, c)
 	return movies, total
 }
 

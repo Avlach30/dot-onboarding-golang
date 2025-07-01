@@ -8,6 +8,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 	"gorm.io/gorm"
 )
@@ -23,16 +24,16 @@ func NewNotificationRepository(db *gorm.DB) domain.NotificationRepository {
 }
 
 // Pagination get notification data with pagination
-func (notification *NotificationRepository) Pagination(httpContext *gin.Context, userId uuid.UUID) ([]entities.NotificationEntity, int) {
+func (notification *NotificationRepository) Pagination(httpContext *gin.Context, userId uuid.UUID, queryDto *querydto.QueryDto) ([]entities.NotificationEntity, int) {
 	query := notification.notificationModel.WithContext(httpContext)
 	var notifications []entities.NotificationEntity
 	var total int64
 
 	// Query filter
-	query = notification.queryFilter(query, httpContext, userId)
+	query = notification.queryFilter(query, queryDto, userId)
 
 	// Query sort
-	query = notification.querySort(query, httpContext)
+	query = notification.querySort(query, queryDto)
 
 	// Count all column first before paginate the query
 	err := query.Count(&total).Error
@@ -42,7 +43,7 @@ func (notification *NotificationRepository) Pagination(httpContext *gin.Context,
 	}
 
 	err = query.Session(&gorm.Session{}).
-		Scopes(utils.Paginate(httpContext)).
+		Scopes(utils.Paginate(queryDto)).
 		Find(&notifications).Error
 
 	if err != nil {
@@ -54,10 +55,10 @@ func (notification *NotificationRepository) Pagination(httpContext *gin.Context,
 }
 
 // func filter for pagination
-func (notification *NotificationRepository) queryFilter(query *gorm.DB, httpContext *gin.Context, userId uuid.UUID) *gorm.DB {
+func (notification *NotificationRepository) queryFilter(query *gorm.DB, queryDto *querydto.QueryDto, userId uuid.UUID) *gorm.DB {
 	query = query.Where("user_id = ?", userId)
 
-	if search := httpContext.Query("search"); search != "" {
+	if search := queryDto.Search; search != "" {
 		query = query.Where("title ILIKE ?", search+"%")
 	}
 
@@ -65,16 +66,16 @@ func (notification *NotificationRepository) queryFilter(query *gorm.DB, httpCont
 }
 
 // func query sort for pagination
-func (notification *NotificationRepository) querySort(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
+func (notification *NotificationRepository) querySort(query *gorm.DB, queryDto *querydto.QueryDto) *gorm.DB {
 	sortableColumns := []string{"title", "created_at", "updated_at"}
 
-	if sort := httpContext.Query("sort_by"); sort != "" {
+	if sort := queryDto.SortBy; sort != "" {
 		if !utils.Contains(sortableColumns, sort) {
 			panic(*exception.BussinessException("Invalid sort column"))
 		}
 
 		// Handle order query
-		if order := httpContext.Query("order"); order != "" {
+		if order := queryDto.Order; order != "" {
 			if order != "asc" && order != "desc" {
 				panic(*exception.BussinessException("Invalid order value"))
 			}

@@ -6,6 +6,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/user/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/gin-gonic/gin"
@@ -23,8 +24,8 @@ func NewUserUsecase(userRepo domain.UserRepository) domain.UserUsecase {
 }
 
 // Pagination implements domain.UserUsecase.
-func (userUsecase *UserUsecase) Pagination(httpContext *gin.Context) ([]entities.UserEntity, int) {
-	return userUsecase.userRepo.Pagination(httpContext)
+func (userUsecase *UserUsecase) Pagination(httpContext *gin.Context, queryDto *querydto.QueryDto) ([]entities.UserEntity, int) {
+	return userUsecase.userRepo.Pagination(httpContext, queryDto)
 }
 
 // Create implements domain.UserUsecase.

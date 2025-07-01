@@ -4,6 +4,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -19,8 +20,8 @@ func NewPermissionUsecase(permissionRepo domain.PermissionRepository) domain.Per
 	}
 }
 
-func (permissionUsecase *PermissionUsecase) Pagination(httpContext *gin.Context) ([]entities.PermissionEntity, int) {
-	return permissionUsecase.permissionRepo.Pagination(httpContext)
+func (permissionUsecase *PermissionUsecase) Pagination(httpContext *gin.Context, queryDto *querydto.QueryDto) ([]entities.PermissionEntity, int) {
+	return permissionUsecase.permissionRepo.Pagination(httpContext, queryDto)
 }
 
 // Create implements domain.PermissionUsecase.

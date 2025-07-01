@@ -9,6 +9,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
@@ -35,7 +36,8 @@ func NewPermissionHandler(router *gin.Engine, permissionUsecase domain.Permissio
 
 func (permissionHandler *PermissionHandler) Pagination() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
-		data, total := permissionHandler.permissionUsecase.Pagination(httpContext)
+		queryDto := querydto.AssignFromHttpContext(httpContext)
+		data, total := permissionHandler.permissionUsecase.Pagination(httpContext, queryDto)
 
 		meta := utils.PaginationMetaBuilder(httpContext, total)
 

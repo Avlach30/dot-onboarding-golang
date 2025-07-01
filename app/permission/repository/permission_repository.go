@@ -8,6 +8,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/permission/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 	"gorm.io/gorm"
 )
@@ -23,15 +24,15 @@ func NewPermissionRepository(db *gorm.DB) domain.PermissionRepository {
 }
 
 // Pagination get permission data with pagination
-func (permission *PermissionRepository) Pagination(httpContext *gin.Context) ([]entities.PermissionEntity, int) {
+func (permission *PermissionRepository) Pagination(httpContext *gin.Context, queryDto *querydto.QueryDto) ([]entities.PermissionEntity, int) {
 	query := permission.model.WithContext(httpContext)
 	var permissions []entities.PermissionEntity
 	var total int64
 
 	// Query filter
-	query = permission.queryFilter(query, httpContext)
+	query = permission.queryFilter(query, queryDto)
 	// Query sort
-	query = permission.querySort(query, httpContext)
+	query = permission.querySort(query, queryDto)
 
 	// Count all column first before paginate the query
 	err := query.Count(&total).Error
@@ -41,7 +42,7 @@ func (permission *PermissionRepository) Pagination(httpContext *gin.Context) ([]
 	}
 
 	err = query.Session(&gorm.Session{}).
-		Scopes(utils.Paginate(httpContext)).Find(&permissions).Error
+		Scopes(utils.Paginate(queryDto)).Find(&permissions).Error
 
 	if err != nil {
 		log.Println("Error pagination permission", err)
@@ -52,8 +53,8 @@ func (permission *PermissionRepository) Pagination(httpContext *gin.Context) ([]
 }
 
 // func filter for pagination
-func (permission *PermissionRepository) queryFilter(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
-	if search := httpContext.Query("search"); search != "" {
+func (permission *PermissionRepository) queryFilter(query *gorm.DB, queryDto *querydto.QueryDto) *gorm.DB {
+	if search := queryDto.Search; search != "" {
 		query = query.Where("name ILIKE ?", search+"%")
 	}
 
@@ -61,16 +62,16 @@ func (permission *PermissionRepository) queryFilter(query *gorm.DB, httpContext 
 }
 
 // func query sort for pagination
-func (permission *PermissionRepository) querySort(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
+func (permission *PermissionRepository) querySort(query *gorm.DB, queryDto *querydto.QueryDto) *gorm.DB {
 	sortableColumns := []string{"name", "created_at", "updated_at"}
 
-	if sort := httpContext.Query("sort_by"); sort != "" {
+	if sort := queryDto.SortBy; sort != "" {
 		if !utils.Contains(sortableColumns, sort) {
 			panic(*exception.BussinessException("Invalid sort column"))
 		}
 
 		// Handle order query
-		if order := httpContext.Query("order"); order != "" {
+		if order := queryDto.Order; order != "" {
 			if order != "asc" && order != "desc" {
 				panic(*exception.BussinessException("Invalid order value"))
 			}

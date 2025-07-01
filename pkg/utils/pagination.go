@@ -1,9 +1,7 @@
 package utils
 
 import (
-	"strconv"
-
-	"github.com/gin-gonic/gin"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 	"gorm.io/gorm"
 )
 
@@ -13,16 +11,14 @@ func GetPaginationOffset(page, limit int) int {
 	return offset
 }
 
-func Paginate(httpContext *gin.Context) func(db *gorm.DB) *gorm.DB {
+func Paginate(queryDto *querydto.QueryDto) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		pageStr := httpContext.DefaultQuery("page", "1")
-		page, _ := strconv.Atoi(pageStr)
+		page := queryDto.Page
 		if page <= 0 {
 			page = 1
 		}
 
-		perPageStr := httpContext.DefaultQuery("per_page", "10")
-		perPage, _ := strconv.Atoi(perPageStr)
+		perPage := queryDto.PerPage
 		switch {
 		case perPage > 100:
 			perPage = 100

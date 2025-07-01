@@ -8,6 +8,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
@@ -35,7 +36,8 @@ func NewMovieStudioHandler(router *gin.Engine, movieStudioUsecase domain.MovieSt
 
 func (movieStudioHandler *MovieStudioHandler) Pagination() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		data, total := movieStudioHandler.movieStudioUsecase.Pagination(c)
+		queryDto := querydto.AssignFromHttpContext(c)
+		data, total := movieStudioHandler.movieStudioUsecase.Pagination(c, queryDto)
 
 		formatedData := make([]dto.MovieStudioIndexResponse, len(data))
 		for i, movieStudio := range data {

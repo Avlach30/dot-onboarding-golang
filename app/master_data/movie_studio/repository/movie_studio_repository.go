@@ -8,6 +8,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/master_data/movie_studio/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 	"gorm.io/gorm"
 )
@@ -22,15 +23,15 @@ func NewMovieStudioRepository(db *gorm.DB) domain.MovieStudioRepository {
 	}
 }
 
-func (movieStudio *MovieStudioRepository) Pagination(httpContext *gin.Context) ([]entities.MovieStudioEntity, int) {
+func (movieStudio *MovieStudioRepository) Pagination(httpContext *gin.Context, queryDto *querydto.QueryDto) ([]entities.MovieStudioEntity, int) {
 	query := movieStudio.model.WithContext(httpContext)
 	var movieStudios []entities.MovieStudioEntity
 	var total int64
 
 	// Query filter
-	query = movieStudio.queryFilter(query, httpContext)
+	query = movieStudio.queryFilter(query, queryDto)
 	// Query sort
-	query = movieStudio.querySort(query, httpContext)
+	query = movieStudio.querySort(query, queryDto)
 
 	err := query.Count(&total).Error
 	if err != nil {
@@ -39,7 +40,7 @@ func (movieStudio *MovieStudioRepository) Pagination(httpContext *gin.Context) (
 	}
 
 	err = query.Session(&gorm.Session{}).
-		Scopes(utils.Paginate(httpContext)).
+		Scopes(utils.Paginate(queryDto)).
 		Find(&movieStudios).Error
 
 	if err != nil {
@@ -51,25 +52,25 @@ func (movieStudio *MovieStudioRepository) Pagination(httpContext *gin.Context) (
 }
 
 // Func filter for pagination
-func (movieStudio *MovieStudioRepository) queryFilter(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
-	if search := httpContext.Query("search"); search != "" {
+func (movieStudio *MovieStudioRepository) queryFilter(query *gorm.DB, queryDto *querydto.QueryDto) *gorm.DB {
+	if search := queryDto.Search; search != "" {
 		query = query.Where("name ILIKE ?", search+"%")
 	}
 
 	return query
 }
 
-func (movieStudio *MovieStudioRepository) querySort(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
+func (movieStudio *MovieStudioRepository) querySort(query *gorm.DB, queryDto *querydto.QueryDto) *gorm.DB {
 	sortableColumns := []string{"name", "chair_capacity", "updated_at"}
 
-	if sort := httpContext.Query("sort_by"); sort != "" {
+	if sort := queryDto.SortBy; sort != "" {
 		// Check if the sort column is valid
 		if !utils.Contains(sortableColumns, sort) {
 			panic(*exception.BussinessException("Invalid sort column"))
 		}
 
 		// Handle order query
-		if order := httpContext.Query("order"); order != "" {
+		if order := queryDto.Order; order != "" {
 			if order != "asc" && order != "desc" {
 				panic(*exception.BussinessException("Invalid order value"))
 			}

@@ -6,6 +6,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 )
 
 type RoleUsecase struct {
@@ -18,8 +19,8 @@ func NewRoleUsecase(roleRepo domain.RoleRepository) domain.RoleUsecase {
 	}
 }
 
-func (roleUsecase *RoleUsecase) Pagination(httpContext *gin.Context) ([]entities.RoleEntity, int) {
-	return roleUsecase.roleRepo.Pagination(httpContext)
+func (roleUsecase *RoleUsecase) Pagination(httpContext *gin.Context, queryDto *querydto.QueryDto) ([]entities.RoleEntity, int) {
+	return roleUsecase.roleRepo.Pagination(httpContext, queryDto)
 }
 
 // Create implements domain.RoleUsecase.
