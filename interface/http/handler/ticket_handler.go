@@ -57,9 +57,7 @@ func (ticketHandler *TicketHandler) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		payload := singleton.GetHTTPRequest[dto.TicketCreateRequest](c)
 
-		newTicket := dto.AssignCreate(payload)
-
-		ticketHandler.ticketUsecase.Create(c, &newTicket)
+		ticketHandler.ticketUsecase.Create(c, payload)
 
 		c.JSON(http.StatusCreated, utils.SucessResponse(nil))
 	}
@@ -83,9 +81,7 @@ func (ticketHandler *TicketHandler) Update() gin.HandlerFunc {
 
 		payload := singleton.GetHTTPRequest[dto.TicketUpdateRequest](c)
 
-		ticket := dto.AssignUpdate(payload)
-
-		ticketHandler.ticketUsecase.Update(c, id, &ticket)
+		ticketHandler.ticketUsecase.Update(c, id, payload)
 
 		c.JSON(http.StatusOK, utils.SucessResponse(nil))
 	}

@@ -9,6 +9,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
 	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
+	ticketDto "gitlab.dot.co.id/playground/boilerplates/golang-service/app/ticket/dto"
 	"gorm.io/gorm"
 )
 
@@ -32,40 +33,42 @@ func (ticketUsecase *TicketUsecase) Pagination(httpContext *gin.Context, queryDt
 	return ticketUsecase.ticketRepo.Pagination(httpContext, queryDto)
 }
 
-func (ticketUsecase *TicketUsecase) Create(httpContext *gin.Context, payload *entities.TicketEntity) {
+func (ticketUsecase *TicketUsecase) Create(httpContext *gin.Context, payload *ticketDto.TicketCreateRequest) {
 	tx := ticketUsecase.db.Begin()
+	newData := ticketDto.AssignCreate(payload)
 
 	// Check availability schedule and user
-	exception := ticketUsecase.CheckAvailabilityScheduleAndUser(httpContext, payload)
+	exception := ticketUsecase.CheckAvailabilityScheduleAndUser(httpContext, &newData)
 	if exception.StatusCode != 0 {
 		tx.Rollback()
 		panic(exception)
 	}
 
 	// Create ticket
-	payload.User = *ticketUsecase.userRepo.FindOneById(httpContext, payload.UserId, false)
-	payload.MovieSchedule = *ticketUsecase.movieScheduleRepo.FindOneById(httpContext, payload.MovieScheduleId, false)
+	newData.User = *ticketUsecase.userRepo.FindOneById(httpContext, payload.UserId, false)
+	newData.MovieSchedule = *ticketUsecase.movieScheduleRepo.FindOneById(httpContext, payload.MovieScheduleId, false)
 
-	ticketUsecase.ticketRepo.Create(httpContext, payload)
+	ticketUsecase.ticketRepo.Create(httpContext, &newData)
 
 	tx.Commit()
 }
 
-func (ticketUsecase *TicketUsecase) Update(httpContext *gin.Context, id uuid.UUID, payload *entities.TicketEntity) {
+func (ticketUsecase *TicketUsecase) Update(httpContext *gin.Context, id uuid.UUID, payload *ticketDto.TicketUpdateRequest) {
 	tx := ticketUsecase.db.Begin()
+	existingData := ticketDto.AssignUpdate(payload)
 
 	// Check availability schedule and user
-	exception := ticketUsecase.CheckAvailabilityScheduleAndUser(httpContext, payload)
+	exception := ticketUsecase.CheckAvailabilityScheduleAndUser(httpContext, &existingData)
 	if exception.StatusCode != 0 {
 		tx.Rollback()
 		panic(exception)
 	}
 
 	// Update ticket
-	payload.User = *ticketUsecase.userRepo.FindOneById(httpContext, payload.UserId, false)
-	payload.MovieSchedule = *ticketUsecase.movieScheduleRepo.FindOneById(httpContext, payload.MovieScheduleId, false)
+	existingData.User = *ticketUsecase.userRepo.FindOneById(httpContext, payload.UserId, false)
+	existingData.MovieSchedule = *ticketUsecase.movieScheduleRepo.FindOneById(httpContext, payload.MovieScheduleId, false)
 
-	ticketUsecase.ticketRepo.Update(httpContext, id, payload)
+	ticketUsecase.ticketRepo.Update(httpContext, id, &existingData)
 
 	tx.Commit()
 }
