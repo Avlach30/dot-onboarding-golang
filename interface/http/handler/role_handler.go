@@ -9,6 +9,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
@@ -35,7 +36,8 @@ func NewRoleHandler(router *gin.Engine, roleUsecase domain.RoleUsecase) {
 
 func (roleHandler *RoleHandler) Pagination() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
-		data, total := roleHandler.roleUsecase.Pagination(httpContext)
+		queryDto := querydto.AssignFromHttpContext(httpContext)
+		data, total := roleHandler.roleUsecase.Pagination(httpContext, queryDto)
 
 		meta := utils.PaginationMetaBuilder(httpContext, total)
 

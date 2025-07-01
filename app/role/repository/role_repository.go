@@ -8,6 +8,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/role/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 	"gorm.io/gorm"
 )
@@ -23,15 +24,15 @@ func NewRoleRepository(db *gorm.DB) domain.RoleRepository {
 }
 
 // Pagination get role data with pagination
-func (role *RoleRepository) Pagination(httpContext *gin.Context) ([]entities.RoleEntity, int) {
+func (role *RoleRepository) Pagination(httpContext *gin.Context, queryDto *querydto.QueryDto) ([]entities.RoleEntity, int) {
 	query := role.model.WithContext(httpContext)
 	var roles []entities.RoleEntity
 	var total int64
 
 	// Query filter
-	query = role.queryFilter(query, httpContext)
+	query = role.queryFilter(query, queryDto)
 	// Query sort
-	query = role.querySort(query, httpContext)
+	query = role.querySort(query, queryDto)
 
 	// Count all column first before paginate the query
 	err := query.Count(&total).Error
@@ -41,7 +42,7 @@ func (role *RoleRepository) Pagination(httpContext *gin.Context) ([]entities.Rol
 	}
 
 	err = query.Session(&gorm.Session{}).
-		Scopes(utils.Paginate(httpContext)).
+		Scopes(utils.Paginate(queryDto)).
 		Find(&roles).Error
 
 	if err != nil {
@@ -53,8 +54,8 @@ func (role *RoleRepository) Pagination(httpContext *gin.Context) ([]entities.Rol
 }
 
 // func filter for pagination
-func (role *RoleRepository) queryFilter(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
-	if search := httpContext.Query("search"); search != "" {
+func (role *RoleRepository) queryFilter(query *gorm.DB, queryDto *querydto.QueryDto) *gorm.DB {
+	if search := queryDto.Search; search != "" {
 		query = query.Where("name ILIKE ?", search+"%")
 	}
 
@@ -62,16 +63,16 @@ func (role *RoleRepository) queryFilter(query *gorm.DB, httpContext *gin.Context
 }
 
 // func query sort for pagination
-func (role *RoleRepository) querySort(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
+func (role *RoleRepository) querySort(query *gorm.DB, queryDto *querydto.QueryDto) *gorm.DB {
 	sortableColumns := []string{"name", "created_at", "updated_at"}
 
-	if sort := httpContext.Query("sort_by"); sort != "" {
+	if sort := queryDto.SortBy; sort != "" {
 		if !utils.Contains(sortableColumns, sort) {
 			panic(*exception.BussinessException("Invalid sort column"))
 		}
 
 		// Handle order query
-		if order := httpContext.Query("order"); order != "" {
+		if order := queryDto.Order; order != "" {
 			if order != "asc" && order != "desc" {
 				panic(*exception.BussinessException("Invalid order value"))
 			}

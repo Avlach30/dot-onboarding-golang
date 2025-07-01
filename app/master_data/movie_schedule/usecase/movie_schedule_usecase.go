@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/master_data/movie_schedule/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 )
 
 type MovieScheduleUsecase struct {
@@ -17,8 +18,8 @@ func NewMovieScheduleUsecase(movieScheduleRepository domain.MovieScheduleReposit
 	}
 }
 
-func (movieScheduleUsecase *MovieScheduleUsecase) Pagination(httpContext *gin.Context) ([]entities.MovieScheduleEntity, int) {
-	return movieScheduleUsecase.movieScheduleRepository.Pagination(httpContext)
+func (movieScheduleUsecase *MovieScheduleUsecase) Pagination(httpContext *gin.Context, queryDto *querydto.QueryDto) ([]entities.MovieScheduleEntity, int) {
+	return movieScheduleUsecase.movieScheduleRepository.Pagination(httpContext, queryDto)
 }
 
 func (movieScheduleUsecase *MovieScheduleUsecase) Create(httpContext *gin.Context, payload *entities.MovieScheduleEntity) {

@@ -8,6 +8,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/constant"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/jwt"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 )
 
@@ -30,9 +31,10 @@ func NewNotificationHandler(router *gin.Engine, notificationUseCase domain.Notif
 
 func (notificationHandler *NotificationHandler) Pagination() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
+		queryDto := querydto.AssignFromHttpContext(httpContext)
 		claimToken := httpContext.MustGet(constant.AuthUserInfoKey)
 		userId := claimToken.(*jwt.CustomClaims).ID
-		data, total := notificationHandler.notificationUseCase.Pagination(httpContext, userId)
+		data, total := notificationHandler.notificationUseCase.Pagination(httpContext, userId, queryDto)
 
 		meta := utils.PaginationMetaBuilder(httpContext, total)
 

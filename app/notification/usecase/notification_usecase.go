@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/notification/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 )
 
 type NotificationUseCase struct {
@@ -17,8 +18,8 @@ func NewNotificationUseCase(notificationRepo domain.NotificationRepository) doma
 	}
 }
 
-func (notification *NotificationUseCase) Pagination(httpContext *gin.Context, userId uuid.UUID) ([]entities.NotificationEntity, int) {
-	return notification.notificationRepo.Pagination(httpContext, userId)
+func (notification *NotificationUseCase) Pagination(httpContext *gin.Context, userId uuid.UUID, queryDto *querydto.QueryDto) ([]entities.NotificationEntity, int) {
+	return notification.notificationRepo.Pagination(httpContext, userId, queryDto)
 }
 
 func (notification *NotificationUseCase) HasUnread(httpContext *gin.Context, userId uuid.UUID) bool {

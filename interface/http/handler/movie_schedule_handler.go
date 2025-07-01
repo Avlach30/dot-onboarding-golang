@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	movieDomain "gitlab.dot.co.id/playground/boilerplates/golang-service/app/master_data/movie/domain"
@@ -11,6 +10,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/guard"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/middleware"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/singleton"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 
@@ -43,7 +43,8 @@ func NewMovieScheduleHandler(router *gin.Engine, movieScheduleUsecase domain.Mov
 
 func (movieScheduleHandler *MovieScheduleHandler) Pagination() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		data, total := movieScheduleHandler.movieScheduleUsecase.Pagination(c)
+		queryDto := querydto.AssignFromHttpContext(c)
+		data, total := movieScheduleHandler.movieScheduleUsecase.Pagination(c, queryDto)
 
 		formatedData := make([]dto.MovieScheduleIndexResponse, len(data))
 		for i, movieSchedule := range data {
@@ -67,9 +68,6 @@ func (movieScheduleHandler *MovieScheduleHandler) Create() gin.HandlerFunc {
 		// Check if movie and movie studio exists
 		movie := movieScheduleHandler.CheckIsExistsMovieById(c, payload.MovieID)
 		movieStudio :=movieScheduleHandler.CheckIsExistsMovieStudioById(c, payload.MovieStudioID)
-
-		fmt.Println(movie)
-		fmt.Println(*movie)
 		
 		newMovieSchedule := entities.MovieScheduleEntity{
 			Movie:         *movie,

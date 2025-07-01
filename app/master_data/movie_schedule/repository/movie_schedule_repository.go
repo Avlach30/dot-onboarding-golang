@@ -8,6 +8,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/app/master_data/movie_schedule/domain"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 	"gorm.io/gorm"
 )
@@ -22,15 +23,15 @@ func NewMovieScheduleRepository(db *gorm.DB) domain.MovieScheduleRepository {
 	}
 }
 
-func (movieSchedule *MovieScheduleRepository) Pagination(httpContext *gin.Context) ([]entities.MovieScheduleEntity, int) {
+func (movieSchedule *MovieScheduleRepository) Pagination(httpContext *gin.Context, queryDto *querydto.QueryDto) ([]entities.MovieScheduleEntity, int) {
 	query := movieSchedule.model.WithContext(httpContext)
 	var movieSchedules []entities.MovieScheduleEntity
 	var total int64
 
 	// Query filter
-	query = movieSchedule.queryFilter(query, httpContext)
+	query = movieSchedule.queryFilter(query, queryDto)
 	// Query sort
-	query = movieSchedule.querySort(query, httpContext)
+	query = movieSchedule.querySort(query, queryDto)
 
 	err := query.Count(&total).
 		Error
@@ -40,7 +41,7 @@ func (movieSchedule *MovieScheduleRepository) Pagination(httpContext *gin.Contex
 	}
 
 	err = query.Session(&gorm.Session{}).
-		Scopes(utils.Paginate(httpContext)).
+		Scopes(utils.Paginate(queryDto)).
 		Find(&movieSchedules).Error
 
 	if err != nil {
@@ -52,25 +53,25 @@ func (movieSchedule *MovieScheduleRepository) Pagination(httpContext *gin.Contex
 }
 
 // Func filter for pagination
-func (movieSchedule *MovieScheduleRepository) queryFilter(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
-	if search := httpContext.Query("search"); search != "" {
+func (movieSchedule *MovieScheduleRepository) queryFilter(query *gorm.DB, queryDto *querydto.QueryDto) *gorm.DB {
+	if search := queryDto.Search; search != "" {
 		query = query.Where("show_datetime LIKE ?", search+"%")
 	}
 
 	return query
 }
 
-func (movieSchedule *MovieScheduleRepository) querySort(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
+func (movieSchedule *MovieScheduleRepository) querySort(query *gorm.DB, queryDto *querydto.QueryDto) *gorm.DB {
 	sortableColumns := []string{"show_datetime", "price", "updated_at"}
 
-	if sort := httpContext.Query("sort_by"); sort != "" {
+	if sort := queryDto.SortBy; sort != "" {
 		// Check if the sort column is valid
 		if !utils.Contains(sortableColumns, sort) {
 			panic(*exception.BussinessException("Invalid sort column"))
 		}
 
 		// Handle order query
-		if order := httpContext.Query("order"); order != "" {
+		if order := queryDto.Order; order != "" {
 			if order != "asc" && order != "desc" {
 				panic(*exception.BussinessException("Invalid order value"))
 			}
@@ -139,4 +140,22 @@ func (movieSchedule *MovieScheduleRepository) Delete(httpContext *gin.Context, i
 		log.Println("Error deleting movie schedule:", err)
 		panic(*exception.ServerErrorException(err))
 	}
+}
+
+func (movieSchedule *MovieScheduleRepository) IsExistById(httpContext *gin.Context, id uuid.UUID) bool {
+	movieSchedule.model = movieSchedule.model.WithContext(httpContext)
+
+	var movieScheduleEntity entities.MovieScheduleEntity
+	err := movieSchedule.model.
+		First(&movieScheduleEntity, id).
+		Error
+
+	if err == gorm.ErrRecordNotFound {
+		return false
+	} else if err != nil {
+		log.Println("Error fetching movie schedule by id", err)
+		panic(*exception.ServerErrorException(err))
+	}
+
+	return true
 }

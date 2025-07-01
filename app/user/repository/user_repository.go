@@ -9,6 +9,7 @@ import (
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	roleEntities "gitlab.dot.co.id/playground/boilerplates/golang-service/entities"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/interface/http/exception"
+	querydto "gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/query_dto"
 	"gitlab.dot.co.id/playground/boilerplates/golang-service/pkg/utils"
 	"gorm.io/gorm"
 )
@@ -26,16 +27,16 @@ func NewUserRepository(db *gorm.DB) domain.UserRepository {
 }
 
 // Pagination get user data with pagination
-func (user *UserRepository) Pagination(httpContext *gin.Context) ([]entities.UserEntity, int) {
+func (user *UserRepository) Pagination(httpContext *gin.Context, queryDto *querydto.QueryDto) ([]entities.UserEntity, int) {
 	query := user.model.WithContext(httpContext)
 	var users []entities.UserEntity
 	var total int64
 
 	// Query filter
-	query = user.queryFilter(query, httpContext)
+	query = user.queryFilter(query, queryDto)
 
 	// Query sort
-	query = user.querySort(query, httpContext)
+	query = user.querySort(query, queryDto)
 
 	// Count all column first before paginate the query
 	err := query.Count(&total).Error
@@ -45,7 +46,7 @@ func (user *UserRepository) Pagination(httpContext *gin.Context) ([]entities.Use
 	}
 
 	err = query.Session(&gorm.Session{}).
-		Scopes(utils.Paginate(httpContext)).
+		Scopes(utils.Paginate(queryDto)).
 		Find(&users).Error
 
 	if err != nil {
@@ -57,8 +58,8 @@ func (user *UserRepository) Pagination(httpContext *gin.Context) ([]entities.Use
 }
 
 // func filter for pagination
-func (user *UserRepository) queryFilter(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
-	if search := httpContext.Query("search"); search != "" {
+func (user *UserRepository) queryFilter(query *gorm.DB, queryDto *querydto.QueryDto) *gorm.DB {
+	if search := queryDto.Search; search != "" {
 		query = query.Where("name ILIKE ?", search+"%")
 	}
 
@@ -66,16 +67,16 @@ func (user *UserRepository) queryFilter(query *gorm.DB, httpContext *gin.Context
 }
 
 // func query sort for pagination
-func (user *UserRepository) querySort(query *gorm.DB, httpContext *gin.Context) *gorm.DB {
+func (user *UserRepository) querySort(query *gorm.DB, queryDto *querydto.QueryDto) *gorm.DB {
 	sortableColumns := []string{"name", "email", "created_at", "updated_at"}
 
-	if sort := httpContext.Query("sort_by"); sort != "" {
+	if sort := queryDto.SortBy; sort != "" {
 		if !utils.Contains(sortableColumns, sort) {
 			panic(*exception.BussinessException("Invalid sort column"))
 		}
 
 		// Handle order query
-		if order := httpContext.Query("order"); order != "" {
+		if order := queryDto.Order; order != "" {
 			if order != "asc" && order != "desc" {
 				panic(*exception.BussinessException("Invalid order value"))
 			}
@@ -220,4 +221,22 @@ func (user *UserRepository) DeleteUserRoles(httpContext *gin.Context, id uuid.UU
 		log.Println("Error delete user roles", err)
 		panic(*exception.ServerErrorException(err))
 	}
+}
+
+func (user *UserRepository) IsExistById(httpContext *gin.Context, id uuid.UUID) bool {
+	user.model = user.model.WithContext(httpContext)
+
+	var userEntity entities.UserEntity
+	err := user.model.
+		First(&userEntity, id).
+		Error
+
+	if err == gorm.ErrRecordNotFound {
+		return false
+	} else if err != nil {
+		log.Println("Error fetching user by id", err)
+		panic(*exception.ServerErrorException(err))
+	}
+
+	return true
 }
