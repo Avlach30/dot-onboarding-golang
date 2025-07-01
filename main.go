@@ -44,6 +44,9 @@ import (
 	movieScheduleRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/master_data/movie_schedule/repository"
 	movieScheduleUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/master_data/movie_schedule/usecase"
 
+	ticketRepo "gitlab.dot.co.id/playground/boilerplates/golang-service/app/ticket/repository"
+	ticketUC "gitlab.dot.co.id/playground/boilerplates/golang-service/app/ticket/usecase"
+
 	"github.com/getsentry/sentry-go"
 	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
@@ -312,6 +315,7 @@ func initializeModule() {
 	movieStudioRepo := movieStudioRepo.NewMovieStudioRepository(db)
 	movieRepo := movieRepo.NewMovieRepository(db)
 	movieScheduleRepo := movieScheduleRepo.NewMovieScheduleRepository(db)
+	ticketRepo := ticketRepo.NewTicketRepository(db)
 
 	// Initialize usecases
 	userUsecase := userUC.NewUserUsecase(userRepo)
@@ -323,6 +327,7 @@ func initializeModule() {
 	movieStudioUsecase := movieStudioUC.NewMovieStudioUsecase(movieStudioRepo)
 	movieUsecase := movieUC.NewMovieUsecase(movieRepo)
 	movieScheduleUsecase := movieScheduleUC.NewMovieScheduleUsecase(movieScheduleRepo)
+	ticketUsecase := ticketUC.NewTicketUsecase(db, ticketRepo, movieScheduleRepo, userRepo)
 
 	// Setup handlers
 	handler.NewUserHandler(router, userUsecase)
@@ -334,6 +339,7 @@ func initializeModule() {
 	handler.NewMovieStudioHandler(router, movieStudioUsecase)
 	handler.NewMovieHandler(router, movieUsecase, fileUsecase)
 	handler.NewMovieScheduleHandler(router, movieScheduleUsecase, movieStudioUsecase, movieUsecase)
+	handler.NewTicketHandler(router, ticketUsecase)
 }
 
 func healthCheck(router *gin.Engine) {
